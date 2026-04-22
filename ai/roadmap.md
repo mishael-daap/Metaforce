@@ -1,7 +1,7 @@
 # Roadmap
 
 ## 1. Frontend & Agent Setup
-Status: pending
+Status: completed
 Goal: Initialize the Vercel AI SDK project and basic chat interface with model.
 
 ## 2. MCP Server Foundation
