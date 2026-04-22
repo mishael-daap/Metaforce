@@ -1,21 +1,25 @@
-'use client';
+"use client";
 
-import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
-import { useRef, useEffect, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { useRef, useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Send } from "lucide-react";
+import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Chat() {
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
-      api: '/api/chat',
+      api: "/api/chat",
     }),
   });
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,54 +29,40 @@ export function Chat() {
   }, [messages]);
 
   return (
-    <Card className="flex flex-col h-[600px] w-full max-w-2xl mx-auto">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">MetaForce AI</h2>
-        <p className="text-sm text-muted-foreground">
-          Describe your Salesforce requirements in natural language
-        </p>
-      </div>
-
+    <div className="w-2/3">
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">
-              <p>Start a conversation by typing a message below.</p>
-              <p className="text-sm mt-2">
-                Example: &quot;Create a custom object called Invoice with fields for Amount and Due Date&quot;
-              </p>
-            </div>
-          )}
-
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex items-start gap-3 ${
-                message.role === 'user' ? 'flex-row-reverse' : ''
+                message.role === "user" ? "flex-row-reverse" : ""
               }`}
             >
               <Avatar className="h-8 w-8">
                 <AvatarFallback>
-                  {message.role === 'user' ? 'U' : 'AI'}
+                  {message.role === "user" ? "U" : "AI"}
                 </AvatarFallback>
               </Avatar>
               <div
                 className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                  message.role === "user"
+                    ? "bg-muted"
+                    : ""
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">
                   {message.parts.map((part, index) =>
-                    part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+                    part.type === "text" ? (
+                      <span key={index}>{part.text}</span>
+                    ) : null,
                   )}
                 </p>
               </div>
             </div>
           ))}
 
-          {status === 'streaming' && (
+          {(status === "submitted" || status === "streaming")&& (
             <div className="flex items-start gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarFallback>AI</AvatarFallback>
@@ -89,29 +79,63 @@ export function Chat() {
         </div>
       </ScrollArea>
 
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput('');
-          }
-        }}
-        className="p-4 border-t"
-      >
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1"
-            disabled={status !== 'ready'}
-          />
-          <Button type="submit" disabled={status !== 'ready' || !input.trim()}>
-            Send
-          </Button>
+      <div className="w-xl">
+        <div className="bg-background border border-border rounded-2xl overflow-hidden px-3 grow">
+          <form
+            className="flex flex-col"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (input.trim()) {
+                sendMessage({ text: input });
+                setInput("");
+              }
+            }}
+          >
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything"
+              rows={1}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = "auto";
+                target.style.height = target.scrollHeight + "px";
+              }}
+              className={cn(
+                "w-full bg-transparent! py-3 px-0 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder-muted-foreground resize-none border-none outline-none text-sm leading-normal min-h-10 max-h-[25vh]",
+                // Custom Scrollbar Styling
+                "[&::-webkit-scrollbar]:w-2",
+                "[&::-webkit-scrollbar-track]:bg-transparent",
+                "[&::-webkit-scrollbar-thumb]:bg-border",
+                "[&::-webkit-scrollbar-thumb]:rounded-full",
+                "hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30",
+              )}
+            />
+
+            <div className="flex items-center justify-between pb-2 pt-1">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="size-8 p-0 rounded-full border border-border flex items-center justify-center"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+
+              <div>
+                <Button
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="size-8 p-0 rounded-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <Send className="size-4 text-primary-foreground" />
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
-    </Card>
+      </div>
+    </div>
   );
 }
