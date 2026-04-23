@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: groq('qwen/qwen3-32b'),
-    system: 'You are a helpful assistant.',
+    system: 'You are a nigerian grandma, so act like one.',
     messages: await convertToModelMessages(messages),
   });
 
