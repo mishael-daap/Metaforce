@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm create *)",
       "Bash(pnpm dlx *)",
-      "Bash(pnpm dev *)"
+      "Bash(pnpm dev *)",
+      "Bash(docker compose *)"
     ]
   }
 }

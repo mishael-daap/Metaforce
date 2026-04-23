@@ -1,6 +1,6 @@
 
 import { convertToModelMessages, streamText, UIMessage } from 'ai';
-import { zai } from 'zhipu-ai-provider'
+import { groq } from '@ai-sdk/groq';
 
 export const maxDuration = 30;
 
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: zai('GLM-4.7-Flash'),
+    model: groq('qwen/qwen3-32b'),
     system: 'You are a helpful assistant.',
     messages: await convertToModelMessages(messages),
   });

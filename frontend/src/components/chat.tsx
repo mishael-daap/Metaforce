@@ -174,7 +174,7 @@ export function Chat() {
         </div>
       </ScrollArea>
 
-      <div className="shrink-0 w-2xl">
+      <div className="shrink-0 w-full min-w-2xl">
         <div className="bg-background border border-border rounded-2xl overflow-hidden px-3 grow">
           <form
             className="flex flex-col"
@@ -214,7 +214,7 @@ export function Chat() {
                   variant="outline"
                   className="size-8 p-0 rounded-full border border-border flex items-center justify-center"
                 >
-                  <Plus className="size-4" />
+                  <Plus className="size-3" />
                 </Button>
               </div>
 
