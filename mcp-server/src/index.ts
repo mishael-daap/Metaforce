@@ -1,5 +1,4 @@
 import express from "express";
-import { createMcpExpressApp, hostHeaderValidation } from "@modelcontextprotocol/express";
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import { McpServer, isInitializeRequest } from "@modelcontextprotocol/server";
 import * as z from "zod";

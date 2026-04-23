@@ -4,7 +4,15 @@
       "Bash(pnpm create *)",
       "Bash(pnpm dlx *)",
       "Bash(pnpm dev *)",
-      "Bash(docker compose *)"
+      "Bash(docker compose *)",
+      "Bash(tasklist)",
+      "Bash(findstr 49900)",
+      "Bash(Get-Process -Id 49900 -ErrorAction SilentlyContinue)",
+      "Bash(Stop-Process -Force)",
+      "Bash(taskkill *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3000)",
+      "Bash(powershell.exe *)"
     ]
   }
 }
