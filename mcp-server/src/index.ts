@@ -35,7 +35,7 @@ server.registerTool(
 async function main() {
   const app = createMcpExpressApp();
 
-  app.use(hostHeaderValidation(["localhost", "127.0.0.1", "metaforce-x9ma.onrender.com"]));
+  // app.use(hostHeaderValidation(["localhost", "127.0.0.1", "metaforce-x9ma.onrender.com"]));
   app.use(express.json());
 
   const transports: Record<string, NodeStreamableHTTPServerTransport> = {};
