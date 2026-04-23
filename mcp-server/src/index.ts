@@ -33,7 +33,8 @@ server.registerTool(
 );
 
 async function main() {
-  const app = createMcpExpressApp();
+  // Use standard express instead of the MCP factory wrapper
+const app = express();
 
   // app.use(hostHeaderValidation(["localhost", "127.0.0.1", "metaforce-x9ma.onrender.com"]));
   app.use(express.json());
