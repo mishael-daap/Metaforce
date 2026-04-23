@@ -1,8 +1,8 @@
 services:
   mcp-server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: mcp-server/Dockerfile
     ports:
       - "8000:8000"
     container_name: metaforce-mcp-server
