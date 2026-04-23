@@ -181,20 +181,6 @@ cd mcp-server
 docker-compose up --build
 ```
 
-## Roadmap
-
-| # | Feature | Status |
-|---|---------|--------|
-| 1 | Frontend & Agent Setup | ✅ Completed |
-| 2 | MCP Server Foundation | ⏳ Pending |
-| 3 | Create Project Tool | ⏳ Pending |
-| 4 | Create Object Tool | ⏳ Pending |
-| 5 | Create Field Tool | ⏳ Pending |
-| 6 | Deploy Tool | ⏳ Pending |
-| 7 | Planning & Sequencing Logic | ⏳ Pending |
-| 8 | Execution & Self-Correction Engine | ⏳ Pending |
-| 9 | Interactive UI & Human-in-the-Loop | ⏳ Pending |
-
 ## Key Design Decisions
 
 - **Agent Orchestration**: Vercel AI SDK handles LLM planning and tool calling loops

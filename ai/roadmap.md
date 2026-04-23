@@ -5,7 +5,7 @@ Status: completed
 Goal: Initialize the Vercel AI SDK project and basic chat interface with model.
 
 ## 2. MCP Server Foundation
-Status: pending
+Status: Completed
 Goal: Set up the MCP server and connect it to the agent.
 
 ## 3. Create Project Tool
