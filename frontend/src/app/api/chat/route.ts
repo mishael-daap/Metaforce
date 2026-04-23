@@ -4,6 +4,8 @@ import { groq } from '@ai-sdk/groq';
 
 export const maxDuration = 30;
 
+// moonshotai/Kimi-K2-Instruct-0905
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
