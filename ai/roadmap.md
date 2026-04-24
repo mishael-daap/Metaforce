@@ -9,7 +9,7 @@ Status: Completed
 Goal: Set up the MCP server and connect it to the agent.
 
 ## 3. Create Project Tool
-Status: pending
+Status: completed
 Goal: Build and connect the MCP tool to set up the Salesforce DX environment.
 
 ## 4. Create Object Tool
