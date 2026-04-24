@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ProjectSpec, SfdxProjectConfig } from '../types/ProjectSpec.js';
 export async function createProject(spec) {
     try {
         // Validate spec

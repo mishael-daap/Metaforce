@@ -6,6 +6,7 @@ export interface CreateProjectResult {
   success: boolean;
   projectPath?: string;
   error?: string;
+  [key: string]: unknown;
 }
 
 export async function createProject(spec: ProjectSpec): Promise<CreateProjectResult> {
