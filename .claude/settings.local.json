@@ -15,7 +15,9 @@
       "Bash(powershell.exe *)",
       "Bash(pnpm exec *)",
       "Bash(pnpm build *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
