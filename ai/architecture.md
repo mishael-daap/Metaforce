@@ -48,7 +48,7 @@ User Input → Vercel AI SDK Agent → Execution Plan UI (Approval) → MCP Serv
 - Package Manager: pnpm (using workspaces)
 - Containerization: Docker (isolating the MCP Server)
 - Project Structure: 
-  - `/frontend`: Vercel AI SDK application
+  - `/Web`: Vercel AI SDK application
   - `/mcp-server`: Dockerized Salesforce MCP backend
   - `/ai/context/example-tools/`: Contains validated reference functions for Salesforce operations (objects, fields, deployments). Must be used as the source of truth for MCP tools.
   - `/ai/context/example-org/`: Reference active SFDX org.

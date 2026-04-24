@@ -1,0 +1,1 @@
+{"version":3,"file":"createProject.d.ts","sourceRoot":"","sources":["../../src/tools/createProject.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,WAAW,EAAqB,MAAM,yBAAyB,CAAC;AAEzE,MAAM,WAAW,mBAAmB;IAClC,OAAO,EAAE,OAAO,CAAC;IACjB,WAAW,CAAC,EAAE,MAAM,CAAC;IACrB,KAAK,CAAC,EAAE,MAAM,CAAC;CAChB;AAED,wBAAsB,aAAa,CAAC,IAAI,EAAE,WAAW,GAAG,OAAO,CAAC,mBAAmB,CAAC,CAsDnF"}

@@ -54,6 +54,9 @@ importers:
       '@ai-sdk/groq':
         specifier: ^3.0.35
         version: 3.0.35(zod@4.3.6)
+      '@ai-sdk/mcp':
+        specifier: ^1.0.36
+        version: 1.0.36(zod@4.3.6)
       '@ai-sdk/react':
         specifier: ^3.0.170
         version: 3.0.170(react@19.2.4)(zod@4.3.6)
@@ -135,6 +138,12 @@ packages:
 
   '@ai-sdk/groq@3.0.35':
     resolution: {integrity: sha512-LXoPwSKaqXst9LyLN2J7gK8n7RldQLbP2zsnBYxXcOsXKrtceksqtbsmGXujvab2TM9FisquAw/ZG2hTbD5vnQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/mcp@1.0.36':
+    resolution: {integrity: sha512-THQKwlknp7OU2ViLPfIU7W01XvDRM2eqH+4UULQgP64AopnwI9mGqqJeGIx2l/pxUu9yIDQtW9YtYM8kHm2CQg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3387,6 +3396,13 @@ snapshots:
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.23(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/mcp@1.0.36(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.23(zod@4.3.6)
+      pkce-challenge: 5.0.1
       zod: 4.3.6
 
   '@ai-sdk/provider-utils@4.0.23(zod@4.3.6)':

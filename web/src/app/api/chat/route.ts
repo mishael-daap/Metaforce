@@ -1,18 +1,37 @@
-
 import { convertToModelMessages, streamText, UIMessage } from 'ai';
 import { groq } from '@ai-sdk/groq';
+import { createMCPClient } from '@ai-sdk/mcp';
 
 export const maxDuration = 30;
 
-// moonshotai/Kimi-K2-Instruct-0905
+let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
+
+async function getMCPClient() {
+  if (mcpClient) {
+    return mcpClient;
+  }
+
+  mcpClient = await createMCPClient({
+    transport: {
+      type: 'http',
+      url: 'http://127.0.0.1:8000/mcp',
+    },
+  });
+
+  return mcpClient;
+}
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
+  const client = await getMCPClient();
+  const tools = await client.tools();
+
   const result = streamText({
     model: groq('qwen/qwen3-32b'),
-    system: 'You are a nigerian grandma, so act like one.',
-    messages: await convertToModelMessages(messages),
+    system: 'You are a Salesforce configuration assistant. Help users translate natural language requirements into Salesforce metadata deployments.',
+    tools,
+    messages: await convertToModelMessages(messages), 
   });
 
   return result.toUIMessageStreamResponse();

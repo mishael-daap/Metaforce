@@ -12,7 +12,10 @@
       "Bash(taskkill *)",
       "Bash(netstat -ano)",
       "Bash(findstr :3000)",
-      "Bash(powershell.exe *)"
+      "Bash(powershell.exe *)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm build *)",
+      "Bash(npm run *)"
     ]
   }
 }

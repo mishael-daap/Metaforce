@@ -4,6 +4,7 @@ import { McpServer, isInitializeRequest } from "@modelcontextprotocol/server";
 import * as z from "zod";
 import crypto from "crypto";
 import { ping } from "./tools/ping.js";
+import { createProject } from "./tools/createProject.js";
 
 const server = new McpServer({ name: "metaforce-mcp", version: "1.0.0" });
 
@@ -13,29 +14,73 @@ server.registerTool(
     title: "Ping",
     description: "Simple ping tool to verify the MCP server is running",
     inputSchema: z.object({}),
-    // Keep your outputSchema as is if it describes the 'structuredData' or 'text'
   },
+
   async () => {
-    const result = await ping(); // Assuming ping() returns { status: "..." }
-    
+    const result = await ping();
+
     return {
       content: [
         {
           type: "text" as const,
-          text: JSON.stringify(result)
-        }
+          text: JSON.stringify(result),
+        },
       ],
-      // If you want to keep the structured data for the LLM to parse easily:
-      structuredContent: result 
+      structuredContent: result,
     };
   },
 );
 
-async function main() {
-  // Use standard express instead of the MCP factory wrapper
-const app = express();
+server.registerTool(
+  "createProject",
+  {
+    title: "Create Project",
+    description: "Create a new Salesforce DX project with sfdx-project.json and force-app directory structure",
+    inputSchema: z.object({
+      projectId: z.string().describe("Project folder name (required)"),
+      name: z.string().optional().describe("Project name (defaults to projectId)"),
+      apiVersion: z.string().optional().describe("Salesforce API version (defaults to 66.0)"),
+      namespace: z.string().optional().describe("Package namespace (defaults to empty string)"),
+    }),
+  },
 
-  // app.use(hostHeaderValidation(["localhost", "127.0.0.1", "metaforce-x9ma.onrender.com"]));
+  async (args) => {
+    const result = await createProject({
+      projectId: args.projectId,
+      name: args.name,
+      apiVersion: args.apiVersion,
+      namespace: args.namespace,
+    });
+
+    if (result.success) {
+      const message = `Project '${args.name || args.projectId}' created successfully at ${result.projectPath}`;
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: message,
+          },
+        ],
+        structuredContent: result,
+      };
+    } else {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to create project: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  },
+);
+
+async function main() {
+
+  const app = express();
+
   app.use(express.json());
 
   const transports: Record<string, NodeStreamableHTTPServerTransport> = {};
