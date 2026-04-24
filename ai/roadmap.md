@@ -13,15 +13,15 @@ Status: completed
 Goal: Build and connect the MCP tool to set up the Salesforce DX environment.
 
 ## 4. Create Object Tool
-Status: pending
+Status: completed
 Goal: Build and connect the MCP tool to generate custom object metadata alongside its fields.
 
 ## 5. Create Field Tool
-Status: pending
+Status: completed
 Goal: Build and connect the MCP tool to append new custom fields to existing objects.
 
 ## 6. Deploy Tool
-Status: pending
+Status: completed
 Goal: Build and connect the MCP tool to deploy the generated metadata to the Salesforce org using the CLI.
 
 ## 7. Planning & Sequencing Logic
