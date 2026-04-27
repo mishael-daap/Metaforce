@@ -16,7 +16,7 @@ async function getMCPClient(alias: string, instanceUrl: string, accessToken: str
   const client = await createMCPClient({
     transport: {
       type: 'http',
-      url: 'http://127.0.0.1:8000/mcp',
+      url: process.env.MCP_SERVER_URL || 'http://127.0.0.1:8000/mcp',
       headers: {
         "x-alias": alias,
         "x-instance-url": instanceUrl,
