@@ -4,32 +4,35 @@ import { createMCPClient } from '@ai-sdk/mcp';
 
 export const maxDuration = 30;
 
-let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
+const mcpClients = new Map<string, Awaited<ReturnType<typeof createMCPClient>>>();
 
-async function getMCPClient() {
-  if (mcpClient) {
-    return mcpClient;
+async function getMCPClient(alias: string, instanceUrl: string, accessToken: string) {
+  const key = `${alias}::${instanceUrl}`;
+
+  if (mcpClients.has(key)) {
+    return mcpClients.get(key)!;
   }
 
-  mcpClient = await createMCPClient({
+  const client = await createMCPClient({
     transport: {
       type: 'http',
       url: 'http://127.0.0.1:8000/mcp',
       headers: {
-        "x-alias": "the-new-project",   // from the modal form
-        "x-instance-url": "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",   // from the modal form
-        "x-access-token": "***REMOVED***"
+        "x-alias": alias,
+        "x-instance-url": instanceUrl,
+        "x-access-token": accessToken,
       }
     },
   });
 
-  return mcpClient;
+  mcpClients.set(key, client);
+  return client;
 }
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  const { messages, alias, instanceUrl, accessToken }: { messages: UIMessage[]; alias: string; instanceUrl: string; accessToken: string } = await req.json();
 
-  const client = await getMCPClient();
+  const client = await getMCPClient(alias, instanceUrl, accessToken);
   const tools = await client.tools();
 
   const result = streamText({
