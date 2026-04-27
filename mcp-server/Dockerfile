@@ -4,6 +4,9 @@ WORKDIR /app
 
 RUN npm install -g pnpm typescript
 
+# Install Salesforce CLI
+RUN npm install -g @salesforce/cli
+
 # Only copy mcp-server files - ignore workspace
 COPY mcp-server/package.json mcp-server/pnpm-lock.yaml* ./
 

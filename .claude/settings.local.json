@@ -17,7 +17,8 @@
       "Bash(pnpm build *)",
       "Bash(npm run *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(docker-compose down *)"
     ]
   }
 }
