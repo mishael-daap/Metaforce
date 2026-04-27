@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
 
 interface OrgSession {
   alias: string;
@@ -71,11 +72,11 @@ function ChatInner({ session }: { session: OrgSession }) {
                 <div
                   className={`rounded-lg px-4 py-2 max-w-[80%] ${message.role === "user" ? "bg-muted" : ""}`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
                     {message.parts.map((part, index) =>
-                      part.type === "text" ? <span key={index}>{part.text}</span> : null,
+                      part.type === "text" ? <ReactMarkdown key={index}>{part.text}</ReactMarkdown> : null,
                     )}
-                  </p>
+                  </div>
                 </div>
               </div>
             ))}
