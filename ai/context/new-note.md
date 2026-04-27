@@ -14,3 +14,19 @@ actual deployment: sf project deploy start --source-dir force-app
 convert from dx to mdataapi: sf project convert source  --source-dir force-app --output-dir mdapi_output
 
 list connected orgs: sf org list
+
+command to pull access token and url: (function() {
+    const instanceUrl = window.location.origin;
+    // Note: 'sid' is often HttpOnly in Lightning, so this may return null 
+    // unless you are on a domain that allows JS access to it (like a VF page).
+    const accessToken = (document.cookie.match(/sid=([^;]+)/) || [])[1];
+
+    console.group("Salesforce Org Details");
+    console.log("%cInstance URL: ", "font-weight: bold", instanceUrl);
+    console.log("%cAccess Token: ", "font-weight: bold", accessToken || "HIDDEN (HttpOnly)");
+    console.groupEnd();
+    
+    if (!accessToken) {
+        console.warn("Token is HttpOnly. To get it, go to the 'Application' tab -> Cookies -> search for 'sid'.");
+    }
+})();

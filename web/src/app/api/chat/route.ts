@@ -15,6 +15,11 @@ async function getMCPClient() {
     transport: {
       type: 'http',
       url: 'http://127.0.0.1:8000/mcp',
+      headers: {
+        "x-alias": "the-new-project",   // from the modal form
+        "x-instance-url": "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",   // from the modal form
+        "x-access-token": "***REMOVED***"
+      }
     },
   });
 
