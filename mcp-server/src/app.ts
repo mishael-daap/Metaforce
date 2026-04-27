@@ -1,3 +1,23 @@
+// import { setupProject } from "./utils/setupProject.js";
+
+// async function main() {
+//   const result = await setupProject({
+//     alias: "metaforce-registered",
+//     instanceUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",
+//     accessToken: "00DgK00000FEwjR!AQEAQFgchO3rozrWn5lxOyMJoOqn2qJMvsk7etljxKeD4EG_8_6caQBmi3.OT1YmnzWLFTTANVv.9.24Uud.tCsfnoJ0s_ZN"
+//   });
+
+//   if (result.success) {
+//     console.log(`Project setup successful at: ${result.projectPath}`);
+//   } else {
+//     console.error(`Project setup failed: ${result.error}`);
+//     process.exit(1);
+//   }
+// }
+
+// main();
+
+
 import express from "express";
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import { McpServer, isInitializeRequest } from "@modelcontextprotocol/server";
@@ -233,6 +253,8 @@ async function main() {
       const alias = req.headers["x-alias"] as string;
       const instanceUrl = req.headers["x-instance-url"] as string;
       const accessToken = req.headers["x-access-token"] as string;
+
+      console.log(alias, instanceUrl, accessToken)
 
       // Validate required headers
       if (!alias || !instanceUrl || !accessToken) {
