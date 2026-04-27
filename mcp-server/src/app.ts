@@ -266,8 +266,11 @@ async function main() {
         return;
       }
 
-      // Setup project and authenticate org
-      const setupResult = await setupProject({ alias, instanceUrl, accessToken });
+        console.log("1. Initialize received:", { alias, instanceUrl });
+      
+    console.log("2. Starting setupProject...");
+    const setupResult = await setupProject({ alias, instanceUrl, accessToken });
+    console.log("3. setupProject result:", setupResult);
 
       if (!setupResult.success) {
         res.status(500).json({
