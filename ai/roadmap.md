@@ -26,7 +26,7 @@ Goal: Build and connect the MCP tool to deploy the generated metadata to the Sal
 
 ## 7. Planning & Sequencing Logic
 Status: pending
-Goal: Implement the agent's ability to ingest requirements, sequence them, and map them to the specific MCP tools (Project, Object, Field, Deploy).
+Goal: Implement the agent's ability to ingest requirements, sequence them, and map them to the specific MCP tools (Object, Field, Deploy).
 
 ## 8. Execution & Self-Correction Engine
 Status: pending

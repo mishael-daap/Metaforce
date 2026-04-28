@@ -30,3 +30,9 @@ command to pull access token and url: (function() {
         console.warn("Token is HttpOnly. To get it, go to the 'Application' tab -> Cookies -> search for 'sid'.");
     }
 })();
+
+add to session storage:
+
+sessionStorage.setItem("accessToken", "");
+sessionStorage.setItem("alias", "my-production-org");
+sessionStorage.setItem("instanceUrl", "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com");
