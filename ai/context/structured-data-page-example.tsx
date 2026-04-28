@@ -1,30 +1,42 @@
-import {
-  convertToModelMessages,
-  streamText,
+import { 
+  convertToModelMessages, 
+  streamText, 
   generateText,
   Output,
-  UIMessage,
-  createUIMessageStream,
+  UIMessage, 
+  createUIMessageStream, 
   createUIMessageStreamResponse,
-  NoObjectGeneratedError,
+  NoObjectGeneratedError
 } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { createMCPClient } from '@ai-sdk/mcp';
-import { ExecutionPlanSchema } from '@/lib/schemas/plan-schemas';
-import { PLANNER_SYSTEM_PROMPT } from '@/lib/ai/planner';
+import { z } from 'zod';
 
 export const maxDuration = 60;
 
-const mcpClients = new Map<string, Awaited<ReturnType<typeof createMCPClient>>>();
+export const ActionSchema = z.object({
+  id: z.string().describe('Unique action identifier e.g. action_1'),
+  tool: z.enum(['createObject', 'createField', 'deploy']),
+  label: z.string().describe('Human readable description of this step'),
+  dependsOn: z.array(z.string()).describe('IDs of actions that must complete first'),
+});
 
-async function getMCPClient(alias: string, instanceUrl: string, accessToken: string) {
-  const key = `${alias}::${instanceUrl}`;
+export const RequirementSchema = z.object({
+  id: z.string().describe('Unique requirement identifier e.g. req_1'),
+  name: z.string().describe('Short name for this requirement'),
+  description: z.string().describe('Detailed description of what this requirement entails'),
+  actions: z.array(ActionSchema).describe('Ordered list of actions to fulfill this requirement'),
+});
 
-  if (mcpClients.has(key)) {
-    return mcpClients.get(key)!;
-  }
+const ExecutionPlanSchema = z.object({
+  requirements_summary: z.string().describe('One sentence summary of all requirements'),
+  requirements: z.array(RequirementSchema).describe('List of requirements with their actions'),
+});
 
-  const client = await createMCPClient({
+// --- MCP Client ---
+
+async function createClient(alias: string, instanceUrl: string, accessToken: string) {
+  return createMCPClient({
     transport: {
       type: 'http',
       url: process.env.MCP_SERVER_URL || 'http://127.0.0.1:8000/mcp',
@@ -35,9 +47,6 @@ async function getMCPClient(alias: string, instanceUrl: string, accessToken: str
       },
     },
   });
-
-  mcpClients.set(key, client);
-  return client;
 }
 
 // --- Handlers ---
@@ -49,7 +58,7 @@ async function handlePlan(messages: UIMessage[]) {
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
       try {
-        // Start text stream first so messageId flushes before plan data
+        // Start text stream immediately so start/messageId flush before plan data
         const textResult = streamText({
           model: groq('llama-3.3-70b-versatile'),
           system: [
@@ -61,9 +70,10 @@ async function handlePlan(messages: UIMessage[]) {
           messages: await convertToModelMessages(messages),
         });
 
+        // Begin merging so start/messageId flush before plan data arrives
         const mergePromise = writer.merge(textResult.toUIMessageStream());
 
-        // Generate plan in parallel
+        // Generate plan concurrently — by the time this resolves, start/messageId are already emitted
         const planResult = await generateText({
           model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
           output: Output.object({
@@ -71,19 +81,31 @@ async function handlePlan(messages: UIMessage[]) {
             description: 'A structured Salesforce metadata deployment plan',
             schema: ExecutionPlanSchema,
           }),
-          system: PLANNER_SYSTEM_PROMPT,
+          system: [
+            'You are a Salesforce configuration assistant.',
+            'Given natural language requirements, generate a structured execution plan.',
+            'Rules:',
+            '- Only use custom objects and custom fields',
+            '- Always end with a deploy action',
+            '- Objects must be created before their fields (respect dependsOn)',
+            '- Topologically sort actions so dependsOn references always point to earlier actions',
+            '- Use __c suffix for all custom object and field API names',
+          ].join('\n'),
           prompt: requirements,
         }).catch((error) => {
           if (NoObjectGeneratedError.isInstance(error)) {
-            console.error('NoObjectGeneratedError:', error.cause);
+            console.error('NoObjectGeneratedError');
+            console.error('Cause:', error.cause);
             console.error('Text:', error.text);
+            console.error('Response:', error.response);
+            console.error('Usage:', error.usage);
           } else {
             console.error('Plan generation failed:', error);
           }
           return null;
         });
 
-        // Wait for text stream before writing plan data
+        // Wait for text stream to finish before writing plan data
         await mergePromise;
 
         if (planResult?.output) {
@@ -99,6 +121,7 @@ async function handlePlan(messages: UIMessage[]) {
             data: { message: 'Plan could not be generated. Please try again.' },
           });
         }
+
       } catch (error) {
         console.error('Unexpected error in handlePlan:', error);
         writer.write({
@@ -114,7 +137,7 @@ async function handlePlan(messages: UIMessage[]) {
 }
 
 async function handleExecute(messages: UIMessage[], alias: string, instanceUrl: string, accessToken: string) {
-  const client = await getMCPClient(alias, instanceUrl, accessToken);
+  const client = await createClient(alias, instanceUrl, accessToken);
 
   try {
     const tools = await client.tools();
@@ -124,6 +147,9 @@ async function handleExecute(messages: UIMessage[], alias: string, instanceUrl: 
       system: 'You are a Salesforce configuration assistant executing a pre-approved plan. Execute the actions using the available tools.',
       tools,
       messages: await convertToModelMessages(messages),
+      onError({ error }) {
+        console.error('Execute stream error:', error);
+      },
     });
 
     return result.toUIMessageStreamResponse();
@@ -133,24 +159,13 @@ async function handleExecute(messages: UIMessage[], alias: string, instanceUrl: 
 }
 
 async function handleChat(messages: UIMessage[]) {
-  const lastMessage = messages[messages.length - 1];
-  const lastText = lastMessage.parts.find(p => p.type === 'text')?.text || '';
-
-  // Check if this is a plan approval
-  if (lastText === 'PLAN_APPROVED') {
-    const result = streamText({
-      model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
-      system: 'You are a Salesforce configuration assistant. The user has approved the execution plan. Acknowledge their approval briefly and let them know they can switch to Execute mode to run the plan.',
-      messages: await convertToModelMessages(messages),
-    });
-
-    return result.toUIMessageStreamResponse();
-  }
-
   const result = streamText({
     model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
     system: 'You are a Salesforce configuration assistant. Help users translate natural language requirements into Salesforce metadata deployments.',
     messages: await convertToModelMessages(messages),
+    onError({ error }) {
+      console.error('Chat stream error:', error);
+    },
   });
 
   return result.toUIMessageStreamResponse();

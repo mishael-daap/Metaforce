@@ -7,9 +7,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Plus } from "lucide-react";
+import { Send, Plus, ListChecks, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { usePlanMode } from "@/hooks/use-plan-mode";
+import { PlanComponent } from "@/components/plan/PlanComponent";
+import { ExecutionPlan } from "@/lib/schemas/plan-schemas";
 
 interface OrgSession {
   alias: string;
@@ -18,6 +21,7 @@ interface OrgSession {
 }
 
 function ChatInner({ session }: { session: OrgSession }) {
+  const { mode, toggleMode, isPlanMode } = usePlanMode();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -25,11 +29,15 @@ function ChatInner({ session }: { session: OrgSession }) {
         alias: session.alias,
         instanceUrl: session.instanceUrl,
         accessToken: session.accessToken,
+        mode,
       },
     }),
   });
 
   const [input, setInput] = useState("");
+  const [currentPlan, setCurrentPlan] = useState<ExecutionPlan | null>(null);
+  const [isApproved, setIsApproved] = useState(false);
+  const [completedActions, setCompletedActions] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,6 +45,22 @@ function ChatInner({ session }: { session: OrgSession }) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Extract plan from data-plan parts
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'assistant') {
+      const planPart = lastMessage.parts.find(p => p.type === 'data-plan');
+      if (planPart && 'data' in planPart && planPart.data) {
+        setCurrentPlan(planPart.data as ExecutionPlan);
+      }
+    }
+  }, [messages]);
+
+  const handleApprovePlan = () => {
+    setIsApproved(true);
+    sendMessage({ text: 'PLAN_APPROVED' });
+  };
 
   return (
     <div className="flex flex-col max-w-4xl max-h-[90vh] overflow-hidden gap-10">
@@ -53,33 +77,38 @@ function ChatInner({ session }: { session: OrgSession }) {
         )}
       >
         <div className="space-y-10">
-          {messages
-            .filter((message) => {
-              if (message.role === "assistant") {
-                const textParts = message.parts.filter((p) => p.type === "text");
-                return textParts.some((p) => p.text.length > 0);
-              }
-              return true;
-            })
-            .map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{message.role === "user" ? "U" : "AI"}</AvatarFallback>
-                </Avatar>
-                <div
-                  className={`rounded-lg px-4 py-2 max-w-[80%] ${message.role === "user" ? "bg-muted" : ""}`}
-                >
-                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
-                    {message.parts.map((part, index) =>
-                      part.type === "text" ? <ReactMarkdown key={index}>{part.text}</ReactMarkdown> : null,
-                    )}
-                  </div>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-start gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>{message.role === "user" ? "U" : "AI"}</AvatarFallback>
+              </Avatar>
+              <div className={`rounded-lg px-4 py-2 max-w-[80%] ${message.role === "user" ? "bg-muted" : ""}`}>
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none space-y-2">
+                  {/* Render data-plan parts */}
+                  {message.parts
+                    .filter((p) => p.type === 'data-plan')
+                    .map((part, index) => (
+                      <PlanComponent
+                        key={index}
+                        plan={(part as any).data as ExecutionPlan}
+                        onApprove={handleApprovePlan}
+                        isApproved={isApproved}
+                        completedActions={completedActions}
+                      />
+                    ))}
+                  {/* Render text parts */}
+                  {message.parts
+                    .filter((p) => p.type === 'text')
+                    .map((part, index) => (
+                      <ReactMarkdown key={index}>{part.text}</ReactMarkdown>
+                    ))}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
 
           {(status === "submitted" || status === "streaming") && (
             <div className="flex items-start gap-3">
@@ -137,6 +166,19 @@ function ChatInner({ session }: { session: OrgSession }) {
                   className="size-8 p-0 rounded-full border border-border flex items-center justify-center"
                 >
                   <Plus className="size-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant={isPlanMode ? "default" : "outline"}
+                  className={cn(
+                    "h-8 px-3 rounded-full text-xs font-medium transition-all",
+                    isPlanMode ? "bg-primary text-primary-foreground" : "border border-border"
+                  )}
+                  onClick={toggleMode}
+                  title={isPlanMode ? "Plan Mode" : "Execute Mode"}
+                >
+                  {isPlanMode ? <ListChecks className="size-3 mr-1" /> : <Rocket className="size-3 mr-1" />}
+                  {isPlanMode ? "Plan" : "Execute"}
                 </Button>
               </div>
               <div>
