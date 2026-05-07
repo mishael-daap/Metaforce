@@ -1,7 +1,7 @@
 # Tasks
 
-- [ ] Initialize Supabase CLI in project
-- [ ] Link to cloud Supabase project
+- [x] Initialize Supabase CLI in project
+- [x] Link to cloud Supabase project
 - [ ] Create migration for all 8 tables
 - [ ] Write SQL for users table
 - [ ] Write SQL for projects table

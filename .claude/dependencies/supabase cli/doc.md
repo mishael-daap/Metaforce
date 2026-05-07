@@ -1,23 +1,6 @@
-# Lean Supabase Cloud CLI Docs (Windows + pnpm)
+# Lean Supabase Cloud CLI Docs (Windows + pnpx)
 
 A minimal reference for working with hosted Supabase projects using the Supabase CLI.
-
----
-
-# 1. Install the CLI
-
-## Using pnpm
-
-```bash
-pnpm add -D supabase
-```
-
-## Verify
-
-```bash
-pnpm supabase --version
-```
-
 ---
 
 # 2. Login
@@ -25,7 +8,7 @@ pnpm supabase --version
 Authenticate the CLI with your Supabase account.
 
 ```bash
-pnpm supabase login
+pnpx supabase login
 ```
 
 ---
@@ -35,7 +18,7 @@ pnpm supabase login
 Inside your project root:
 
 ```bash
-pnpm supabase init
+pnpx supabase init
 ```
 
 This creates:
@@ -59,7 +42,7 @@ https://supabase.com/dashboard/project/<project-ref>
 Link the local project:
 
 ```bash
-pnpm supabase link --project-ref your-project-ref
+pnpx supabase link --project-ref rpcoxcpgcqtkwthphtau
 ```
 
 ---
@@ -67,7 +50,7 @@ pnpm supabase link --project-ref your-project-ref
 # 5. Create a Migration
 
 ```bash
-pnpm supabase migration new create_profiles_table
+pnpx supabase migration new create_profiles_table
 ```
 
 Generated file:
@@ -94,7 +77,7 @@ create table profiles (
 Apply local migrations to the hosted database:
 
 ```bash
-pnpm supabase db push
+pnpx supabase db push
 ```
 
 This is the main deployment command.
@@ -106,7 +89,7 @@ This is the main deployment command.
 If someone changed the schema directly in the dashboard:
 
 ```bash
-pnpm supabase db pull
+pnpx supabase db pull
 ```
 
 Best practice:
@@ -121,7 +104,7 @@ Best practice:
 Generate types from the linked cloud database:
 
 ```bash
-pnpm supabase gen types typescript --linked > src/types/database.ts
+pnpx supabase gen types typescript --linked > src/types/database.ts
 ```
 
 Useful for type-safe Supabase queries.
@@ -131,7 +114,7 @@ Useful for type-safe Supabase queries.
 # 9. View Migration Status
 
 ```bash
-pnpm supabase migration list
+pnpx supabase migration list
 ```
 
 Shows:
@@ -147,13 +130,13 @@ Shows:
 Mark a migration as applied:
 
 ```bash
-pnpm supabase migration repair --status applied <timestamp>
+pnpx supabase migration repair --status applied <timestamp>
 ```
 
 Mark as reverted:
 
 ```bash
-pnpm supabase migration repair --status reverted <timestamp>
+pnpx supabase migration repair --status reverted <timestamp>
 ```
 
 Use carefully.
@@ -165,7 +148,7 @@ Use carefully.
 If using local Supabase with Docker:
 
 ```bash
-pnpm supabase db reset
+pnpx supabase db reset
 ```
 
 This:
@@ -219,7 +202,7 @@ supabase/seed.sql
 ## Create Migration
 
 ```bash
-pnpm supabase migration new add_profiles
+pnpx supabase migration new add_profiles
 ```
 
 ## Write SQL
@@ -234,13 +217,13 @@ create table profiles (
 ## Push Changes
 
 ```bash
-pnpm supabase db push
+pnpx supabase db push
 ```
 
 ## Generate Types
 
 ```bash
-pnpm supabase gen types typescript --linked > src/types/database.ts
+pnpx supabase gen types typescript --linked > src/types/database.ts
 ```
 
 ## Commit
@@ -275,7 +258,7 @@ supabase/migrations/
 After schema changes:
 
 ```bash
-pnpm supabase gen types typescript --linked > src/types/database.ts
+pnpx supabase gen types typescript --linked > src/types/database.ts
 ```
 
 ---
@@ -291,47 +274,47 @@ Your migration files should fully reproduce your database schema.
 ## Login
 
 ```bash
-pnpm supabase login
+pnpx supabase login
 ```
 
 ## Initialize
 
 ```bash
-pnpm supabase init
+pnpx supabase init
 ```
 
 ## Link Project
 
 ```bash
-pnpm supabase link --project-ref your-project-ref
+pnpx supabase link --project-ref your-project-ref
 ```
 
 ## Create Migration
 
 ```bash
-pnpm supabase migration new migration_name
+pnpx supabase migration new migration_name
 ```
 
 ## Push to Cloud
 
 ```bash
-pnpm supabase db push
+pnpx supabase db push
 ```
 
 ## Pull Remote Changes
 
 ```bash
-pnpm supabase db pull
+pnpx supabase db pull
 ```
 
 ## Generate Types
 
 ```bash
-pnpm supabase gen types typescript --linked
+pnpx supabase gen types typescript --linked
 ```
 
 ## View Migrations
 
 ```bash
-pnpm supabase migration list
+pnpx supabase migration list
 ```
