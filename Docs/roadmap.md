@@ -1,12 +1,13 @@
 # Roadmap
 
 ## 1. Data Model
-Status: pending
+Status: completed
 Goal: Define and provision all Supabase tables, relationships, and RLS policies
 
 ## 2. Requirement Chat
 Status: pending
 Goal: Shared AI chat interface for incrementally building and refining a requirements list
+2.2 
 
 ## 3. Action Planning
 Status: pending

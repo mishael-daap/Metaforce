@@ -11,6 +11,6 @@
 - [ ] Write SQL for requirements table
 - [ ] Write SQL for actions table
 - [ ] Write SQL for metadata_components table
-- [ ] Push migration to Supabase cloud
+- [x] Push migration to Supabase cloud
 - [ ] Generate TypeScript types from schema
 - [ ] Verify tables in Supabase dashboard

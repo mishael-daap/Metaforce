@@ -14,6 +14,9 @@ Read the following rules to guide you while working with this project.
 - When introducing a new dependency/library, request the user to fetch official docs and save to `.claude/dependencies/<dependency-name>/docs.md`.
 - Do NOT proceed with implementation until dependency docs are available.
 - Exception: Skip this step only if 100% certain how the dependency behaves.
+
+#### Existing Dependencies
+- Supabase Cli, Path: .claude\dependencies\supabase cli\doc.md
 ---
 
 ## Skills 
