@@ -68,7 +68,7 @@ export default function Page() {
         >
           <PromptInputTextarea
             value={input}
-            placeholder="Say something..."
+            placeholder="What are you working on?"
             onChange={(e) => setInput(e.currentTarget.value)}
             className=""
           />
