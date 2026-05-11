@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
-export default function SignInComponent() {
+export default function RegisterComponent() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignUp = async () => {
     setIsLoading(true);
     try {
-      await signIn('google', { redirectTo: '/' });
+      await signIn('google', { redirectTo: '/', callbackUrl: '/' });
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('Sign up error:', error);
       setIsLoading(false);
     }
   };
@@ -25,22 +26,42 @@ export default function SignInComponent() {
         <div className="space-y-6">
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Welcome Back
+              Create Account
             </h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to your account to continue
+              Sign up to get started with our platform
             </p>
           </div>
 
+          <div className="space-y-3 rounded-lg bg-muted/50 p-4">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Benefits
+            </p>
+            <ul className="space-y-2 text-sm text-foreground">
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                <span>Secure authentication</span>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                <span>One-click login</span>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                <span>Always encrypted</span>
+              </li>
+            </ul>
+          </div>
+
           <Button
-            onClick={handleGoogleSignIn}
+            onClick={handleGoogleSignUp}
             disabled={isLoading}
             className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Creating account...
               </>
             ) : (
               <>
@@ -54,26 +75,23 @@ export default function SignInComponent() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Sign in with Google
+                Sign up with Google
               </>
             )}
           </Button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
-            </div>
-          </div>
-
           <p className="text-center text-xs text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <a href="/register" className="font-semibold text-primary hover:underline">
-              Create one now
+            Already have an account?{' '}
+            <a href="/signin" className="font-semibold text-primary hover:underline">
+              Sign in here
             </a>
           </p>
+
+          <div className="pt-2 border-t border-border">
+            <p className="text-center text-xs text-muted-foreground">
+              By signing up, you agree to our <Link className='underline' href={"/terms"}>Terms of Service</Link>
+            </p>
+          </div>
         </div>
       </Card>
     </div>
