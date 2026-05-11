@@ -1,0 +1,29 @@
+# Tasks
+- [ ] Create SidebarLayout component
+- [ ] Create ProjectsPage component
+- [ ] Create ProjectCard component
+- [ ] Create ProjectDetailPage component
+- [ ] Checkin with user before continuation
+- [ ] Create CreateProjectDialog component
+- [ ] Create EditProjectDialog component
+- [ ] Create DeleteProjectDialog component
+- [ ] Create SearchInput component
+- [ ] Create SortDropdown component
+- [ ] Create MetadataComponentCard component
+- [ ] Create GET /api/projects endpoint
+- [ ] Create POST /api/projects endpoint
+- [ ] Create GET /api/projects/[id] endpoint
+- [ ] Create PUT /api/projects/[id] endpoint
+- [ ] Create DELETE /api/projects/[id] endpoint
+- [ ] Create GET /api/projects/[id]/metadata endpoint
+- [ ] Set up Supabase client utilities
+- [ ] Checkin with user before continuation
+- [ ] Implement search functionality
+- [ ] Implement sort functionality
+- [ ] Implement project creation
+- [ ] Implement project editing
+- [ ] Implement project deletion
+- [ ] Implement metadata components display
+- [ ] Add responsive grid layout
+- [ ] Add empty state
+- [ ] Test end-to-end flow
