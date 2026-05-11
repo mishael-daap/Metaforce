@@ -1,12 +1,11 @@
 # Tasks
-- [ ] Create SidebarLayout component
-- [ ] Create ProjectsPage component
-- [ ] Create ProjectCard component
-- [ ] Create ProjectDetailPage component
-- [ ] Checkin with user before continuation
-- [ ] Create CreateProjectDialog component
-- [ ] Create EditProjectDialog component
-- [ ] Create DeleteProjectDialog component
+- [x] Create SidebarLayout component
+- [x] Create ProjectsPage component
+- [x] Create ProjectCard component
+- [x] Create ProjectDetailPage component
+- [x] Create CreateProjectDialog component
+- [x] Create EditProjectDialog component
+- [x] Create DeleteProjectDialog component
 - [ ] Create SearchInput component
 - [ ] Create SortDropdown component
 - [ ] Create MetadataComponentCard component
