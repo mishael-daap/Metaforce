@@ -11,6 +11,11 @@ const poppinsPoppins = Poppins({subsets:['latin'],weight:['100','200','300','400
 
 const openSansOpenSans = Open_Sans({subsets:['latin'],weight:['300','400','500','600','700','800'],variable:'--font-open-sans'});
 
+import { SessionProvider } from "next-auth/react";
+import { auth } from "./auth";
+
+const session = await auth();
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -36,7 +41,10 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
     >
-      <body className="min-h-full flex flex-col"><TooltipProvider>{children}</TooltipProvider></body>
+      {/* <body className="min-h-full flex flex-col"><TooltipProvider>{children}</TooltipProvider></body> */}
+      <body>
+        <SessionProvider session={session}><TooltipProvider>{children}</TooltipProvider></SessionProvider>
+      </body>
       {/* <body className="min-h-full flex flex-col">{children}</body> */}
     </html>
   );
