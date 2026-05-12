@@ -15,6 +15,7 @@ export async function GET() {
 
     // Fetch user from database
     const { data: user, error: userError } = await supabase
+      .schema("next_auth")
       .from("users")
       .select("id")
       .eq("email", userEmail)
@@ -56,8 +57,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log(session.user)
-
     const body = await request.json();
     const { name, description } = body;
 
@@ -78,8 +77,6 @@ export async function POST(request: Request) {
       .select("id")
       .eq("email", userEmail)
       .single();
-
-      console.log(userError)
 
     if (userError || !user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, MessageSquare, Edit, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog";
@@ -29,11 +35,15 @@ interface MetadataComponent {
 export default function ProjectDetailPage({
   params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = use(params);
+
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
-  const [metadataComponents, setMetadataComponents] = useState<MetadataComponent[]>([]);
+  const [metadataComponents, setMetadataComponents] = useState<
+    MetadataComponent[]
+  >([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,8 +52,8 @@ export default function ProjectDetailPage({
   const fetchProjectDetails = async () => {
     try {
       const [projectRes, metadataRes] = await Promise.all([
-        fetch(`/api/projects/${params.projectId}`),
-        fetch(`/api/projects/${params.projectId}/metadata`),
+        fetch(`/api/projects/${projectId}`), // was params.projectId
+        fetch(`/api/projects/${projectId}/metadata`), // was params.projectId
       ]);
 
       if (projectRes.ok) {
@@ -62,13 +72,13 @@ export default function ProjectDetailPage({
     }
   };
 
-  useEffect(() => {
-    fetchProjectDetails();
-  }, [params.projectId]);
+ useEffect(() => {
+  fetchProjectDetails();
+}, [projectId]); // was params.projectId
 
   const handleChatClick = () => {
-    router.push(`/dashboard/project/${params.projectId}/chat`);
-  };
+  router.push(`/dashboard/project/${projectId}/chat`); // was params.projectId
+};
 
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
@@ -122,7 +132,9 @@ export default function ProjectDetailPage({
     return (
       <SidebarLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="text-muted-foreground">Loading project details...</div>
+          <div className="text-muted-foreground">
+            Loading project details...
+          </div>
         </div>
       </SidebarLayout>
     );
@@ -154,7 +166,9 @@ export default function ProjectDetailPage({
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
-              <p className="text-muted-foreground">{project.description || "No description"}</p>
+              <p className="text-muted-foreground">
+                {project.description || "No description"}
+              </p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleEditClick}>
@@ -189,7 +203,9 @@ export default function ProjectDetailPage({
                 <span>{formatDate(project.updated_at)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Metadata Components</span>
+                <span className="text-muted-foreground">
+                  Metadata Components
+                </span>
                 <span>{metadataComponents.length}</span>
               </div>
             </CardContent>
@@ -249,8 +265,12 @@ export default function ProjectDetailPage({
                 <Card key={component.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{component.name}</CardTitle>
-                      <Badge variant={getComponentTypeColor(component.type) as any}>
+                      <CardTitle className="text-lg">
+                        {component.name}
+                      </CardTitle>
+                      <Badge
+                        variant={getComponentTypeColor(component.type) as any}
+                      >
                         {getComponentTypeLabel(component.type)}
                       </Badge>
                     </div>

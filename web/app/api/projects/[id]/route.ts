@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = params.id;
+    const { id: projectId } = await params;
 
     // Fetch project
     const { data: project, error: projectError } = await supabase
@@ -29,6 +29,7 @@ export async function GET(
     // Verify user owns this project
     const userEmail = session.user.email;
     const { data: user, error: userError } = await supabase
+      .schema("next_auth")
       .from("users")
       .select("id")
       .eq("email", userEmail)
@@ -50,7 +51,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+ { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -59,7 +60,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = params.id;
+    const { id: projectId } = await params;
     const body = await request.json();
     const { name, description } = body;
 
@@ -84,6 +85,7 @@ export async function PUT(
     // Verify user owns this project
     const userEmail = session.user.email;
     const { data: user, error: userError } = await supabase
+      .schema("next_auth")
       .from("users")
       .select("id")
       .eq("email", userEmail)
@@ -124,7 +126,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+ { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -133,7 +135,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = params.id;
+    const { id: projectId } = await params;
 
     // Fetch project
     const { data: project, error: projectError } = await supabase
@@ -149,6 +151,7 @@ export async function DELETE(
     // Verify user owns this project
     const userEmail = session.user.email;
     const { data: user, error: userError } = await supabase
+      .schema("next_auth")
       .from("users")
       .select("id")
       .eq("email", userEmail)
