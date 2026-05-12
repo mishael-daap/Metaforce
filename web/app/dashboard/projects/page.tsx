@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, MessageSquare, MoreHorizontal, Trash2, Edit } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,24 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
 import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog";
 import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
+import { ProjectCard } from "@/components/projects/project-card";
 
 interface Project {
   id: string;
@@ -127,15 +114,6 @@ export default function ProjectsPage() {
     setSelectedProject(null);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -197,63 +175,14 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <Card
+            <ProjectCard
               key={project.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleProjectClick(project.id)}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-xl">{project.name}</CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => handleEditClick(e, project)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => handleDeleteClick(e, project)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <CardDescription className="line-clamp-2">
-                  {project.description || "No description"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  Created {formatDate(project.created_at)}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={(e) => handleChatClick(e, project.id)}
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Open Chat
-                </Button>
-              </CardFooter>
-            </Card>
+              project={project}
+              onProjectClick={handleProjectClick}
+              onChatClick={handleChatClick}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           ))}
         </div>
       )}

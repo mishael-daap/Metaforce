@@ -33,7 +33,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
         side="left"
         variant="sidebar"
         collapsible="icon"
-        className="flex-shrink-0"
+        className="shrink-0"
       >
         <SidebarHeader className="border-b">
           {isCollapsed ? (
@@ -67,7 +67,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 
         <SidebarContent className="flex-1 py-4 overflow-y-auto">
           <SidebarGroup>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -76,7 +76,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
                     <SidebarMenuButton
                       asChild
                       className={cn(
-                        "flex items-center rounded-xl py-2 text-sm font-medium transition-colors",
+                        "flex items-center py-2 text-sm font-medium transition-colors",
                         isCollapsed ? "justify-center px-0" : "gap-3 px-3",
                         isActive
                           ? "bg-primary text-primary-foreground"

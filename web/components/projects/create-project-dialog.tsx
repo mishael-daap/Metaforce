@@ -107,11 +107,19 @@ export function CreateProjectDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={loading}
                 rows={3}
+                className="
+    max-h-40
+    min-h-40
+    overflow-y-auto
+    resize-none
+    scrollbar-thin
+    scrollbar-thumb-muted-foreground/30
+    scrollbar-track-transparent
+    pr-3
+  "
               />
             </div>
-            {error && (
-              <div className="text-sm text-destructive">{error}</div>
-            )}
+            {error && <div className="text-sm text-destructive">{error}</div>}
           </div>
           <DialogFooter>
             <Button

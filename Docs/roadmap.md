@@ -13,11 +13,11 @@ Status: completed
 Goal: Set up NextAuth, login/signup pages, protected routes
 
 ## 4. Project Management
-Status: pending
+Status: in-progress
 Goal: Projects page, create project, project selection, database client setup
 
 ## 5. Dashboard Page
-Status: pending
+Status: completed
 Goal: Main dashboard with sidebar navigation (Projects, User Profile), default route to /dashboard/projects
 
 ## 6. Conversation & Message Persistence

@@ -171,10 +171,6 @@ export default function ProjectDetailPage({
               <MessageSquare className="mr-2 h-4 w-4" />
               Go to Chat
             </Button>
-            <Button variant="destructive" onClick={handleDeleteClick}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
           </div>
         </div>
       </div>
@@ -203,29 +199,7 @@ export default function ProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={handleChatClick}
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Open Chat Interface
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={handleEditClick}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Project Details
-            </Button>
-          </CardContent>
-        </Card>
+        
       </div>
 
       {/* Metadata Components */}
@@ -279,6 +253,33 @@ export default function ProjectDetailPage({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Danger Zone */}
+      <div className="mt-12 pt-8 border-t">
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>
+              Irreversible and destructive actions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Delete this project</p>
+              <p className="text-sm text-muted-foreground">
+                Once you delete a project, there is no going back. Please be certain.
+              </p>
+            </div>
+            <Button variant="destructive" onClick={handleDeleteClick}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Project
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Dialogs */}
