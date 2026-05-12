@@ -88,6 +88,7 @@ Drive execution.
 
 ### Skeleton
 
+Before completion 
 ```md
 # Tasks
 - [ ] Create User model
@@ -95,6 +96,16 @@ Drive execution.
 - [ ] Add validation
 - [ ] Implement login
 - [ ] Write tests
+```
+
+After completion 
+```md
+# Tasks
+- [x] Create User model
+- [x] Implement signup endpoint
+- [x] Add validation
+- [x] Implement login
+- [x] Write tests
 ```
 
 ### Quality Criteria

@@ -56,7 +56,11 @@ Never skip this step. Never assume approval.
 
 ### Stage 4 — File Creation
 
-After approval, create the files at:
+After approval
+
+Update roadmap status:
+
+Create the files at:
 
 ```
 Docs/features/<feature-name>/
@@ -77,7 +81,11 @@ Docs/features/<feature-name>/
 Work exclusively from `tasks.md`. Execute ONE task at a time.
 
 After completing each task:
-- Mark it as complete in `tasks.md`
+- Mark it as complete in `tasks.md`.
+  Example: 
+    - [ ] Create profile card
+    After completion
+    - [x] Create profile card
 - Ensure it is functional and working before moving on
 
 Do NOT:
