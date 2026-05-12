@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pnpm supabase:*)",
-      "Bash(pnpx supabase *)"
+      "Bash(pnpx supabase *)",
+      "Skill(shadcn)"
     ]
   }
 }

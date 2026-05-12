@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog";
 import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 
@@ -130,179 +129,173 @@ export default function ProjectDetailPage({
 
   if (loading) {
     return (
-      <SidebarLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-muted-foreground">
-            Loading project details...
-          </div>
-        </div>
-      </SidebarLayout>
+      <div className="flex items-center justify-center h-full">
+        <div className="text-muted-foreground">Loading project details...</div>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <SidebarLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-muted-foreground">Project not found</div>
-        </div>
-      </SidebarLayout>
+      <div className="flex items-center justify-center h-full">
+        <div className="text-muted-foreground">Project not found</div>
+      </div>
     );
   }
 
   return (
-    <SidebarLayout>
-      <div className="container mx-auto p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
-              <p className="text-muted-foreground">
-                {project.description || "No description"}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleEditClick}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="outline" onClick={handleChatClick}>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Go to Chat
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteClick}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </div>
+    <div className="container mx-auto p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="mb-4"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
+            <p className="text-muted-foreground">
+              {project.description || "No description"}
+            </p>
           </div>
-        </div>
-
-        {/* Project Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Created</span>
-                <span>{formatDate(project.created_at)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Last Updated</span>
-                <span>{formatDate(project.updated_at)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Metadata Components
-                </span>
-                <span>{metadataComponents.length}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleChatClick}
-              >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Open Chat Interface
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleEditClick}
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Project Details
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Metadata Components */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Metadata Components</h2>
-            {metadataComponents.length === 0 && (
-              <Button variant="outline" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Component
-              </Button>
-            )}
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleEditClick}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+            <Button variant="outline" onClick={handleChatClick}>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Go to Chat
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteClick}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
           </div>
-
-          {metadataComponents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="text-muted-foreground mb-4">
-                  No metadata components yet
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Start a chat to create components for this project
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {metadataComponents.map((component) => (
-                <Card key={component.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">
-                        {component.name}
-                      </CardTitle>
-                      <Badge
-                        variant={getComponentTypeColor(component.type) as any}
-                      >
-                        {getComponentTypeLabel(component.type)}
-                      </Badge>
-                    </div>
-                    <CardDescription className="font-mono text-xs">
-                      {component.api_name}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      Created {formatDate(component.created_at)}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Project Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Created</span>
+              <span>{formatDate(project.created_at)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Last Updated</span>
+              <span>{formatDate(project.updated_at)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                Metadata Components
+              </span>
+              <span>{metadataComponents.length}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={handleChatClick}
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Open Chat Interface
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={handleEditClick}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Project Details
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Metadata Components */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Metadata Components</h2>
+          {metadataComponents.length === 0 && (
+            <Button variant="outline" size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Component
+            </Button>
+          )}
+        </div>
+
+        {metadataComponents.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="text-muted-foreground mb-4">
+                No metadata components yet
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Start a chat to create components for this project
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {metadataComponents.map((component) => (
+              <Card key={component.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">
+                      {component.name}
+                    </CardTitle>
+                    <Badge
+                      variant={getComponentTypeColor(component.type) as any}
+                    >
+                      {getComponentTypeLabel(component.type)}
+                    </Badge>
+                  </div>
+                  <CardDescription className="font-mono text-xs">
+                    {component.api_name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    Created {formatDate(component.created_at)}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Dialogs */}
-      <DeleteProjectDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        project={project}
-        onProjectDeleted={handleProjectDeleted}
-      />
-      <EditProjectDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        project={project}
-        onProjectUpdated={handleProjectUpdated}
-      />
-    </SidebarLayout>
+    <DeleteProjectDialog
+      open={deleteDialogOpen}
+      onOpenChange={setDeleteDialogOpen}
+      project={project}
+      onProjectDeleted={handleProjectDeleted}
+    />
+    <EditProjectDialog
+      open={editDialogOpen}
+      onOpenChange={setEditDialogOpen}
+      project={project}
+      onProjectUpdated={handleProjectUpdated}
+    />
+    </div>
+
+    
   );
 }

@@ -1,82 +1,110 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Folder, User, LayoutDashboard, MessageSquare } from "lucide-react";
-
-interface SidebarLayoutProps {
-  children: React.ReactNode;
-}
+import {
+  Sidebar,
+  SidebarInset,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Folder, User, PanelLeft } from "lucide-react";
 
 const navigation = [
   { name: "Projects", href: "/dashboard/projects", icon: Folder },
   { name: "User Profile", href: "/dashboard/profile", icon: User },
 ];
 
-export function SidebarLayout({ children }: SidebarLayoutProps) {
+export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { toggleSidebar, state } = useSidebar(); // ← use shadcn's own state
+  const isCollapsed = state === "collapsed";
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "flex flex-col border-r bg-card transition-all duration-300",
-          sidebarOpen ? "w-64" : "w-16"
-        )}
+    <>
+      <Sidebar
+        side="left"
+        variant="sidebar"
+        collapsible="icon"
+        className="flex-shrink-0"
       >
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b px-4">
-          {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <LayoutDashboard className="h-6 w-6" />
-              <span className="font-semibold">Metaforce</span>
+        <SidebarHeader className="border-b">
+          {isCollapsed ? (
+            // Collapsed: just the toggle button, centered
+            <div className="flex h-16 items-center justify-center">
+              <button
+                onClick={toggleSidebar}
+                className="p-1 rounded hover:bg-sidebar-accent"
+                aria-label="Open sidebar"
+              >
+                <PanelLeft className="h-4 w-4 rotate-180" />
+              </button>
+            </div>
+          ) : (
+            // Expanded: logo + name on left, toggle on right
+            <div className="flex h-16 items-center justify-between px-3">
+              <div className="flex items-center gap-2">
+                <Folder className="h-5 w-5 shrink-0" />
+                <span className="font-semibold">Metaforce</span>
+              </div>
+              <button
+                onClick={toggleSidebar}
+                className="p-1 rounded hover:bg-sidebar-accent"
+                aria-label="Close sidebar"
+              >
+                <PanelLeft className="h-4 w-4" />
+              </button>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={cn(!sidebarOpen && "mx-auto")}
-          >
-            <LayoutDashboard className="h-5 w-5" />
-          </Button>
-        </div>
+        </SidebarHeader>
 
-        {/* Navigation */}
-        <ScrollArea className="flex-1 px-3 py-4">
-          <nav className="space-y-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {sidebarOpen && <span>{item.name}</span>}
-                </Link>
-              );
-            })}
-          </nav>
-        </ScrollArea>
-      </aside>
+        <SidebarContent className="flex-1 py-4 overflow-y-auto">
+          <SidebarGroup>
+            <SidebarMenu>
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      className={cn(
+                        "flex items-center rounded-xl py-2 text-sm font-medium transition-colors",
+                        isCollapsed ? "justify-center px-0" : "gap-3 px-3",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      )}
+                    >
+                      <Link
+                        href={item.href}
+                        className="flex items-center w-full"
+                      >
+                        <Icon
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            isCollapsed ? "mx-auto" : "",
+                          )}
+                        />
+                        {!isCollapsed && <span>{item.name}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
+      <SidebarInset className="flex-1 overflow-auto">{children}</SidebarInset>
+    </>
   );
 }
