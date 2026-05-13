@@ -21,12 +21,12 @@ Status: completed
 Goal: Main dashboard with sidebar navigation (Projects, User Profile), default route to /dashboard/projects
 
 ## 6. Conversation & Message Persistence
-Status: pending
+Status: completed
 Goal: Persist conversations and messages to Supabase, load chat history when navigating to /chat?projectId=xxx
 
-## 7. Agent Tools for Requirements
+## 7. Agent Tools for Requirements and Actions
 Status: pending
-Goal: AI tool calling for requirement CRUD operations
+Goal: AI tool calling for requirement and action CRUD operations
 
 ## 8. Requirement Chat
 Status: pending

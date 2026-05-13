@@ -1,5 +1,5 @@
 import { groq } from "@ai-sdk/groq";
-import { streamText, convertToModelMessages, createIdGenerator } from "ai";
+import { streamText, convertToModelMessages, createIdGenerator, tool, stepCountIs } from "ai";
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import {
@@ -8,6 +8,8 @@ import {
   saveMessages,
 } from "@/lib/chat-store";
 import type { UIMessage } from "ai";
+import { createRequirementTools } from "@/lib/tools/requirements";
+// import { createAction, getActions, getAction, updateAction, deleteAction } from "@/lib/tools/actions";
 
 export const maxDuration = 30;
 
@@ -53,7 +55,9 @@ export async function POST(req: Request) {
   const result = streamText({
     model,
     system: `You are a helpful assistant. You will help users with configuring Salesforce.`,
+    tools: {...createRequirementTools(projectId) },
     messages: await convertToModelMessages(messages),
+    stopWhen: stepCountIs(5)
   });
 
   // consumeStream() without await detaches stream completion from the

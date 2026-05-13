@@ -3,7 +3,10 @@
     "allow": [
       "Bash(pnpm supabase:*)",
       "Bash(pnpx supabase *)",
-      "Skill(shadcn)"
+      "Skill(shadcn)",
+      "Bash(grep -E \"\\\\.\\(tsx?|js\\)$\")",
+      "Bash(xargs grep -l -i requirement)",
+      "Bash(xargs grep -l \"ai\\\\|tool\")"
     ]
   }
 }
