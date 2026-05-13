@@ -9,7 +9,9 @@ export function createRequirementTools(projectId: string) {
         "Create a new requirement. Use after discussing and confirming what the user needs.",
       inputSchema: z.object({
         title: z.string().describe("Short, clear title for the requirement"),
-        description: z.string().describe("Detailed description of the requirement"),
+        description: z
+          .string()
+          .describe("Detailed description of the requirement"),
       }),
       execute: async ({ title, description }) => {
         const { data, error } = await supabase

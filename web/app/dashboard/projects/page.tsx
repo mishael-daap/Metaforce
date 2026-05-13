@@ -82,7 +82,7 @@ export default function ProjectsPage() {
 
   const handleChatClick = (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation();
-    router.push(`/dashboard/project/${projectId}/chat`);
+    router.push(`/project/${projectId}`);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, project: Project) => {

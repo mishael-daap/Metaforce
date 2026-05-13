@@ -76,7 +76,7 @@ export default function ProjectDetailPage({
 }, [projectId]); // was params.projectId
 
   const handleChatClick = () => {
-  router.push(`/dashboard/project/${projectId}/chat`); // was params.projectId
+  router.push(`/project/${projectId}`); // was params.projectId
 };
 
   const handleDeleteClick = () => {

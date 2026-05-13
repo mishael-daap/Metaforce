@@ -69,7 +69,11 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           <SidebarGroup>
             <SidebarMenu className="gap-2">
               {navigation.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive =
+                  pathname === item.href ||
+                  (item.href === "/dashboard/projects" &&
+                    (pathname?.startsWith("/dashboard/project/") ||
+                      pathname?.startsWith("/project/")));
                 const Icon = item.icon;
                 return (
                   <SidebarMenuItem key={item.name}>

@@ -25,7 +25,7 @@ Status: completed
 Goal: Persist conversations and messages to Supabase, load chat history when navigating to /chat?projectId=xxx
 
 ## 7. Agent Tools for Requirements and Actions
-Status: pending
+Status: in-progress
 Goal: AI tool calling for requirement and action CRUD operations
 
 ## 8. Requirement Chat
