@@ -12,14 +12,23 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/src/components/ai-elements/message";
-import { MessageCircle } from "lucide-react";
+import { AppWindow, MessageCircle, File} from "lucide-react";
 import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
 } from "@/src/components/ai-elements/prompt-input";
 
-export default function Page() {
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+
+import { useImperativeHandle } from "react";
+import { Button } from "@/components/ui/button";
+
+export function Page() {
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat();
   const handleSubmit = (message: PromptInputMessage) => {
@@ -29,7 +38,7 @@ export default function Page() {
     }
   };
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full">
       <Conversation className="flex-1 overflow-y-auto">
         <ConversationContent>
           {messages.length === 0 ? (
@@ -81,4 +90,36 @@ export default function Page() {
       </div>
     </div>
   );
+}
+export default function ResizableDemo() {
+  const [showPanel, setShowPanel] = useState(false);
+  return (
+    // top bar
+    <div className="h-screen flex flex-col p-4">
+      <div className="flex justify-between">
+        
+
+        <div>.</div>
+
+        <File  onClick={() => setShowPanel(p => !p)} className=""/>
+
+      </div>
+      <ResizablePanelGroup
+      orientation="horizontal"
+      className="w-screen"
+    >
+      <ResizablePanel defaultSize="70%">
+        <Page />
+      </ResizablePanel>
+
+      <ResizableHandle  className="bg-transparent" withHandle/>
+
+      {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
+        <div className="flex h-full items-center justify-center p-6 rounded-lg border">
+          <span className="font-semibold">small panel</span>
+        </div>
+      </ResizablePanel>}
+    </ResizablePanelGroup>
+    </div>
+  )
 }
