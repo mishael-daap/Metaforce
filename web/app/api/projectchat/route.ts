@@ -11,6 +11,7 @@ import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
 // import { createAction, getActions, getAction, updateAction, deleteAction } from "@/lib/tools/actions";
 import { getRequirementsPrompt } from "@/lib/prompts";
+import { supabase } from "@/lib/supabase";
 
 export const maxDuration = 30;
 
@@ -40,6 +41,8 @@ export async function POST(req: Request) {
   let conversationId: string | undefined;
   // Start with just the new message as fallback if no projectId
   let messages: UIMessage[] = [newUserMessage];
+  let projectName = "not provided";
+  let projectDescription = "not provided";
 
   if (projectId) {
     const conversation = await getConversationForProject(projectId);
@@ -51,11 +54,28 @@ export async function POST(req: Request) {
       const history = await loadMessages(conversation.id);
       messages = [...history, newUserMessage];
     }
+    // Fetch project details to enrich the prompt
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("name, description")
+        .eq("id", projectId)
+        .single();
+
+      if (error) {
+        console.error("Failed to fetch project:", error);
+      } else if (data) {
+        projectName = data.name ?? "not provided";
+        projectDescription = data.description ?? "not provided";
+      }
+    } catch (err) {
+      console.error("Error fetching project:", err);
+    }
   }
 
   const result = streamText({
     model,
-    system: getRequirementsPrompt("not provided", "not provided"),
+    system: getRequirementsPrompt(projectName, projectDescription),
     tools: {...createRequirementTools(projectId!) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(10)
