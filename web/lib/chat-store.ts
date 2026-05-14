@@ -73,7 +73,6 @@ export async function saveMessages({
       id: msg.id,
       conversation_id: conversationId,
       ui_message: msg,
-      created_at: new Date().toISOString(),
     })),
     { onConflict: "id" }
   );

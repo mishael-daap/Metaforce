@@ -1,5 +1,11 @@
 import { groq } from "@ai-sdk/groq";
-import { streamText, convertToModelMessages, createIdGenerator, tool, stepCountIs } from "ai";
+import {
+  streamText,
+  convertToModelMessages,
+  createIdGenerator,
+  tool,
+  stepCountIs,
+} from "ai";
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import {
@@ -16,13 +22,16 @@ import { supabase } from "@/lib/supabase";
 export const maxDuration = 30;
 
 const model = wrapLanguageModel({
-  model: groq("meta-llama/llama-4-scout-17b-16e-instruct"),
+  model: groq("openai/gpt-oss-120b"),
   middleware: devToolsMiddleware(),
 });
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { messages: clientMessages, projectId }: {
+  const {
+    messages: clientMessages,
+    projectId,
+  }: {
     messages: UIMessage[];
     projectId?: string;
   } = body;
@@ -44,15 +53,20 @@ export async function POST(req: Request) {
   let projectName = "not provided";
   let projectDescription = "not provided";
 
+  console.log("project id is", projectId);
+
+  let chatHistory: UIMessage[] = [];
+
   if (projectId) {
     const conversation = await getConversationForProject(projectId);
     if (conversation) {
       conversationId = conversation.id;
+      console.log("conversation id is", conversationId);
       // Load full history from DB — the DB is source of truth, not the client.
       // We only trust the new user message from the client; everything
       // else is loaded fresh to prevent tampered or truncated history.
-      const history = await loadMessages(conversation.id);
-      messages = [...history, newUserMessage];
+      chatHistory = await loadMessages(conversation.id);
+      messages = [...chatHistory, newUserMessage];
     }
     // Fetch project details to enrich the prompt
     try {
@@ -73,17 +87,18 @@ export async function POST(req: Request) {
     }
   }
 
+  if (conversationId) {
+    console.log("new user message is", newUserMessage)
+    await saveMessages({ conversationId, messages: [newUserMessage] });
+  }
+
   const result = streamText({
     model,
     system: getRequirementsPrompt(projectName, projectDescription),
-    tools: {...createRequirementTools(projectId!) },
+    tools: { ...createRequirementTools(projectId!) },
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(10)
+    stopWhen: stepCountIs(10),
   });
-
-  // consumeStream() without await detaches stream completion from the
-  // client connection — onFinish fires even if the user closes the tab
-  result.consumeStream();
 
   return result.toUIMessageStreamResponse({
     // originalMessages is the full context so the SDK builds the complete
@@ -92,15 +107,14 @@ export async function POST(req: Request) {
     // Server-side IDs ensure assistant messages always get a stable
     // non-empty id — prevents upsert failures in Supabase
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ messages: finalMessages }) => {
+    onFinish: ({ messages: finalMessages, responseMessage }) => {
       if (!conversationId) return;
 
-      saveMessages({
-        conversationId,
-        messages: finalMessages,
-      }).catch((err) => {
-        console.error("Failed to save messages:", err);
-      });
+      console.log("user message is", responseMessage);
+
+      saveMessages({ conversationId, messages: [responseMessage] }).catch(
+        (err) => console.error("Failed to save messages:", err),
+      );
     },
   });
 }

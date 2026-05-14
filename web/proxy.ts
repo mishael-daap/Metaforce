@@ -9,7 +9,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const loginUrl = new URL("/login", req.url);
+  const loginUrl = new URL("/register", req.url);
   return NextResponse.redirect(loginUrl);
 }
 
