@@ -37,7 +37,8 @@ PHASE 2 - REQUIREMENTS GATHERING
     - Example question: "What are some of the things you would like to have on the system?"
 
 2. Listen to the user's response and extract requirements using the following format:
-    - Format:  The [system] shall [action] [object] so that [rationale].
+    - Format:  Requirement Title: The [system] shall [action] [object] so that [rationale].
+               Requirment Description: 
     - Example: The Account object shall store a unique Account Number for each record
                so that every account can be identified.
 

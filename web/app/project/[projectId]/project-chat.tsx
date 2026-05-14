@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/resizable"
 import { File } from "lucide-react";
 import { supabase } from "@/lib/supabase-client";
+import { getProjectRequirements, updateRequirement, deleteRequirement } from "./actions";
+import { RequirementsList } from "@/components/chat/requirements-list";
+import type { Requirement } from "@/src/types/requirements";
 
 export function Chat({
   projectId,
@@ -107,6 +110,8 @@ export default function ProjectChat({
 }) {
   const [showPanel, setShowPanel] = useState(false);
   const [projectName, setProjectName] = useState(projectId);
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjectName = async () => {
@@ -127,8 +132,44 @@ export default function ProjectChat({
       }
     };
 
+    const fetchRequirements = async () => {
+      setLoading(true);
+      try {
+        const reqs = await getProjectRequirements(projectId);
+        setRequirements(reqs);
+      } catch (err) {
+        console.error("Failed to fetch requirements:", err);
+        setRequirements([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProjectName();
+    fetchRequirements();
   }, [projectId]);
+
+  const handleUpdateRequirement = async (id: string, title: string, description: string) => {
+    const result = await updateRequirement(id, title, description, projectId);
+    if (result.success) {
+      // Refresh requirements list
+      const reqs = await getProjectRequirements(projectId);
+      setRequirements(reqs);
+    } else {
+      console.error("Failed to update requirement:", result.error);
+    }
+  };
+
+  const handleDeleteRequirement = async (id: string) => {
+    const result = await deleteRequirement(id, projectId);
+    if (result.success) {
+      // Refresh requirements list
+      const reqs = await getProjectRequirements(projectId);
+      setRequirements(reqs);
+    } else {
+      console.error("Failed to delete requirement:", result.error);
+    }
+  };
 
   return (
     // top bar
@@ -150,8 +191,18 @@ export default function ProjectChat({
       <ResizableHandle  className="bg-transparent" withHandle/>
 
       {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
-        <div className="flex h-full items-center justify-center p-6 rounded-lg border">
-          <span className="font-semibold">small panel</span>
+        <div className="h-full overflow-y-auto">
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <span>Loading requirements...</span>
+            </div>
+          ) : (
+            <RequirementsList
+              requirements={requirements}
+              onUpdate={handleUpdateRequirement}
+              onDelete={handleDeleteRequirement}
+            />
+          )}
         </div>
       </ResizablePanel>}
     </ResizablePanelGroup>
