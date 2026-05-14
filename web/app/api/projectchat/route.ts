@@ -10,6 +10,7 @@ import {
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
 // import { createAction, getActions, getAction, updateAction, deleteAction } from "@/lib/tools/actions";
+import { getRequirementsPrompt } from "@/lib/prompts";
 
 export const maxDuration = 30;
 
@@ -54,10 +55,10 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model,
-    system: `You are a helpful assistant. You will help users with configuring Salesforce.`,
-    tools: {...createRequirementTools(projectId) },
+    system: getRequirementsPrompt("not provided", "not provided"),
+    tools: {...createRequirementTools(projectId!) },
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(5)
+    stopWhen: stepCountIs(10)
   });
 
   // consumeStream() without await detaches stream completion from the

@@ -200,10 +200,10 @@ body {
     font-weight: var(--font-body-weight);
     letter-spacing: var(--font-body-tracking);
 }
-
+/* 
 .scrollbar-thin {
-  scrollbar-width: thin;                    /* Firefox */
-  scrollbar-color: transparent transparent; /* Firefox — invisible until hover */
+  scrollbar-width: thin;                   
+  scrollbar-color: transparent transparent; 
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -221,5 +221,5 @@ body {
 }
 
 .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background: hsl(var(--border)); /* or use your token */
-}
+  background: hsl(var(--border));
+} */

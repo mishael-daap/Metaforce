@@ -120,7 +120,7 @@ export default function ProjectChat({
       orientation="horizontal"
       className="w-screen"
     >
-      <ResizablePanel defaultSize="70%">
+      <ResizablePanel defaultSize="60%">
         <Chat projectId={projectId} initialMessages={initialMessages} />
       </ResizablePanel>
 
