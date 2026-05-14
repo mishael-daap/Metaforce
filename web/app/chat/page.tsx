@@ -91,6 +91,7 @@ export function Page() {
     </div>
   );
 }
+
 export default function ResizableDemo() {
   const [showPanel, setShowPanel] = useState(false);
   return (

@@ -14,5 +14,7 @@ export default async function ProjectChatPage({
 
   const messages = await loadMessages(conversation.id);
 
-  return <ProjectChat projectId={projectId} initialMessages={messages} />;
+  return <div className="h-screen flex flex-col">
+    <ProjectChat projectId={projectId} initialMessages={messages} />;
+  </div>
 }

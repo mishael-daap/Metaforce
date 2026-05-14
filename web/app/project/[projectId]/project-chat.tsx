@@ -7,8 +7,14 @@ import { MessageCircle } from "lucide-react";
 import { PromptInputMessage, PromptInput, PromptInputTextarea, PromptInputSubmit } from "@/src/components/ai-elements/prompt-input";
 import { Conversation, ConversationContent, ConversationEmptyState } from "@/src/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/src/components/ai-elements/message";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { File } from "lucide-react";
 
-export default function ProjectChat({
+export function Chat({
   projectId,
   initialMessages,
 }: {
@@ -41,8 +47,8 @@ export default function ProjectChat({
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <Conversation className="flex-1 overflow-y-auto">
+    <div className="flex flex-col ">
+      <Conversation className="flex-1 overflow-y-auto scrollbar-thin">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -89,4 +95,42 @@ export default function ProjectChat({
       </div>
     </div>
   );
+}
+
+export default function ProjectChat({
+  projectId,
+  initialMessages,
+}: {
+  projectId: string;
+  initialMessages: UIMessage[];
+}) {
+  const [showPanel, setShowPanel] = useState(false);
+  return (
+    // top bar
+    <div className="h-screen flex flex-col p-4 overflow-hidden">
+      <div className="flex justify-between">
+        
+
+        <div>.</div>
+
+        <File  onClick={() => setShowPanel(p => !p)} className=""/>
+
+      </div>
+      <ResizablePanelGroup
+      orientation="horizontal"
+      className="w-screen"
+    >
+      <ResizablePanel defaultSize="70%">
+        <Chat projectId={projectId} initialMessages={initialMessages} />
+      </ResizablePanel>
+
+      <ResizableHandle  className="bg-transparent" withHandle/>
+
+      {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
+        <div className="flex h-full items-center justify-center p-6 rounded-lg border">
+          <span className="font-semibold">small panel</span>
+        </div>
+      </ResizablePanel>}
+    </ResizablePanelGroup>
+    </div>)
 }
