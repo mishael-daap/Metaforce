@@ -24,9 +24,98 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { Requirement } from "@/src/types/requirements";
+
+const mockRequirements: Requirement[] = [
+  {
+    id: '1',
+    title: 'User Authentication',
+    description:
+      'Implement secure user authentication with JWT tokens and email verification. Users should be able to sign up, log in, and reset their passwords.',
+    status: 'completed',
+  },
+  {
+    id: '2',
+    title: 'Database Integration',
+    description:
+      'Set up PostgreSQL database with proper schema, indexing, and migrations. Ensure data integrity with appropriate constraints.',
+    status: 'completed',
+  },
+  {
+    id: '3',
+    title: 'API Documentation',
+    description:
+      'Create comprehensive API documentation using OpenAPI/Swagger. Include authentication details, endpoint specifications, and example requests.',
+    status: 'planned',
+  },
+  {
+    id: '4',
+    title: 'Performance Optimization',
+    description:
+      'Optimize database queries, implement caching strategies, and reduce bundle size. Target achieving <2s initial load time.',
+    status: 'pending',
+  },
+  {
+    id: '5',
+    title: 'Mobile Responsiveness',
+    description:
+      'Ensure the application is fully responsive on mobile devices (iOS and Android). Test on various screen sizes.',
+    status: 'pending',
+  },
+  {
+    id: '6',
+    title: 'Legacy System Migration',
+    description:
+      'Migrate data from the old system to the new architecture. This requirement was superseded by the new architecture.',
+    status: 'cancelled',
+  }, {
+    id: '1',
+    title: 'User Authentication',
+    description:
+      'Implement secure user authentication with JWT tokens and email verification. Users should be able to sign up, log in, and reset their passwords.',
+    status: 'completed',
+  },
+  {
+    id: '2',
+    title: 'Database Integration',
+    description:
+      'Set up PostgreSQL database with proper schema, indexing, and migrations. Ensure data integrity with appropriate constraints.',
+    status: 'completed',
+  },
+  {
+    id: '3',
+    title: 'API Documentation',
+    description:
+      'Create comprehensive API documentation using OpenAPI/Swagger. Include authentication details, endpoint specifications, and example requests.',
+    status: 'planned',
+  },
+  {
+    id: '4',
+    title: 'Performance Optimization',
+    description:
+      'Optimize database queries, implement caching strategies, and reduce bundle size. Target achieving <2s initial load time.',
+    status: 'pending',
+  },
+  {
+    id: '5',
+    title: 'Mobile Responsiveness',
+    description:
+      'Ensure the application is fully responsive on mobile devices (iOS and Android). Test on various screen sizes.',
+    status: 'pending',
+  },
+  {
+    id: '6',
+    title: 'Legacy System Migration',
+    description:
+      'Migrate data from the old system to the new architecture. This requirement was superseded by the new architecture.',
+    status: 'cancelled',
+  },
+];
+
 
 import { useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
+import { RequirementsList } from "@/components/chat/requirements-list";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -109,17 +198,19 @@ export default function ResizableDemo() {
       orientation="horizontal"
       className="w-screen"
     >
-      <ResizablePanel defaultSize="70%">
+      <ResizablePanel defaultSize="60%">
         <Page />
       </ResizablePanel>
 
       <ResizableHandle  className="bg-transparent" withHandle/>
 
-      {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
-        <div className="flex h-full items-center justify-center p-6 rounded-lg border">
-          <span className="font-semibold">small panel</span>
-        </div>
-      </ResizablePanel>}
+      {showPanel && (
+  <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
+    <div className="h-full overflow-y-auto rounded-lg border p-6">
+      <RequirementsList requirements={mockRequirements} />
+    </div>
+  </ResizablePanel>
+)}
     </ResizablePanelGroup>
     </div>
   )

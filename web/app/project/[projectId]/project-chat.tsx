@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { MessageCircle } from "lucide-react";
@@ -13,6 +13,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { File } from "lucide-react";
+import { supabase } from "@/lib/supabase-client";
 
 export function Chat({
   projectId,
@@ -105,15 +106,37 @@ export default function ProjectChat({
   initialMessages: UIMessage[];
 }) {
   const [showPanel, setShowPanel] = useState(false);
+  const [projectName, setProjectName] = useState(projectId);
+
+  useEffect(() => {
+    const fetchProjectName = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("name")
+          .eq("id", projectId)
+          .single();
+
+        if (error) {
+          console.error("Error fetching project:", error);
+        } else if (data && data.name) {
+          setProjectName(data.name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch project name:", err);
+      }
+    };
+
+    fetchProjectName();
+  }, [projectId]);
+
   return (
     // top bar
     <div className="h-screen flex flex-col p-4 overflow-hidden">
-      <div className="flex justify-between">
-        
+      <div className="flex justify-between items-center">
+        <div className="text-lg font-medium">{projectName}</div>
 
-        <div>.</div>
-
-        <File  onClick={() => setShowPanel(p => !p)} className=""/>
+        <File  onClick={() => setShowPanel(p => !p)} className="cursor-pointer"/>
 
       </div>
       <ResizablePanelGroup
