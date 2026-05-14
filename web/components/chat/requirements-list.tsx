@@ -79,15 +79,15 @@ export function RequirementsList({ requirements, onUpdate, onDelete }: Requireme
             >
               <button
                 onClick={() => toggleExpand(requirement.id)}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-200 transition-colors"
+                className="w-full px-4 py-3 flex justify-between hover:bg-gray-200 transition-colors"
               >
-                <div className="flex items-center gap-3 flex-1 text-left">
+                <div className="flex justify-between gap-3 flex-1 text-left">
                   <ChevronDown
-                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 shrink-0 ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
                   />
-                  <h3 className={`font-medium text-gray-900 ${requirement.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                  <h3 className={`font-medium text-gray-900 text-sm ${requirement.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                     {requirement.title}
                   </h3>
                   <Badge

@@ -21,9 +21,11 @@ import type { Requirement } from "@/src/types/requirements";
 export function Chat({
   projectId,
   initialMessages,
+  onFinish,         // <- no '?' here
 }: {
   projectId: string;
   initialMessages: UIMessage[];
+  onFinish?: (messages: UIMessage[]) => void;  // '?' only in the type
 }) {
   const [input, setInput] = useState("");
 
@@ -41,6 +43,12 @@ export function Chat({
         };
       },
     }),
+    onFinish: async ({ messages: finalMessages }) => {
+      // Call the onFinish callback if provided
+      if (onFinish) {
+        onFinish(finalMessages);
+      }
+    },
   });
 
   const handleSubmit = (message: PromptInputMessage) => {
@@ -112,6 +120,7 @@ export default function ProjectChat({
   const [projectName, setProjectName] = useState(projectId);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previousRequirementsHash, setPreviousRequirementsHash] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjectName = async () => {
@@ -149,6 +158,30 @@ export default function ProjectChat({
     fetchRequirements();
   }, [projectId]);
 
+  // Auto-open requirements panel when requirements change (but not on initial load)
+  useEffect(() => {
+    if (previousRequirementsHash !== null) {
+      // Create a hash of current requirements
+      const currentHash = requirements
+        .map(req => `${req.id}-${req.title}-${req.description}-${req.status}`)
+        .join('|');
+
+      // If hash changed and there are requirements, open the panel
+      if (currentHash !== previousRequirementsHash && requirements.length > 0) {
+        setShowPanel(true);
+      }
+
+      // Update the previous hash
+      setPreviousRequirementsHash(currentHash);
+    } else {
+      // Set initial hash on first load
+      const initialHash = requirements
+        .map(req => `${req.id}-${req.title}-${req.description}-${req.status}`)
+        .join('|');
+      setPreviousRequirementsHash(initialHash);
+    }
+  }, [requirements, previousRequirementsHash]);
+
   const handleUpdateRequirement = async (id: string, title: string, description: string) => {
     const result = await updateRequirement(id, title, description, projectId);
     if (result.success) {
@@ -185,7 +218,16 @@ export default function ProjectChat({
       className="w-screen"
     >
       <ResizablePanel defaultSize="60%">
-        <Chat projectId={projectId} initialMessages={initialMessages} />
+        <Chat
+          projectId={projectId}
+          initialMessages={initialMessages}
+          onFinish={(finalMessages) => {
+            // Optionally fetch requirements after chat finishes to catch any AI-created requirements
+            getProjectRequirements(projectId).then(newReqs => {
+              setRequirements(newReqs);
+            });
+          }}
+        />
       </ResizablePanel>
 
       <ResizableHandle  className="bg-transparent" withHandle/>
