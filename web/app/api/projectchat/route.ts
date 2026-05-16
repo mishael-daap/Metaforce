@@ -15,8 +15,8 @@ import {
 } from "@/lib/chat-store";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
-// import { createAction, getActions, getAction, updateAction, deleteAction } from "@/lib/tools/actions";
-import { getRequirementsPrompt } from "@/lib/prompts";
+// Action tools removed as per new architecture
+import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { supabase } from "@/lib/supabase";
 
 export const maxDuration = 30;

@@ -14,6 +14,19 @@ export async function getConversationForProject(
   return data;
 }
 
+export async function getRequirementsForProject(
+  projectId: string
+): Promise<Requirement[]> {
+  const { data, error } = await supabase
+    .from("requirements")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(`Failed to get requirements: ${error.message}`);
+  return data ?? [];
+}
+
 export async function createConversation(
   projectId: string
 ): Promise<{ id: string }> {

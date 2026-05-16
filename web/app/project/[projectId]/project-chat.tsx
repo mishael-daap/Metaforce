@@ -17,15 +17,28 @@ import { supabase } from "@/lib/supabase-client";
 import { getProjectRequirements, updateRequirement, deleteRequirement } from "./actions";
 import { RequirementsList } from "@/components/chat/requirements-list";
 import type { Requirement } from "@/src/types/requirements";
+import { Button } from "@/components/ui/button";
+
+// "max-w-4xl max-h-[90vh] overflow-y-scroll px-10",
+//           "[&::-webkit-scrollbar]:w-2",
+//           "[&::-webkit-scrollbar-track]:bg-transparent",
+//           "[&::-webkit-scrollbar-thumb]:bg-border",
+//           "[&::-webkit-scrollbar-thumb]:rounded-full",
+//           "hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30",
+//           "[&::-webkit-scrollbar]:hidden",
 
 export function Chat({
   projectId,
   initialMessages,
   onFinish,         // <- no '?' here
+  mode,
+  setMode,
 }: {
   projectId: string;
   initialMessages: UIMessage[];
   onFinish?: (messages: UIMessage[]) => void;  // '?' only in the type
+  mode: 'plan' | 'build';
+  setMode: React.Dispatch<React.SetStateAction<'plan' | 'build'>>;
 }) {
   const [input, setInput] = useState("");
 
@@ -33,7 +46,7 @@ export function Chat({
     id: projectId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
-      api: "/api/projectchat",
+      api: mode === 'build' ? "/api/projectbuild" : "/api/projectchat",
       prepareSendMessagesRequest({ messages, id }) {
         return {
           body: {
@@ -58,9 +71,11 @@ export function Chat({
     }
   };
 
+
+
   return (
     <div className="flex flex-col ">
-      <Conversation className="flex-1 overflow-y-auto scrollbar-thin">
+      <Conversation className="flex-1 overflow-y-auto scrollbar-thin ">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -121,6 +136,7 @@ export default function ProjectChat({
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState(true);
   const [previousRequirementsHash, setPreviousRequirementsHash] = useState<string | null>(null);
+  const [mode, setMode] = useState<'plan' | 'build'>('plan'); // Default to plan mode
 
   useEffect(() => {
     const fetchProjectName = async () => {
@@ -209,44 +225,67 @@ export default function ProjectChat({
     <div className="h-screen flex flex-col p-4 overflow-hidden">
       <div className="flex justify-between items-center">
         <div className="text-lg font-medium">{projectName}</div>
-
-        <File  onClick={() => setShowPanel(p => !p)} className="cursor-pointer"/>
-
-      </div>
-      <ResizablePanelGroup
-      orientation="horizontal"
-      className="w-screen"
-    >
-      <ResizablePanel defaultSize="60%">
-        <Chat
-          projectId={projectId}
-          initialMessages={initialMessages}
-          onFinish={(finalMessages) => {
-            // Optionally fetch requirements after chat finishes to catch any AI-created requirements
-            getProjectRequirements(projectId).then(newReqs => {
-              setRequirements(newReqs);
-            });
-          }}
-        />
-      </ResizablePanel>
-
-      <ResizableHandle  className="bg-transparent" withHandle/>
-
-      {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
-        <div className="h-full overflow-y-auto">
-          {loading ? (
-            <div className="flex h-full items-center justify-center">
-              <span>Loading requirements...</span>
-            </div>
-          ) : (
-            <RequirementsList
-              requirements={requirements}
-              onUpdate={handleUpdateRequirement}
-              onDelete={handleDeleteRequirement}
-            />
-          )}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={mode === 'plan' ? 'secondary' : 'default'}
+            onClick={() => setMode('plan')}
+            size="sm"
+          >
+            Plan Mode
+          </Button>
+          <Button
+            variant={mode === 'build' ? 'secondary' : 'default'}
+            onClick={() => setMode('build')}
+            size="sm"
+          >
+            Build Mode
+          </Button>
         </div>
-      </ResizablePanel>}
-    </ResizablePanelGroup>
-    </div>)
+      </div>
+
+      <ResizablePanelGroup
+        orientation="horizontal"
+        className="w-screen"
+      >
+        <ResizablePanel defaultSize="60%">
+          <Chat
+            projectId={projectId}
+            initialMessages={initialMessages}
+            onFinish={(finalMessages) => {
+              // Optionally fetch requirements after chat finishes to catch any AI-created requirements
+              getProjectRequirements(projectId).then(newReqs => {
+                setRequirements(newReqs);
+              });
+            }}
+            mode={mode}
+            setMode={setMode}
+          />
+        </ResizablePanel>
+
+        <ResizableHandle  className="bg-transparent" withHandle/>
+
+        {showPanel && <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
+          <div className="h-full overflow-y-auto">
+            {loading ? (
+              <div className="flex h-full items-center justify-center">
+                <span>Loading requirements...</span>
+              </div>
+            ) : (
+             <>
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Current mode: {mode === 'plan' ? 'Plan' : 'Build'}
+                </p>
+              </div>
+              <RequirementsList
+                requirements={requirements}
+                onUpdate={handleUpdateRequirement}
+                onDelete={handleDeleteRequirement}
+              /></>
+            )}
+          </div>
+        </ResizablePanel>}
+      </ResizablePanelGroup>
+    </div>
+  );
 }

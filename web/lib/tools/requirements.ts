@@ -157,5 +157,61 @@ export function createRequirementTools(projectId: string) {
         };
       },
     }),
+
+    getPendingRequirements: tool({
+      description:
+        "Get the first pending or planned requirement for the current project. Use to find the next requirement to work on.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const { data, error } = await supabase
+          .from("requirements")
+          .select("*")
+          .eq("project_id", projectId)
+          .in("status", ["pending", "planned"])
+          .order("created_at", { ascending: true })
+          .limit(1);
+
+        if (error) {
+          throw new Error(`Failed to fetch pending requirements: ${error.message}`);
+        }
+
+        return {
+          requirements: data || [],
+        };
+      },
+    }),
+
+    saveMetadataComponent: tool({
+      description: "Save a metadata component that was created by executing a requirement. Links the component to its requirement.",
+      inputSchema: z.object({
+        requirementId: z.string().uuid().describe("The ID of the requirement that created this component"),
+        type: z.enum(["custom_object", "custom_field"]).describe("The type of metadata component"),
+        name: z.string().describe("The human-readable name of the component"),
+        apiName: z.string().describe("The API name of the component (e.g. 'MyObject__c' or 'MyField__c')"),
+        definition: z.string().describe("The XML definition of the component"),
+      }),
+      execute: async ({ requirementId, type, name, apiName, definition }) => {
+        const { data, error } = await supabase
+          .from("metadata_components")
+          .insert({
+            requirement_id: requirementId,
+            type,
+            name,
+            api_name: apiName,
+            definition,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(`Failed to save metadata component: ${error.message}`);
+        }
+
+        return {
+          success: true,
+          metadataComponent: data,
+        };
+      },
+    }),
   };
 }
