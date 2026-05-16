@@ -18,6 +18,7 @@ import { getProjectRequirements, updateRequirement, deleteRequirement } from "./
 import { RequirementsList } from "@/components/chat/requirements-list";
 import type { Requirement } from "@/src/types/requirements";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // "max-w-4xl max-h-[90vh] overflow-y-scroll px-10",
 //           "[&::-webkit-scrollbar]:w-2",
@@ -30,13 +31,13 @@ import { Button } from "@/components/ui/button";
 export function Chat({
   projectId,
   initialMessages,
-  onFinish,         // <- no '?' here
+  onFinish,
   mode,
   setMode,
 }: {
   projectId: string;
   initialMessages: UIMessage[];
-  onFinish?: (messages: UIMessage[]) => void;  // '?' only in the type
+  onFinish?: (messages: UIMessage[]) => void;
   mode: 'plan' | 'build';
   setMode: React.Dispatch<React.SetStateAction<'plan' | 'build'>>;
 }) {
@@ -48,19 +49,11 @@ export function Chat({
     transport: new DefaultChatTransport({
       api: mode === 'build' ? "/api/projectbuild" : "/api/projectchat",
       prepareSendMessagesRequest({ messages, id }) {
-        return {
-          body: {
-            messages,
-            projectId: id,
-          },
-        };
+        return { body: { messages, projectId: id } };
       },
     }),
     onFinish: async ({ messages: finalMessages }) => {
-      // Call the onFinish callback if provided
-      if (onFinish) {
-        onFinish(finalMessages);
-      }
+      if (onFinish) onFinish(finalMessages);
     },
   });
 
@@ -71,11 +64,9 @@ export function Chat({
     }
   };
 
-
-
   return (
-    <div className="flex flex-col ">
-      <Conversation className="flex-1 overflow-y-auto scrollbar-thin ">
+    <div className="flex flex-col">
+      <Conversation className="flex-1 overflow-y-auto scrollbar-thin">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -113,6 +104,23 @@ export function Chat({
             placeholder="What are you working on?"
             onChange={(e) => setInput(e.currentTarget.value)}
           />
+
+          {/* Plan / Build toggle — sits left of the submit button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setMode(mode === 'plan' ? 'build' : 'plan')}
+            className={cn(
+              "absolute bottom-1 left-1 h-7 px-2 rounded-full border transition-colors",
+              mode === 'build'
+                ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                : "border-border text-muted-foreground hover:bg-accent"
+            )}
+          >
+            {/* <IconWand className="size-3" /> */}
+            <span className="text-xs capitalize">{mode}</span>
+          </Button>
+
           <PromptInputSubmit
             status={status === "streaming" ? "streaming" : "ready"}
             disabled={!input.trim()}
@@ -225,22 +233,6 @@ export default function ProjectChat({
     <div className="h-screen flex flex-col p-4 overflow-hidden">
       <div className="flex justify-between items-center">
         <div className="text-lg font-medium">{projectName}</div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={mode === 'plan' ? 'secondary' : 'default'}
-            onClick={() => setMode('plan')}
-            size="sm"
-          >
-            Plan Mode
-          </Button>
-          <Button
-            variant={mode === 'build' ? 'secondary' : 'default'}
-            onClick={() => setMode('build')}
-            size="sm"
-          >
-            Build Mode
-          </Button>
-        </div>
       </div>
 
       <ResizablePanelGroup
@@ -271,17 +263,12 @@ export default function ProjectChat({
                 <span>Loading requirements...</span>
               </div>
             ) : (
-             <>
-              <div className="mb-4">
-                <p className="text-sm text-muted-foreground">
-                  Current mode: {mode === 'plan' ? 'Plan' : 'Build'}
-                </p>
-              </div>
+             
               <RequirementsList
                 requirements={requirements}
                 onUpdate={handleUpdateRequirement}
                 onDelete={handleDeleteRequirement}
-              /></>
+              />
             )}
           </div>
         </ResizablePanel>}
