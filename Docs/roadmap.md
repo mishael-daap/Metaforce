@@ -32,34 +32,27 @@ Goal: AI tool calling for requirement and action CRUD operations
 Status: completed
 Goal: Full chat with requirements panel and AI-driven requirement management
 
-## 9. Action Planning
-Status: pending
-Goal: Expand a requirement into a list of granular, reviewable actions before execution
 
-## 10. Action Execution
+## 9. Execution
 Status: pending
-Goal: Execute actions sequentially via mocked tool calls with per-action approval and completion tracking
+Goal: Agent can prepare a set of tasks for a requirement in chat, user approves and agent completes the tasks via mocked tool calls and seek user approval, mark task as complete and repeat for next task
 
-## 11. Error Recovery
-Status: pending
-Goal: Diagnose failed actions, propose fixes, and retry after user approval
-
-## 12. SFDX Server
+## 10. SFDX Server
 Status: pending
 Goal: Dockerized Node.js service exposing CLI endpoints for creating Salesforce metadata
 
-## 13. Metadata Library
+## 11. Metadata Library
 Status: pending
 Goal: Save every created metadata component to Supabase for reuse across orgs and projects
 
-## 14. SFDX Integration
+## 12. SFDX Integration
 Status: pending
 Goal: Replace mocked tool calls with real SFDX Server endpoints for live Salesforce execution
 
-## 15. Chrome Extension
+## 13. Chrome Extension
 Status: pending
 Goal: Extract access token and instance URL from an active Salesforce org session
 
-## 16. Org Connection
+## 14. Org Connection
 Status: pending
 Goal: Link a Salesforce org to a Metaforce project using credentials from the Chrome extension
