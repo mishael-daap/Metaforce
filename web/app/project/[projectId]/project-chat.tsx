@@ -43,13 +43,15 @@ export function Chat({
 }) {
   const [input, setInput] = useState("");
 
+  console.log("mode is", mode)
+
   const { messages, sendMessage, status } = useChat({
     id: projectId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
-      api: mode === 'build' ? "/api/projectbuild" : "/api/projectchat",
-      prepareSendMessagesRequest({ messages, id }) {
-        return { body: { messages, projectId: id } };
+      api: "/api/projectchat",
+      prepareSendMessagesRequest({ messages, id, body }) {
+        return { body: { messages, projectId: id, ...body} };
       },
     }),
     onFinish: async ({ messages: finalMessages }) => {
@@ -59,7 +61,7 @@ export function Chat({
 
   const handleSubmit = (message: PromptInputMessage) => {
     if (message.text.trim()) {
-      sendMessage({ text: message.text });
+      sendMessage({ text: message.text }, { body: { projectId, mode } });
       setInput("");
     }
   };
@@ -233,6 +235,7 @@ export default function ProjectChat({
     <div className="h-screen flex flex-col p-4 overflow-hidden">
       <div className="flex justify-between items-center">
         <div className="text-lg font-medium">{projectName}</div>
+        <File onClick={()=> setShowPanel(!showPanel)} />
       </div>
 
       <ResizablePanelGroup

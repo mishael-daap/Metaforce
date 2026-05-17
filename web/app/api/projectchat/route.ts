@@ -31,10 +31,14 @@ export async function POST(req: Request) {
   const {
     messages: clientMessages,
     projectId,
+    mode
   }: {
     messages: UIMessage[];
     projectId?: string;
+    mode: string
   } = body;
+
+  console.log("mode is", mode)
 
   // Validate incoming data before touching the DB
   if (!Array.isArray(clientMessages) || clientMessages.length === 0) {
