@@ -15,8 +15,9 @@ import {
 } from "@/lib/chat-store";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
-// Action tools removed as per new architecture
+import { createSfdxTools } from "@/lib/tools/sfdx";
 import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
+import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
 
 export const maxDuration = 30;
@@ -27,12 +28,34 @@ const model = wrapLanguageModel({
 });
 
 async function handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+  console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
   const result = streamText({
     model,
     system: getRequirementsPrompt(projectName, projectDescription),
     tools: { ...createRequirementTools(projectId) },
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(50),
+  });
+
+  return result.toUIMessageStreamResponse({
+    originalMessages: messages,
+    generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
+    onFinish: ({ responseMessage }) => {
+      if (!conversationId) return;
+      console.log(" ai response message", responseMessage)
+      saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
+    },
+  });
+}
+
+async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+  console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
+  const result = streamText({
+    model,
+    system: getBuildPlanPrompt(projectName, projectDescription),
+    tools: { ...createRequirementTools(projectId), ...createSfdxTools() },
+    messages: await convertToModelMessages(messages),
+    stopWhen: stepCountIs(50),
   });
 
   return result.toUIMessageStreamResponse({
@@ -43,10 +66,6 @@ async function handlePlanMode({ messages, projectId, projectName, projectDescrip
       saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
     },
   });
-}
-
-async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId }) {
-//  to be built
 }
 
 
@@ -116,34 +135,11 @@ export async function POST(req: Request) {
     await saveMessages({ conversationId, messages: [newUserMessage] });
   }
 
-  // const result = streamText({
-  //   model,
-  //   system: getRequirementsPrompt(projectName, projectDescription),
-  //   tools: { ...createRequirementTools(projectId!) },
-  //   messages: await convertToModelMessages(messages),
-  //   stopWhen: stepCountIs(10),
-  // });
-
-  // return result.toUIMessageStreamResponse({
-  //   // originalMessages is the full context so the SDK builds the complete
-  //   // final array (history + assistant response) before passing to onFinish
-  //   originalMessages: messages,
-  //   // Server-side IDs ensure assistant messages always get a stable
-  //   // non-empty id — prevents upsert failures in Supabase
-  //   generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-  //   onFinish: ({ responseMessage }) => {
-  //     if (!conversationId) return;
-
-  //     saveMessages({ conversationId, messages: [responseMessage] }).catch(
-  //       (err) => console.error("Failed to save messages:", err),
-  //     );
-  //   },
-  // });
-
    if (mode === "plan") {
+    console.log("were in plan mode")
     return handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId });
   } else if (mode === "build") {
-    return new Response("Bad Request: unknown mode", { status: 400 });
+    return handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId });
   } else {
     return new Response("Bad Request: unknown mode", { status: 400 });
   }

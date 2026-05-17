@@ -40,9 +40,9 @@ export function createSfdxTools() {
         ),
       }),
       execute: async ({ name, label, fields }) => {
-        // Mock implementation - in reality this would call the SFDX Server
-        // For now, we'll return a mock success response
+        // Mock implementation - simulates async work with a delay
         // TODO: Replace with actual SFDX Server call when server is implemented
+        await new Promise(r => setTimeout(r, 1500));
 
         // Create a mock definition that would be stored in metadata_components
         const definition = `<?xml version="1.0" encoding="UTF-8"?>
@@ -112,8 +112,9 @@ export function createSfdxTools() {
         fieldType,
         referencedObject,
       }) => {
-        // Mock implementation - in reality this would call the SFDX Server
+        // Mock implementation - simulates async work with a delay
         // TODO: Replace with actual SFDX Server call when server is implemented
+        await new Promise(r => setTimeout(r, 1500));
 
         // Create a mock definition that would be stored in metadata_components
         const definition = `<?xml version="1.0" encoding="UTF-8"?>

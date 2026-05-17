@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 
 export function createRequirementTools(projectId: string) {
+  console.log("project id from prompt", projectId)
   return {
     createRequirement: tool({
       description:
@@ -181,37 +182,5 @@ export function createRequirementTools(projectId: string) {
       },
     }),
 
-    saveMetadataComponent: tool({
-      description: "Save a metadata component that was created by executing a requirement. Links the component to its requirement.",
-      inputSchema: z.object({
-        requirementId: z.string().uuid().describe("The ID of the requirement that created this component"),
-        type: z.enum(["custom_object", "custom_field"]).describe("The type of metadata component"),
-        name: z.string().describe("The human-readable name of the component"),
-        apiName: z.string().describe("The API name of the component (e.g. 'MyObject__c' or 'MyField__c')"),
-        definition: z.string().describe("The XML definition of the component"),
-      }),
-      execute: async ({ requirementId, type, name, apiName, definition }) => {
-        const { data, error } = await supabase
-          .from("metadata_components")
-          .insert({
-            requirement_id: requirementId,
-            type,
-            name,
-            api_name: apiName,
-            definition,
-          })
-          .select()
-          .single();
-
-        if (error) {
-          throw new Error(`Failed to save metadata component: ${error.message}`);
-        }
-
-        return {
-          success: true,
-          metadataComponent: data,
-        };
-      },
-    }),
   };
 }

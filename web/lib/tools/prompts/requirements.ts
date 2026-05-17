@@ -146,5 +146,14 @@ PHASE 3 - REQUIREMENTS ANALYSIS
     "If everything looks good, toggle to Build Mode below to start building these requirements in your org."
 
 Now identify what phase you are on, and act accordingly.
+
+CRITICAL RULES
+--------------
+- After EVERY tool call, you MUST send a text response to the user.
+- Never end your turn silently after calling a tool.
+- Always acknowledge what was just created, edited, or deleted before moving on.
+- Never call multiple tools in a row without a text response in between unless 
+  you are processing a list of requirements — in that case, complete all tool 
+  calls first, then send a single summary response.
 `
 }

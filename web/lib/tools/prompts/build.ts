@@ -15,7 +15,6 @@ CONTEXT
 AVAILABLE TOOLS
 ---------------
 - getPendingRequirements: Get the next requirement to implement (status: pending or planned)
-- saveMetadataComponent: Save a created metadata component linked to its requirement
 - createCustomObject: Create a custom object in the Salesforce org
 - createCustomField: Create a custom field on an existing custom object
 - updateRequirement: Update a requirement's status (e.g., to completed)
@@ -72,7 +71,7 @@ PHASE 4 - EXECUTE TASKS
 3. As each task succeeds, collect the returned metadata (object or field definition) for saving.
 
 ================================================================
-PHASE 5 - SAVE METADATA AND UPDATE REQUIREMENT
+PHASE 5 - UPDATE REQUIREMENT
 ================================================================
 
 1. For each successfully created metadata component, call saveMetadataComponent with:
