@@ -26,6 +26,30 @@ const model = wrapLanguageModel({
   middleware: devToolsMiddleware(),
 });
 
+async function handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+  const result = streamText({
+    model,
+    system: getRequirementsPrompt(projectName, projectDescription),
+    tools: { ...createRequirementTools(projectId) },
+    messages: await convertToModelMessages(messages),
+    stopWhen: stepCountIs(10),
+  });
+
+  return result.toUIMessageStreamResponse({
+    originalMessages: messages,
+    generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
+    onFinish: ({ responseMessage }) => {
+      if (!conversationId) return;
+      saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
+    },
+  });
+}
+
+async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+//  to be built
+}
+
+
 export async function POST(req: Request) {
   const body = await req.json();
   const {
@@ -37,8 +61,6 @@ export async function POST(req: Request) {
     projectId?: string;
     mode: string
   } = body;
-
-  console.log("mode is", mode)
 
   // Validate incoming data before touching the DB
   if (!Array.isArray(clientMessages) || clientMessages.length === 0) {
@@ -56,8 +78,6 @@ export async function POST(req: Request) {
   let messages: UIMessage[] = [newUserMessage];
   let projectName = "not provided";
   let projectDescription = "not provided";
-
-  console.log("project id is", projectId);
 
   let chatHistory: UIMessage[] = [];
 
@@ -96,29 +116,35 @@ export async function POST(req: Request) {
     await saveMessages({ conversationId, messages: [newUserMessage] });
   }
 
-  const result = streamText({
-    model,
-    system: getRequirementsPrompt(projectName, projectDescription),
-    tools: { ...createRequirementTools(projectId!) },
-    messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(10),
-  });
+  // const result = streamText({
+  //   model,
+  //   system: getRequirementsPrompt(projectName, projectDescription),
+  //   tools: { ...createRequirementTools(projectId!) },
+  //   messages: await convertToModelMessages(messages),
+  //   stopWhen: stepCountIs(10),
+  // });
 
-  return result.toUIMessageStreamResponse({
-    // originalMessages is the full context so the SDK builds the complete
-    // final array (history + assistant response) before passing to onFinish
-    originalMessages: messages,
-    // Server-side IDs ensure assistant messages always get a stable
-    // non-empty id — prevents upsert failures in Supabase
-    generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ messages: finalMessages, responseMessage }) => {
-      if (!conversationId) return;
+  // return result.toUIMessageStreamResponse({
+  //   // originalMessages is the full context so the SDK builds the complete
+  //   // final array (history + assistant response) before passing to onFinish
+  //   originalMessages: messages,
+  //   // Server-side IDs ensure assistant messages always get a stable
+  //   // non-empty id — prevents upsert failures in Supabase
+  //   generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
+  //   onFinish: ({ responseMessage }) => {
+  //     if (!conversationId) return;
 
-      console.log("user message is", responseMessage);
+  //     saveMessages({ conversationId, messages: [responseMessage] }).catch(
+  //       (err) => console.error("Failed to save messages:", err),
+  //     );
+  //   },
+  // });
 
-      saveMessages({ conversationId, messages: [responseMessage] }).catch(
-        (err) => console.error("Failed to save messages:", err),
-      );
-    },
-  });
+   if (mode === "plan") {
+    return handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId });
+  } else if (mode === "build") {
+    return new Response("Bad Request: unknown mode", { status: 400 });
+  } else {
+    return new Response("Bad Request: unknown mode", { status: 400 });
+  }
 }
