@@ -49,6 +49,7 @@ export async function ensureProjectExists(input: ProjectSetupInput): Promise<Pro
 
     // Basic URL validation
     try {
+      console.log("the org url from the project set up function", orgUrl)
       new URL(orgUrl);
     } catch {
       return { success: false, error: 'orgUrl must be a valid URL' };

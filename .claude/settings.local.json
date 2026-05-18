@@ -6,7 +6,9 @@
       "Skill(shadcn)",
       "Bash(grep -E \"\\\\.\\(tsx?|js\\)$\")",
       "Bash(xargs grep -l -i requirement)",
-      "Bash(xargs grep -l \"ai\\\\|tool\")"
+      "Bash(xargs grep -l \"ai\\\\|tool\")",
+      "Bash(sf version *)",
+      "Bash(docker compose build *)"
     ]
   }
 }

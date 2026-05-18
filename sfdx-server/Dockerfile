@@ -1,35 +1,38 @@
-# Stage 1: Salesforce CLI Image
-FROM salesforce/cli:latest-slim AS sfdx-cli
+# Stage 1: Build
+# Install all deps (including devDependencies) and compile TypeScript
+FROM node:20 AS builder
 
-# Stage 2: Node.js + App
-FROM node:20-slim
-
-# Install OpenSSL and Java (required by Salesforce CLI for some operations)
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jre-headless \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Salesforce CLI from the official image
-COPY --from=sfdx-cli /usr/local/bin/sf /usr/local/bin/sf
-COPY --from=sfdx-cli /usr/local/lib/node_modules/@salesforce /usr/local/lib/node_modules/@salesforce
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json tsconfig.json ./
-
-# Install dependencies
+COPY package.json package-lock.json tsconfig.json ./
 RUN npm install
 
-# Copy source code
 COPY src ./src
-
-# Build TypeScript
 RUN npx tsc
 
-# Expose port
+# Stage 2: Production
+FROM node:20
+
+# Install system dependencies: Java (required by CLI for metadata ops),
+# curl and ca-certificates (required for HTTPS to Salesforce orgs)
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jre-headless \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Salesforce CLI globally with all its dependencies
+RUN npm install -g @salesforce/cli
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+# Copy compiled artifacts from the build stage
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 8000
 
-# Start the server
 CMD ["node", "dist/index.js"]

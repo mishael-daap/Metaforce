@@ -1,10 +1,10 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import { validateApiKey } from './middleware/auth.js';
 import { extractProjectContext } from './middleware/projectContext.js';
 import metadataRoutes from './routes/metadata.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
