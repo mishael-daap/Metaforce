@@ -28,7 +28,7 @@ router.post('/objects', async (req, res) => {
       res.status(500).json({
         status: false,
         error: `Project setup failed: ${setupResult.error}`,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -40,7 +40,7 @@ router.post('/objects', async (req, res) => {
       res.status(500).json({
         success: false,
         error: `Object creation failed: ${createResult.error}`,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -55,7 +55,7 @@ router.post('/objects', async (req, res) => {
       res.status(500).json({
         success: false,
         error: `Deployment failed: ${deployResult.error}`,
-        createdItems: [{ fullName: objectSpec.fullName, type: 'CustomObject', xml: createResult.xml! }]
+        components: [{ fullName: objectSpec.fullName, type: 'CustomObject', xml: createResult.xml! }]
       });
       return;
     }
@@ -64,7 +64,7 @@ router.post('/objects', async (req, res) => {
     res.json({
       success: true,
       error: null,
-      createdItems: [
+      components: [
         { fullName: objectSpec.fullName, type: 'CustomObject', xml: createResult.xml! }
       ]
     });
@@ -73,7 +73,7 @@ router.post('/objects', async (req, res) => {
     res.status(500).json({
       status: false,
       error: errorMessage,
-      createdItems: []
+      components: []
     });
   }
 });
@@ -91,7 +91,7 @@ router.post('/fields', async (req, res) => {
       res.status(400).json({
         status: false,
         error: 'objectName is required in request body',
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -100,7 +100,7 @@ router.post('/fields', async (req, res) => {
       res.status(400).json({
         status: false,
         error: 'field spec is required in request body',
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -116,7 +116,7 @@ router.post('/fields', async (req, res) => {
       res.status(500).json({
         status: false,
         error: `Project setup failed: ${setupResult.error}`,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -128,7 +128,7 @@ router.post('/fields', async (req, res) => {
       res.status(500).json({
         success: false,
         error: `Field creation failed: ${createResult.error}`,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -143,7 +143,7 @@ router.post('/fields', async (req, res) => {
       res.status(500).json({
         success: false,
         error: `Deployment failed: ${deployResult.error}`,
-        createdItems: [{ fullName: field.fullName, type: 'CustomField', xml: createResult.xml! }]
+        components: [{ fullName: field.fullName, type: 'CustomField', xml: createResult.xml! }]
       });
       return;
     }
@@ -152,7 +152,7 @@ router.post('/fields', async (req, res) => {
     res.json({
       success: true,
       error: null,
-      createdItems: [
+      components: [
         { fullName: field.fullName, type: 'CustomField', xml: createResult.xml! }
       ]
     });
@@ -161,7 +161,7 @@ router.post('/fields', async (req, res) => {
     res.status(500).json({
       status: false,
       error: errorMessage,
-      createdItems: []
+      components: []
     });
   }
 });
@@ -179,7 +179,7 @@ router.get('/objects', (req, res) => {
       res.json({
         success: true,
         error: null,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -201,14 +201,14 @@ router.get('/objects', (req, res) => {
     res.json({
       status: true,
       error: null,
-      createdItems: objects
+      components: objects
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
     res.status(500).json({
       status: false,
       error: errorMessage,
-      createdItems: []
+      components: []
     });
   }
 });
@@ -228,7 +228,7 @@ router.get('/objects/:apiName', (req, res) => {
       res.status(404).json({
         status: false,
         error: `Custom object '${apiName}' not found in project '${projectId}'`,
-        createdItems: []
+        components: []
       });
       return;
     }
@@ -247,7 +247,7 @@ router.get('/objects/:apiName', (req, res) => {
     res.json({
       success: true,
       error: null,
-      createdItems: [
+      components: [
         { fullName: apiName, type: 'CustomObject', xml: xmlContent }
       ],
       detail: {
@@ -261,7 +261,7 @@ router.get('/objects/:apiName', (req, res) => {
     res.status(500).json({
       status: false,
       error: errorMessage,
-      createdItems: []
+      components: []
     });
   }
 });

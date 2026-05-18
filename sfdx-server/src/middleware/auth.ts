@@ -9,7 +9,7 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
     res.status(401).json({
       success: false,
       error: 'Unauthorized: x-api-key header is required',
-      createdItems: []
+      components: []
     });
     return;
   }
@@ -18,7 +18,7 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
     res.status(401).json({
       success: false,
       error: 'Unauthorized: Invalid API key',
-      createdItems: []
+      components: []
     });
     return;
   }

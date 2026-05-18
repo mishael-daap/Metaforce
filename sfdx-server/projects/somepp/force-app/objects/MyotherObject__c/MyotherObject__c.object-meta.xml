@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <nameField>
+        <label>My Object Name</label>
+        <type>Text</type>
+    </nameField>
+    <description>A custom object for my app</description>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <label>My other Object</label>
+    <pluralLabel>My Objects</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

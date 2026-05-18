@@ -26,7 +26,7 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
     res.status(400).json({
       success: false,
       error: 'Bad Request: x-project-id header is required',
-      createdItems: []
+      components: []
     });
     return;
   }
@@ -35,7 +35,7 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
     res.status(400).json({
       status: false,
       error: 'Bad Request: x-access-token header is required',
-      createdItems: []
+      components: []
     });
     return;
   }
@@ -44,7 +44,7 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
     res.status(400).json({
       status: false,
       error: 'Bad Request: x-org-url header is required',
-      createdItems: []
+      components: []
     });
     return;
   }

@@ -32,7 +32,7 @@ app.use((req, res) => {
   res.status(404).json({
     status: false,
     error: 'Not Found',
-    createdItems: []
+    components: []
   });
 });
 
@@ -42,7 +42,7 @@ app.use((err: any, req: express.Request, res: express.Response) => {
   res.status(500).json({
     status: false,
     error: 'Internal Server Error',
-    createdItems: []
+    components: []
   });
 });
 

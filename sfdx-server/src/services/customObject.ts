@@ -10,10 +10,10 @@ export interface CustomObjectResult {
   error?: string;
 }
 
-export interface CreatedItem {
-  name: string;
+export interface Component {
+  fullName: string;
   type: string;
-  path: string;
+  xml: string;
 }
 
 export async function createCustomObject(
@@ -56,7 +56,6 @@ export async function createCustomObject(
 
     return {
       success: true,
-      outputPath: xmlFilePath,
       xml: xmlContent
     };
   } catch (err) {
