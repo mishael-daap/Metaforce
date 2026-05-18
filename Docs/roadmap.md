@@ -38,7 +38,7 @@ Status: completed
 Goal: Agent can prepare a set of tasks for a requirement in chat, user approves and agent completes the tasks via mocked tool calls and seek user approval, mark task as complete and repeat for next task
 
 ## 10. SFDX Server
-Status: pending
+Status: in-progress
 Goal: Dockerized Node.js service exposing CLI endpoints for creating Salesforce metadata
 
 ## 11. Metadata Library
@@ -56,3 +56,7 @@ Goal: Extract access token and instance URL from an active Salesforce org sessio
 ## 14. Org Connection
 Status: pending
 Goal: Link a Salesforce org to a Metaforce project using credentials from the Chrome extension
+
+## 14. Model Selection
+Status: pending
+Goal: User can add new model with api key and model name, and then select model on chat interface

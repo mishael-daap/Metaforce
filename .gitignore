@@ -10,6 +10,17 @@
 !.yarn/releases
 !.yarn/versions
 
+# sfdx server
+/sfdx-server/node_modules
+/sfdx-server/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/sfdx-server/dist
+
 # testing
 /coverage
 
