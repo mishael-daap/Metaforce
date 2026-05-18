@@ -6,6 +6,7 @@ import { buildCustomFieldXml } from '../xml/builders/customFieldBuilder.js';
 export interface CustomFieldResult {
   success: boolean;
   outputPath?: string;
+  xml?: string;
   error?: string;
 }
 
@@ -45,7 +46,8 @@ export async function createCustomField(
 
     return {
       success: true,
-      outputPath: xmlFilePath
+      outputPath: xmlFilePath,
+      xml: xmlContent
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

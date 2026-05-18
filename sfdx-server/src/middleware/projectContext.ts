@@ -24,7 +24,7 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
 
   if (!projectId) {
     res.status(400).json({
-      status: false,
+      success: false,
       error: 'Bad Request: x-project-id header is required',
       createdItems: []
     });

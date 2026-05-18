@@ -7,7 +7,7 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
 
   if (!apiKey) {
     res.status(401).json({
-      status: false,
+      success: false,
       error: 'Unauthorized: x-api-key header is required',
       createdItems: []
     });
@@ -16,7 +16,7 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
 
   if (apiKey !== API_KEY) {
     res.status(401).json({
-      status: false,
+      success: false,
       error: 'Unauthorized: Invalid API key',
       createdItems: []
     });

@@ -6,6 +6,7 @@ import { buildCustomObjectXml } from '../xml/builders/customObjectBuilder.js';
 export interface CustomObjectResult {
   success: boolean;
   outputPath?: string;
+  xml?: string;
   error?: string;
 }
 
@@ -20,6 +21,9 @@ export async function createCustomObject(
   spec: CustomObjectSpec
 ): Promise<CustomObjectResult> {
   try {
+    // Default deploymentStatus to Deployed if not provided
+    spec = { ...spec, deploymentStatus: spec.deploymentStatus || 'Deployed' };
+
     const validationResult = validateInputs(projectId, spec);
     if (!validationResult.valid) {
       return {
@@ -52,7 +56,8 @@ export async function createCustomObject(
 
     return {
       success: true,
-      outputPath: xmlFilePath
+      outputPath: xmlFilePath,
+      xml: xmlContent
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

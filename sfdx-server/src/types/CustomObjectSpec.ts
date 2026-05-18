@@ -16,7 +16,7 @@ export interface CustomObjectSpec {
   label: string;
   pluralLabel: string;
   description?: string;
-  deploymentStatus: DeploymentStatus;
+  deploymentStatus?: DeploymentStatus;
   sharingModel: SharingModel;
   externalSharingModel?: string;
   allowInChatterGroups?: boolean;

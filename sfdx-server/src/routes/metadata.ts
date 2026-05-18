@@ -38,7 +38,7 @@ router.post('/objects', async (req, res) => {
 
     if (!createResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Object creation failed: ${createResult.error}`,
         createdItems: []
       });
@@ -53,19 +53,19 @@ router.post('/objects', async (req, res) => {
 
     if (!deployResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Deployment failed: ${deployResult.error}`,
-        createdItems: [{ name: objectSpec.fullName, type: 'CustomObject', path: createResult.outputPath! }]
+        createdItems: [{ fullName: objectSpec.fullName, type: 'CustomObject', xml: createResult.xml! }]
       });
       return;
     }
 
     // Step 4: Return success
     res.json({
-      status: true,
+      success: true,
       error: null,
       createdItems: [
-        { name: objectSpec.fullName, type: 'CustomObject', path: createResult.outputPath! }
+        { fullName: objectSpec.fullName, type: 'CustomObject', xml: createResult.xml! }
       ]
     });
   } catch (err) {
@@ -126,7 +126,7 @@ router.post('/fields', async (req, res) => {
 
     if (!createResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Field creation failed: ${createResult.error}`,
         createdItems: []
       });
@@ -141,19 +141,19 @@ router.post('/fields', async (req, res) => {
 
     if (!deployResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Deployment failed: ${deployResult.error}`,
-        createdItems: [{ name: field.fullName, type: 'CustomField', path: createResult.outputPath! }]
+        createdItems: [{ fullName: field.fullName, type: 'CustomField', xml: createResult.xml! }]
       });
       return;
     }
 
     // Step 4: Return success
     res.json({
-      status: true,
+      success: true,
       error: null,
       createdItems: [
-        { name: field.fullName, type: 'CustomField', path: createResult.outputPath! }
+        { fullName: field.fullName, type: 'CustomField', xml: createResult.xml! }
       ]
     });
   } catch (err) {
@@ -177,7 +177,7 @@ router.get('/objects', (req, res) => {
 
     if (!fs.existsSync(projectPath)) {
       res.json({
-        status: true,
+        success: true,
         error: null,
         createdItems: []
       });
@@ -190,10 +190,11 @@ router.get('/objects', (req, res) => {
       .map(entry => {
         const objectFilePath = path.join(projectPath, entry.name, `${entry.name}.object-meta.xml`);
         const exists = fs.existsSync(objectFilePath);
+        const xmlContent = exists ? fs.readFileSync(objectFilePath, 'utf-8') : undefined;
         return {
-          name: entry.name,
+          fullName: entry.name,
           type: 'CustomObject',
-          path: exists ? objectFilePath : undefined
+          xml: xmlContent
         };
       });
 
@@ -244,10 +245,10 @@ router.get('/objects/:apiName', (req, res) => {
     }
 
     res.json({
-      status: true,
+      success: true,
       error: null,
       createdItems: [
-        { name: apiName, type: 'CustomObject', path: objectMetaPath }
+        { fullName: apiName, type: 'CustomObject', xml: xmlContent }
       ],
       detail: {
         apiName,
