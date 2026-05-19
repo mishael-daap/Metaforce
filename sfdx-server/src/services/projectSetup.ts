@@ -29,12 +29,36 @@ export async function ensureProjectExists(input: ProjectSetupInput): Promise<Pro
     const projectPath = path.join(process.cwd(), 'projects', projectId);
 
     // Check if project already exists (lazy init)
-    if (fs.existsSync(projectPath)) {
-      return {
-        success: true,
-        projectPath
-      };
+if (fs.existsSync(projectPath)) {
+  // Check if org is already authenticated
+  let isAuthenticated = false;
+  try {
+    const { stdout } = await execAsync(`sf org display --target-org ${projectId} --json`, { cwd: projectPath });
+    const result = JSON.parse(stdout);
+    isAuthenticated = result.result?.connectedStatus === 'Connected';
+  } catch {
+    isAuthenticated = false;
+  }
+
+  // Only authenticate if not already connected
+  if (!isAuthenticated) {
+    const command = `sf org login access-token --instance-url ${orgUrl} --alias ${projectId} --no-prompt --json`;
+    try {
+      const { stdout } = await execAsync(command, {
+        env: { ...process.env, SF_ACCESS_TOKEN: accessToken },
+        cwd: projectPath
+      });
+      const result = JSON.parse(stdout);
+      if (result.status !== 0) {
+        return { success: false, error: result.message || 'Authentication failed' };
+      }
+    } catch (authError: any) {
+      return { success: false, error: `Failed to re-authenticate: ${authError.message}` };
     }
+  }
+
+  return { success: true, projectPath };
+}
 
     // Validate inputs
     if (!projectId) {
