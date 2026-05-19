@@ -67,6 +67,38 @@ export async function createCustomObject(
   }
 }
 
+export async function deleteCustomObject(
+  projectId: string,
+  objectName: string
+): Promise<CustomObjectResult> {
+  try {
+    if (!projectId) {
+      return { success: false, error: 'projectId is required' };
+    }
+
+    if (!objectName) {
+      return { success: false, error: 'objectName is required' };
+    }
+
+    const projectPath = path.join(process.cwd(), 'projects', projectId);
+    if (!fs.existsSync(projectPath)) {
+      return { success: false, error: `Project '${projectId}' does not exist.` };
+    }
+
+    const objectDir = path.join(projectPath, 'force-app', 'objects', objectName);
+    if (!fs.existsSync(objectDir)) {
+      return { success: false, error: `Custom object '${objectName}' not found in project '${projectId}'.` };
+    }
+
+    fs.rmSync(objectDir, { recursive: true, force: true });
+
+    return { success: true };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return { success: false, error: errorMessage };
+  }
+}
+
 interface ValidationResult {
   valid: boolean;
   error?: string;

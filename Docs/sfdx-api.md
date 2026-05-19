@@ -295,6 +295,247 @@ Requires all auth headers.
 
 ---
 
+## PUT /metadata/objects/:apiName
+
+Updates an existing custom object by overwriting its XML and redeploying to the org.
+
+### Headers
+
+Requires all auth headers listed above.
+
+### URL Parameters
+
+| Param | Description |
+| -------- | ----------------------------------- |
+| apiName | API name of the object to update (e.g. `MyObject__c`) |
+
+### Request Body
+
+Same shape as `POST /metadata/objects`. The `fullName` in the body must match the `:apiName` URL parameter.
+
+```json
+{
+  "fullName": "MyObject__c",
+  "label": "My Object",
+  "pluralLabel": "My Objects",
+  "deploymentStatus": "Deployed",
+  "sharingModel": "ReadWrite",
+  "visibility": "Public",
+  "nameField": {
+    "label": "My Object Name",
+    "type": "Text"
+  }
+}
+```
+
+### Response
+
+**Success — 200 OK**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "MyObject__c",
+      "type": "CustomObject",
+      "xml": "<?xml version=..."
+    }
+  ]
+}
+```
+
+**Not Found — 404**
+
+```json
+{
+  "status": false,
+  "error": "Custom object 'MyObject__c' not found in project 'my-project-01'",
+  "components": []
+}
+```
+
+**Mismatch — 400**
+
+```json
+{
+  "status": false,
+  "error": "fullName in body ('Other__c') must match URL param ('MyObject__c')",
+  "components": []
+}
+```
+
+---
+
+## PUT /metadata/fields/:objectName/:fieldName
+
+Updates an existing custom field by overwriting its XML and redeploying to the org.
+
+### Headers
+
+Requires all auth headers listed above.
+
+### URL Parameters
+
+| Param | Description |
+| ----------- | ----------------------------------- |
+| objectName | API name of the parent object (e.g. `MyObject__c`) |
+| fieldName | API name of the field to update (e.g. `Description__c`) |
+
+### Request Body
+
+Same shape as the `field` object in `POST /metadata/fields`. The `fullName` in the field spec must match the `:fieldName` URL parameter.
+
+```json
+{
+  "field": {
+    "fullName": "Description__c",
+    "label": "Description",
+    "type": "Text",
+    "length": 500,
+    "required": false
+  }
+}
+```
+
+### Response
+
+**Success — 200 OK**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "Description__c",
+      "type": "CustomField",
+      "xml": "<?xml version=..."
+    }
+  ]
+}
+```
+
+**Not Found — 404**
+
+```json
+{
+  "status": false,
+  "error": "Custom field 'Description__c' not found on object 'MyObject__c' in project 'my-project-01'",
+  "components": []
+}
+```
+
+---
+
+## DELETE /metadata/objects/:apiName
+
+Deletes a custom object from the Salesforce org and removes its local files. The server first retrieves the latest metadata from the org to ensure local state is in sync, then executes `sf project delete source --metadata CustomObject:<apiName>` against the org.
+
+### Headers
+
+Requires all auth headers listed above.
+
+### URL Parameters
+
+| Param | Description |
+| -------- | ----------------------------------- |
+| apiName | API name of the object to delete (e.g. `MyObject__c`) |
+
+### Response
+
+**Success — 200 OK**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "MyObject__c",
+      "type": "CustomObject"
+    }
+  ]
+}
+```
+
+**Not Found — 404**
+
+```json
+{
+  "status": false,
+  "error": "Custom object 'MyObject__c' not found in project 'my-project-01'",
+  "components": []
+}
+```
+
+**Org Delete Failed — 500**
+
+```json
+{
+  "status": false,
+  "error": "Delete from org failed: <SFDX error message>",
+  "components": []
+}
+```
+
+---
+
+## DELETE /metadata/fields/:objectName/:fieldName
+
+Deletes a custom field from the Salesforce org and removes its local file. The server first retrieves the latest metadata from the org to ensure local state is in sync, then executes `sf project delete source --metadata CustomField:<objectName>.<fieldName>` against the org.
+
+### Headers
+
+Requires all auth headers listed above.
+
+### URL Parameters
+
+| Param | Description |
+| ----------- | ----------------------------------- |
+| objectName | API name of the parent object (e.g. `MyObject__c`) |
+| fieldName | API name of the field to delete (e.g. `Description__c`) |
+
+### Response
+
+**Success — 200 OK**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "Description__c",
+      "type": "CustomField"
+    }
+  ]
+}
+```
+
+**Not Found — 404**
+
+```json
+{
+  "status": false,
+  "error": "Custom field 'Description__c' not found on object 'MyObject__c' in project 'my-project-01'",
+  "components": []
+}
+```
+
+**Org Delete Failed — 500**
+
+```json
+{
+  "status": false,
+  "error": "Delete from org failed: <SFDX error message>",
+  "components": []
+}
+```
+
+---
+
 ## Error Response Format
 
 All error responses follow this structure:

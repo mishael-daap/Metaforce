@@ -58,6 +58,43 @@ export async function createCustomField(
   }
 }
 
+export async function deleteCustomField(
+  projectId: string,
+  objectName: string,
+  fieldName: string
+): Promise<CustomFieldResult> {
+  try {
+    if (!projectId) {
+      return { success: false, error: 'projectId is required' };
+    }
+
+    if (!objectName) {
+      return { success: false, error: 'objectName is required' };
+    }
+
+    if (!fieldName) {
+      return { success: false, error: 'fieldName is required' };
+    }
+
+    const projectPath = path.join(process.cwd(), 'projects', projectId);
+    if (!fs.existsSync(projectPath)) {
+      return { success: false, error: `Project '${projectId}' does not exist.` };
+    }
+
+    const fieldFilePath = path.join(projectPath, 'force-app', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
+    if (!fs.existsSync(fieldFilePath)) {
+      return { success: false, error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'.` };
+    }
+
+    fs.rmSync(fieldFilePath, { force: true });
+
+    return { success: true };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return { success: false, error: errorMessage };
+  }
+}
+
 interface ValidationResult {
   valid: boolean;
   error?: string;
