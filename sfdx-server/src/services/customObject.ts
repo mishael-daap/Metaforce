@@ -34,7 +34,7 @@ export async function createCustomObject(
 
     const objectName = spec.fullName;
     const projectPath = path.join(process.cwd(), 'projects', projectId);
-    const outputDir = path.join(projectPath, 'force-app', 'objects', objectName);
+    const outputDir = path.join(projectPath, 'force-app', 'main', 'default', 'objects', objectName);
 
     if (!fs.existsSync(projectPath)) {
       return {
@@ -85,7 +85,7 @@ export async function deleteCustomObject(
       return { success: false, error: `Project '${projectId}' does not exist.` };
     }
 
-    const objectDir = path.join(projectPath, 'force-app', 'objects', objectName);
+    const objectDir = path.join(projectPath, 'force-app', 'main', 'default', 'objects', objectName);
     if (!fs.existsSync(objectDir)) {
       return { success: false, error: `Custom object '${objectName}' not found in project '${projectId}'.` };
     }

@@ -33,7 +33,7 @@ export async function createCustomField(
       };
     }
 
-    const outputDir = path.join(projectPath, 'force-app', 'objects', objectName, 'fields');
+    const outputDir = path.join(projectPath, 'force-app', 'main', 'default', 'objects', objectName, 'fields');
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -81,7 +81,7 @@ export async function deleteCustomField(
       return { success: false, error: `Project '${projectId}' does not exist.` };
     }
 
-    const fieldFilePath = path.join(projectPath, 'force-app', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
+    const fieldFilePath = path.join(projectPath, 'force-app', 'main', 'default', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
     if (!fs.existsSync(fieldFilePath)) {
       return { success: false, error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'.` };
     }

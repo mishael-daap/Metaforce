@@ -191,7 +191,7 @@ router.get('/objects', async (req, res) => {
     }
 
     // Step 3: Read from filesystem
-    const projectPath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects');
+    const projectPath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects');
 
     if (!fs.existsSync(projectPath)) {
       res.json({ success: true, error: null, components: [] });
@@ -223,7 +223,7 @@ router.get('/objects/:apiName', (req, res) => {
   try {
     const { projectId } = req.projectContext!;
     const { apiName } = req.params;
-    const objectDir = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects', apiName);
+    const objectDir = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects', apiName);
     const objectMetaPath = path.join(objectDir, `${apiName}.object-meta.xml`);
 
     if (!fs.existsSync(objectMetaPath)) {
@@ -296,7 +296,7 @@ router.put('/objects/:apiName', async (req, res) => {
     }
 
     // Step 2: Validate object exists
-    const objectMetaPath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects', apiName, `${apiName}.object-meta.xml`);
+    const objectMetaPath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects', apiName, `${apiName}.object-meta.xml`);
     if (!fs.existsSync(objectMetaPath)) {
       res.status(404).json({ status: false, error: `Custom object '${apiName}' not found in project '${projectId}'`, components: [] });
       return;
@@ -351,7 +351,7 @@ router.put('/fields/:objectName/:fieldName', async (req, res) => {
     }
 
     // Step 2: Validate field exists
-    const fieldFilePath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
+    const fieldFilePath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
     if (!fs.existsSync(fieldFilePath)) {
       res.status(404).json({ status: false, error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'`, components: [] });
       return;
@@ -402,7 +402,7 @@ router.delete('/objects/:apiName', async (req, res) => {
     }
 
     // Step 3: Validate object exists
-    const objectDir = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects', apiName);
+    const objectDir = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects', apiName);
     if (!fs.existsSync(path.join(objectDir, `${apiName}.object-meta.xml`))) {
       res.status(404).json({ status: false, error: `Custom object '${apiName}' not found in project '${projectId}'`, components: [] });
       return;
@@ -451,7 +451,7 @@ router.delete('/fields/:objectName/:fieldName', async (req, res) => {
     }
 
     // Step 3: Validate field exists
-    const fieldFilePath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
+    const fieldFilePath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'main', 'default', 'objects', objectName, 'fields', `${fieldName}.field-meta.xml`);
     if (!fs.existsSync(fieldFilePath)) {
       res.status(404).json({ status: false, error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'`, components: [] });
       return;

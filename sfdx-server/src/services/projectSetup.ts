@@ -91,7 +91,7 @@ if (fs.existsSync(projectPath)) {
     const sfdxConfig = {
       packageDirectories: [
         {
-          path: 'force-app',
+          path: 'force-app/main/default',
           default: true
         }
       ],
@@ -108,7 +108,7 @@ if (fs.existsSync(projectPath)) {
     );
 
     // Create force-app directory structure
-    const objectsPath = path.join(projectPath, 'force-app', 'objects');
+    const objectsPath = path.join(projectPath, 'force-app', 'main', 'default', 'objects');
     fs.mkdirSync(objectsPath, { recursive: true });
 
     // Create manifest directory and package.xml

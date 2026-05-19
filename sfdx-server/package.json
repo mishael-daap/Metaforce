@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "tsc && node dist/index.js",
+    "test": "npx tsx src/tester.ts ",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
