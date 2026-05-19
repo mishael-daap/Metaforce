@@ -21,6 +21,9 @@
 !.yarn/versions
 /sfdx-server/dist
 
+/.claude/context
+/sfdx-server/projects
+
 # testing
 /coverage
 

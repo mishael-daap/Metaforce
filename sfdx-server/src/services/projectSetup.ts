@@ -87,6 +87,22 @@ export async function ensureProjectExists(input: ProjectSetupInput): Promise<Pro
     const objectsPath = path.join(projectPath, 'force-app', 'objects');
     fs.mkdirSync(objectsPath, { recursive: true });
 
+    // Create manifest directory and package.xml
+const manifestPath = path.join(projectPath, 'manifest');
+fs.mkdirSync(manifestPath, { recursive: true });
+
+fs.writeFileSync(
+  path.join(manifestPath, 'package.xml'),
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>*</members>
+        <name>CustomObject</name>
+    </types>
+</Package>`,
+  'utf-8'
+);
+
     // Authenticate with Salesforce CLI
     const command = `sf org login access-token --instance-url ${orgUrl} --alias ${projectId} --no-prompt --json`;
 
