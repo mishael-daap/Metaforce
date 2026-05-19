@@ -1,370 +1,219 @@
-import * as https from "https";
-import * as http from "http";
+const BASE_URL = 'http://localhost:8000';
+const API_KEY = 'password';
+const PROJECT_ID = 'tester-project-01';
+const ACCESS_TOKEN = '00DgK00000FEwjR!AQEAQNE4m1q4lnm_UEG0T7Fl65ROWfFX4yHB4tGs09qsX8aS15Xj5obSFU3FoMAFPMTMrZNoisXk_CnUlKoHDvUVnPgKxw42';
+const ORG_URL = 'https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com';
 
-// ─── CONFIG ────────────────────────────────────────────────────────────────────
-const CONFIG = {
-  baseUrl: "http://localhost:8000",
-  apiKey: process.env.SFDX_API_KEY ?? "password",
-  projectId: process.env.SFDX_PROJECT_ID ?? "my-project-01",
-  accessToken: process.env.SFDX_ACCESS_TOKEN ?? "YOUR_ACCESS_TOKEN",
-  orgUrl: process.env.SFDX_ORG_URL ?? "https://myorg.salesforce.com",
+const headers: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'x-api-key': API_KEY,
+  'x-project-id': PROJECT_ID,
+  'x-access-token': ACCESS_TOKEN,
+  'x-org-url': ORG_URL,
 };
 
-// Test objects/fields to create
-const TEST_OBJECTS = [
-  {
-    fullName: "TestVehicle__c",
-    label: "Test Vehicle",
-    pluralLabel: "Test Vehicles",
-    description: "Auto-generated test object: Vehicle",
-    deploymentStatus: "Deployed" as const,
-    sharingModel: "ReadWrite" as const,
-    visibility: "Public" as const,
-    nameField: { label: "Vehicle Name", type: "Text" },
-    enableActivities: true,
-    enableReports: true,
-    enableSearch: true,
-  },
-  {
-    fullName: "TestInventory__c",
-    label: "Test Inventory",
-    pluralLabel: "Test Inventories",
-    description: "Auto-generated test object: Inventory",
-    deploymentStatus: "Deployed" as const,
-    sharingModel: "Private" as const,
-    visibility: "Public" as const,
-    nameField: { label: "Inventory Name", type: "Text" },
-    enableBulkApi: true,
-    enableReports: true,
-  },
-];
-
-const TEST_FIELDS: Record<string, object[]> = {
-  TestVehicle__c: [
-    {
-      fullName: "Mileage__c",
-      label: "Mileage",
-      type: "Number",
-      precision: 10,
-      scale: 2,
-      required: false,
-      description: "Vehicle mileage in km",
-    },
-    {
-      fullName: "Color__c",
-      label: "Color",
-      type: "Text",
-      length: 100,
-      required: false,
-    },
-    {
-      fullName: "IsAvailable__c",
-      label: "Is Available",
-      type: "Checkbox",
-      defaultValue: true,
-    },
-  ],
-  TestInventory__c: [
-    {
-      fullName: "StockCount__c",
-      label: "Stock Count",
-      type: "Number",
-      precision: 8,
-      scale: 0,
-      required: true,
-    },
-    {
-      fullName: "Notes__c",
-      label: "Notes",
-      type: "LongTextArea",
-      length: 32768,
-      visibleLines: 5,
-    },
-  ],
-};
-
-// ─── TYPES ─────────────────────────────────────────────────────────────────────
 interface TestResult {
-  step: number;
   name: string;
   method: string;
-  url: string;
-  status: "PASS" | "FAIL" | "SKIP";
-  httpStatus: number | null;
-  responseTimeMs: number;
+  path: string;
+  status: number;
+  success: boolean;
+  durationMs: number;
   error?: string;
-  note?: string;
 }
 
-// ─── HTTP HELPER ───────────────────────────────────────────────────────────────
-function request<T>(
-  method: string,
-  path: string,
-  body?: object,
-  authenticated = true
-): Promise<{ data: T; httpStatus: number; responseTimeMs: number }> {
-  return new Promise((resolve, reject) => {
-    const url = new URL(CONFIG.baseUrl + path);
-    const isHttps = url.protocol === "https:";
-    const bodyStr = body ? JSON.stringify(body) : undefined;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (authenticated) {
-      headers["x-api-key"] = CONFIG.apiKey;
-      headers["x-project-id"] = CONFIG.projectId;
-      headers["x-access-token"] = CONFIG.accessToken;
-      headers["x-org-url"] = CONFIG.orgUrl;
-    }
-    if (bodyStr) {
-      headers["Content-Length"] = Buffer.byteLength(bodyStr).toString();
-    }
-
-    const options = {
-      hostname: url.hostname,
-      port: url.port || (isHttps ? 443 : 80),
-      path: url.pathname + url.search,
-      method,
-      headers,
-    };
-
-    const start = Date.now();
-    const lib = isHttps ? https : http;
-
-    const req = lib.request(options, (res) => {
-      let raw = "";
-      res.on("data", (chunk) => (raw += chunk));
-      res.on("end", () => {
-        const responseTimeMs = Date.now() - start;
-        try {
-          resolve({ data: JSON.parse(raw) as T, httpStatus: res.statusCode ?? 0, responseTimeMs });
-        } catch {
-          resolve({ data: raw as unknown as T, httpStatus: res.statusCode ?? 0, responseTimeMs });
-        }
-      });
-    });
-
-    req.on("error", (err) => reject(err));
-    if (bodyStr) req.write(bodyStr);
-    req.end();
-  });
-}
-
-// ─── RUNNER ────────────────────────────────────────────────────────────────────
 const results: TestResult[] = [];
-let stepCounter = 0;
 
-async function run(
-  name: string,
-  method: string,
-  path: string,
-  opts: { body?: object; authenticated?: boolean; expectStatus?: number; note?: string } = {}
-): Promise<{ data: unknown; passed: boolean }> {
-  const { body, authenticated = true, expectStatus = 200, note } = opts;
-  const step = ++stepCounter;
-  const url = CONFIG.baseUrl + path;
-
-  process.stdout.write(`  [${String(step).padStart(2, "0")}] ${method.padEnd(6)} ${path} ... `);
+async function request(name: string, method: string, path: string, body?: any): Promise<any> {
+  const url = `${BASE_URL}${path}`;
+  const start = Date.now();
 
   try {
-    const { data, httpStatus, responseTimeMs } = await request<unknown>(method, path, body, authenticated);
-    const passed = httpStatus === expectStatus;
-    const status = passed ? "PASS" : "FAIL";
-    const anyData = data as Record<string, unknown>;
-    const apiOk = anyData?.status === true || anyData?.success === true;
-    const finalStatus: "PASS" | "FAIL" = passed && apiOk ? "PASS" : "FAIL";
-    const error = !passed
-      ? `Expected HTTP ${expectStatus}, got ${httpStatus}`
-      : !apiOk
-      ? `API returned status=false: ${anyData?.error ?? "unknown"}`
-      : undefined;
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-    results.push({ step, name, method, url, status: finalStatus, httpStatus, responseTimeMs, error, note });
+    const durationMs = Date.now() - start;
+    const data: any = await res.json();
+    const success = data.success === true || data.status === true;
+    const error = data.error || undefined;
 
-    const tag = finalStatus === "PASS" ? "✓ PASS" : "✗ FAIL";
-    console.log(`${tag}  (${responseTimeMs}ms)`);
-    if (error) console.log(`         ↳ ${error}`);
+    results.push({ name, method, path, status: res.status, success, durationMs, error });
 
-    return { data, passed: finalStatus === "PASS" };
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    results.push({ step, name, method, url, status: "FAIL", httpStatus: null, responseTimeMs: 0, error: msg, note });
-    console.log(`✗ FAIL  (connection error)`);
-    console.log(`         ↳ ${msg}`);
-    return { data: null, passed: false };
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`${method} ${path} — ${name}`);
+    console.log(`Status: ${res.status} | Duration: ${durationMs}ms | Success: ${success}`);
+    if (error) console.log(`Error: ${error}`);
+    const preview = JSON.stringify(data, null, 2);
+    console.log(`Response: ${preview.length > 600 ? preview.slice(0, 600) + '...' : preview}`);
+
+    return data;
+  } catch (err: any) {
+    const durationMs = Date.now() - start;
+    results.push({ name, method, path, status: 0, success: false, durationMs, error: err.message });
+
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`${method} ${path} — ${name}`);
+    console.log(`FAILED | Duration: ${durationMs}ms`);
+    console.log(`Error: ${err.message}`);
+
+    return null;
   }
 }
 
-// ─── REPORT ────────────────────────────────────────────────────────────────────
-function printReport(totalMs: number) {
-  const passes = results.filter((r) => r.status === "PASS").length;
-  const fails = results.filter((r) => r.status === "FAIL").length;
-  const avgTime = results.length
-    ? Math.round(results.reduce((s, r) => s + r.responseTimeMs, 0) / results.length)
-    : 0;
-  const slowest = results.slice().sort((a, b) => b.responseTimeMs - a.responseTimeMs)[0];
-  const fastest = results.slice().sort((a, b) => a.responseTimeMs - b.responseTimeMs)[0];
+async function run() {
+  console.log('\n' + '#'.repeat(60));
+  console.log('  SFDX Server Route Tester');
+  console.log(`  Base URL: ${BASE_URL}`);
+  console.log(`  Project:  ${PROJECT_ID}`);
+  console.log('#'.repeat(60));
 
-  console.log("\n" + "═".repeat(72));
-  console.log("  SFDX API TEST REPORT");
-  console.log("═".repeat(72));
-  console.log(`  Ran at      : ${new Date().toISOString()}`);
-  console.log(`  Total time  : ${(totalMs / 1000).toFixed(2)}s`);
-  console.log(`  Requests    : ${results.length}  |  ✓ ${passes} passed  |  ✗ ${fails} failed`);
-  console.log(`  Avg latency : ${avgTime}ms  |  Fastest: ${fastest?.responseTimeMs}ms  |  Slowest: ${slowest?.responseTimeMs}ms`);
-  console.log("─".repeat(72));
+  // 1. Health check
+  await request('Health Check', 'GET', '/health');
 
-  console.log("\n  FULL RESULTS\n");
-  for (const r of results) {
-    const icon = r.status === "PASS" ? "✓" : "✗";
-    const time = r.responseTimeMs ? `${r.responseTimeMs}ms` : "—";
-    const http = r.httpStatus ?? "—";
-    console.log(`  ${icon} [${String(r.step).padStart(2, "0")}] ${r.name}`);
-    console.log(`       ${r.method.padEnd(6)} ${r.url}  →  HTTP ${http}  (${time})`);
-    if (r.note) console.log(`       Note   : ${r.note}`);
-    if (r.error) console.log(`       Error  : ${r.error}`);
+  // 2. Create first custom object
+  await request('Create Object: TesterObj__c', 'POST', '/metadata/objects', {
+    fullName: 'TesterObj__c',
+    label: 'Tester Object',
+    pluralLabel: 'Tester Objects',
+    description: 'Created by route tester',
+    deploymentStatus: 'Deployed',
+    sharingModel: 'ReadWrite',
+    visibility: 'Public',
+    nameField: { label: 'Tester Obj Name', type: 'Text' },
+  });
+
+  // 3. Create second custom object
+  await request('Create Object: SecondObj__c', 'POST', '/metadata/objects', {
+    fullName: 'SecondObj__c',
+    label: 'Second Object',
+    pluralLabel: 'Second Objects',
+    deploymentStatus: 'Deployed',
+    sharingModel: 'ReadWrite',
+    visibility: 'Public',
+    nameField: { label: 'Second Obj Name', type: 'AutoNumber', displayFormat: 'SEC-{00000}' },
+  });
+
+  // 4. List all objects
+  await request('List All Objects', 'GET', '/metadata/objects');
+
+  // 5. Get specific object
+  await request('Get Object: TesterObj__c', 'GET', '/metadata/objects/TesterObj__c');
+
+  // 6. Create a Text field
+  await request('Create Field: Description__c on TesterObj__c', 'POST', '/metadata/fields', {
+    objectName: 'TesterObj__c',
+    field: {
+      fullName: 'Description__c',
+      label: 'Description',
+      type: 'Text',
+      length: 255,
+      required: false,
+    },
+  });
+
+  // 7. Create a Number field
+  await request('Create Field: Score__c on TesterObj__c', 'POST', '/metadata/fields', {
+    objectName: 'TesterObj__c',
+    field: {
+      fullName: 'Score__c',
+      label: 'Score',
+      type: 'Number',
+      precision: 18,
+      scale: 2,
+      required: false,
+    },
+  });
+
+  // 8. Create a Checkbox field on SecondObj__c
+  await request('Create Field: Active__c on SecondObj__c', 'POST', '/metadata/fields', {
+    objectName: 'SecondObj__c',
+    field: {
+      fullName: 'Active__c',
+      label: 'Active',
+      type: 'Checkbox',
+      defaultValue: false,
+    },
+  });
+
+  // 9. Get object with its fields
+  await request('Get Object with Fields: TesterObj__c', 'GET', '/metadata/objects/TesterObj__c');
+
+  // 10. Update the object (change description + enable reports)
+  await request('Update Object: TesterObj__c', 'PUT', '/metadata/objects/TesterObj__c', {
+    fullName: 'TesterObj__c',
+    label: 'Tester Object',
+    pluralLabel: 'Tester Objects',
+    description: 'Updated by route tester',
+    deploymentStatus: 'Deployed',
+    sharingModel: 'ReadWrite',
+    visibility: 'Public',
+    enableReports: true,
+    nameField: { label: 'Tester Obj Name', type: 'Text' },
+  });
+
+  // 11. Update a field (change label + length)
+  await request('Update Field: Description__c on TesterObj__c', 'PUT', '/metadata/fields/TesterObj__c/Description__c', {
+    field: {
+      fullName: 'Description__c',
+      label: 'Detailed Description',
+      type: 'Text',
+      length: 500,
+      required: false,
+    },
+  });
+
+  // 12. List all objects after updates
+  await request('List All Objects (after updates)', 'GET', '/metadata/objects');
+
+  // 13. Delete a field from TesterObj__c
+  await request('Delete Field: Score__c from TesterObj__c', 'DELETE', '/metadata/fields/TesterObj__c/Score__c');
+
+  // 14. Delete a field from SecondObj__c
+  await request('Delete Field: Active__c from SecondObj__c', 'DELETE', '/metadata/fields/SecondObj__c/Active__c');
+
+  // 15. Delete TesterObj__c
+  await request('Delete Object: TesterObj__c', 'DELETE', '/metadata/objects/TesterObj__c');
+
+  // 16. Delete SecondObj__c
+  await request('Delete Object: SecondObj__c', 'DELETE', '/metadata/objects/SecondObj__c');
+
+  // 17. List all objects (should be empty)
+  await request('List All Objects (should be empty)', 'GET', '/metadata/objects');
+
+  // ---- Summary ----
+  console.log('\n\n' + '#'.repeat(60));
+  console.log('  SUMMARY');
+  console.log('#'.repeat(60));
+  console.log('');
+
+  const colW = [4, 44, 8, 6, 10, 46];
+  const header = ['#', 'Name', 'Method', 'Status', 'Time(ms)', 'Path'].map((h, i) => h.padEnd(colW[i])).join(' ');
+  console.log(header);
+  console.log('-'.repeat(header.length));
+
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const row = [
+      String(i + 1).padEnd(colW[0]),
+      r.name.padEnd(colW[1]).slice(0, colW[1]),
+      r.method.padEnd(colW[2]),
+      String(r.status).padEnd(colW[3]),
+      String(r.durationMs).padEnd(colW[4]),
+      r.path.padEnd(colW[5]).slice(0, colW[5]),
+    ].join(' ');
+    const mark = r.success ? 'OK' : 'FAIL';
+    console.log(`${row}  ${mark}`);
   }
 
-  if (fails > 0) {
-    console.log("\n" + "─".repeat(72));
-    console.log("  FAILURES SUMMARY\n");
-    for (const r of results.filter((r) => r.status === "FAIL")) {
-      console.log(`  ✗ [${String(r.step).padStart(2, "0")}] ${r.name}`);
-      console.log(`       ${r.error}`);
-    }
-  }
-
-  console.log("\n" + "═".repeat(72));
-  const verdict = fails === 0 ? "ALL TESTS PASSED ✓" : `${fails} TEST(S) FAILED ✗`;
-  console.log(`  ${verdict}`);
-  console.log("═".repeat(72) + "\n");
+  console.log('');
+  const passed = results.filter(r => r.success).length;
+  const failed = results.filter(r => !r.success).length;
+  const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
+  console.log(`Total: ${results.length} | Passed: ${passed} | Failed: ${failed} | Time: ${totalMs}ms`);
+  console.log('');
 }
 
-// ─── MAIN ──────────────────────────────────────────────────────────────────────
-async function main() {
-  const suiteStart = Date.now();
-
-  console.log("\n" + "═".repeat(72));
-  console.log("  SFDX API TESTER");
-  console.log(`  Base URL   : ${CONFIG.baseUrl}`);
-  console.log(`  Project ID : ${CONFIG.projectId}`);
-  console.log("═".repeat(72) + "\n");
-
-  // ── 1. Health check ───────────────────────────────────────────────────────
-  console.log("▶  HEALTH CHECK");
-  await run("Health check", "GET", "/health", { authenticated: false });
-
-  // ── 2. List objects (baseline — may be empty) ─────────────────────────────
-  console.log("\n▶  LIST OBJECTS (baseline)");
-  await run("List all objects (baseline)", "GET", "/metadata/objects", {
-    note: "Baseline — may return empty list",
-  });
-
-  // ── 3. Create objects ─────────────────────────────────────────────────────
-  console.log("\n▶  CREATE OBJECTS");
-  for (const obj of TEST_OBJECTS) {
-    await run(`Create object: ${obj.fullName}`, "POST", "/metadata/objects", { body: obj });
-  }
-
-  // ── 4. List objects (should now include test objects) ─────────────────────
-  console.log("\n▶  LIST OBJECTS (after creation)");
-  await run("List all objects (post-create)", "GET", "/metadata/objects");
-
-  // ── 5. Get objects by API name ────────────────────────────────────────────
-  console.log("\n▶  GET OBJECTS BY API NAME");
-  for (const obj of TEST_OBJECTS) {
-    await run(`Get object by name: ${obj.fullName}`, "GET", `/metadata/objects/${obj.fullName}`);
-  }
-
-  // ── 6. Update objects ─────────────────────────────────────────────────────
-  console.log("\n▶  UPDATE OBJECTS");
-  for (const obj of TEST_OBJECTS) {
-    const updated = {
-      ...obj,
-      description: `${obj.description} [UPDATED]`,
-      enableHistory: true,
-      enableFeeds: true,
-    };
-    await run(`Update object: ${obj.fullName}`, "PUT", `/metadata/objects/${obj.fullName}`, {
-      body: updated,
-    });
-  }
-
-  // ── 7. Get objects by API name (verify updates) ───────────────────────────
-  console.log("\n▶  GET OBJECTS BY API NAME (verify updates)");
-  for (const obj of TEST_OBJECTS) {
-    await run(`Get updated object: ${obj.fullName}`, "GET", `/metadata/objects/${obj.fullName}`, {
-      note: "Verify description updated",
-    });
-  }
-
-  // ── 8. Create fields ──────────────────────────────────────────────────────
-  console.log("\n▶  CREATE FIELDS");
-  for (const [objectName, fields] of Object.entries(TEST_FIELDS)) {
-    for (const field of fields) {
-      const f = field as Record<string, unknown>;
-      await run(`Create field: ${objectName}.${f.fullName}`, "POST", "/metadata/fields", {
-        body: { objectName, field: f },
-      });
-    }
-  }
-
-  // ── 9. Update fields ──────────────────────────────────────────────────────
-  console.log("\n▶  UPDATE FIELDS");
-  for (const [objectName, fields] of Object.entries(TEST_FIELDS)) {
-    for (const field of fields) {
-      const f = field as Record<string, unknown>;
-      const updated = { ...f, description: `${f.description ?? f.label} [UPDATED]`, inlineHelpText: "Auto-test updated field" };
-      await run(`Update field: ${objectName}.${f.fullName}`, "PUT", `/metadata/fields/${objectName}/${f.fullName}`, {
-        body: { field: updated },
-      });
-    }
-  }
-
-  // ── 10. Attempt to GET a non-existent object (expect 404) ────────────────
-  console.log("\n▶  NEGATIVE TESTS");
-  await run("Get non-existent object (expect 404)", "GET", "/metadata/objects/NonExistent__c", {
-    expectStatus: 404,
-    note: "Intentional — testing 404 handling",
-  });
-
-  // Attempt object update with mismatched fullName (expect 400)
-  await run("Update object with mismatched fullName (expect 400)", "PUT", `/metadata/objects/${TEST_OBJECTS[0].fullName}`, {
-    body: { ...TEST_OBJECTS[0], fullName: "Mismatch__c" },
-    expectStatus: 400,
-    note: "Intentional — testing body/param mismatch",
-  });
-
-  // ── 11. Delete fields ─────────────────────────────────────────────────────
-  console.log("\n▶  DELETE FIELDS");
-  for (const [objectName, fields] of Object.entries(TEST_FIELDS)) {
-    for (const field of fields) {
-      const f = field as Record<string, unknown>;
-      await run(`Delete field: ${objectName}.${f.fullName}`, "DELETE", `/metadata/fields/${objectName}/${f.fullName}`);
-    }
-  }
-
-  // ── 12. Delete objects ────────────────────────────────────────────────────
-  console.log("\n▶  DELETE OBJECTS");
-  for (const obj of TEST_OBJECTS) {
-    await run(`Delete object: ${obj.fullName}`, "DELETE", `/metadata/objects/${obj.fullName}`);
-  }
-
-  // ── 13. Confirm deletion (expect 404) ────────────────────────────────────
-  console.log("\n▶  CONFIRM DELETIONS (expect 404)");
-  for (const obj of TEST_OBJECTS) {
-    await run(`Confirm deleted: ${obj.fullName} (expect 404)`, "GET", `/metadata/objects/${obj.fullName}`, {
-      expectStatus: 404,
-      note: "Confirms object was successfully deleted",
-    });
-  }
-
-  // ── Report ────────────────────────────────────────────────────────────────
-  printReport(Date.now() - suiteStart);
-}
-
-main().catch((err) => {
-  console.error("\nFatal error running test suite:", err);
-  process.exit(1);
-});
+run();

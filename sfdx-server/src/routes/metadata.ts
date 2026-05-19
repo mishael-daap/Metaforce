@@ -239,11 +239,15 @@ router.get('/objects/:apiName', (req, res) => {
 
     // List fields on this object
     const fieldsDir = path.join(objectDir, 'fields');
-    let fields: string[] = [];
+    let fields: Array<{ fullName: string; type: string; xml: string }> = [];
     if (fs.existsSync(fieldsDir)) {
       fields = fs.readdirSync(fieldsDir)
         .filter(file => file.endsWith('.field-meta.xml'))
-        .map(file => file.replace('.field-meta.xml', ''));
+        .map(file => {
+const fullName = file.replace('.field-meta.xml', '');
+const xml = fs.readFileSync(path.join(fieldsDir, file), 'utf-8');
+return { fullName, type: 'CustomField', xml };
+});
     }
 
     res.json({
