@@ -91,7 +91,7 @@ if (fs.existsSync(projectPath)) {
     const sfdxConfig = {
       packageDirectories: [
         {
-          path: 'force-app/main/default',
+          path: 'force-app',
           default: true
         }
       ],
