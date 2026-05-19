@@ -5,6 +5,7 @@ import { createCustomField } from '../services/customField.js';
 import { deployMetadata } from '../services/deploy.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { retrieveMetadata } from '../services/retrieveMetadata.js';
 
 const router = Router();
 
@@ -170,17 +171,29 @@ router.post('/fields', async (req, res) => {
  * GET /metadata/objects
  * Lists all custom objects for the project.
  */
-router.get('/objects', (req, res) => {
+router.get('/objects', async (req, res) => {
   try {
-    const { projectId } = req.projectContext!;
+    const { projectId, accessToken, orgUrl } = req.projectContext!;
+
+    // Step 1: Ensure project exists + auth
+    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
+    if (!setupResult.success) {
+      res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
+      return;
+    }
+
+    // Step 2: Retrieve latest from org
+    const retrieveResult = await retrieveMetadata(projectId);
+    if (!retrieveResult.success) {
+      res.status(500).json({ status: false, error: `Retrieve failed: ${retrieveResult.error}`, components: [] });
+      return;
+    }
+
+    // Step 3: Read from filesystem
     const projectPath = path.join(process.cwd(), 'projects', projectId, 'force-app', 'objects');
 
     if (!fs.existsSync(projectPath)) {
-      res.json({
-        success: true,
-        error: null,
-        components: []
-      });
+      res.json({ success: true, error: null, components: [] });
       return;
     }
 
@@ -191,25 +204,13 @@ router.get('/objects', (req, res) => {
         const objectFilePath = path.join(projectPath, entry.name, `${entry.name}.object-meta.xml`);
         const exists = fs.existsSync(objectFilePath);
         const xmlContent = exists ? fs.readFileSync(objectFilePath, 'utf-8') : undefined;
-        return {
-          fullName: entry.name,
-          type: 'CustomObject',
-          xml: xmlContent
-        };
+        return { fullName: entry.name, type: 'CustomObject', xml: xmlContent };
       });
 
-    res.json({
-      status: true,
-      error: null,
-      components: objects
-    });
+    res.json({ status: true, error: null, components: objects });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({
-      status: false,
-      error: errorMessage,
-      components: []
-    });
+    res.status(500).json({ status: false, error: errorMessage, components: [] });
   }
 });
 
