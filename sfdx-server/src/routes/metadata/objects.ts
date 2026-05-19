@@ -3,7 +3,6 @@ import { ensureProjectExists } from '../../services/projectSetup.js';
 import { createCustomObject } from '../../services/customObject.js';
 import { deployMetadata } from '../../services/deploy.js';
 import { deleteMetadata } from '../../services/deleteMetadata.js';
-import { retrieveMetadata } from '../../services/retrieveMetadata.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -20,12 +19,6 @@ router.get('/', async (req, res) => {
     const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
     if (!setupResult.success) {
       res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
-
-    const retrieveResult = await retrieveMetadata(projectId);
-    if (!retrieveResult.success) {
-      res.status(500).json({ status: false, error: `Retrieve failed: ${retrieveResult.error}`, components: [] });
       return;
     }
 
@@ -230,12 +223,6 @@ router.delete('/:apiName', async (req, res) => {
     const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
     if (!setupResult.success) {
       res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
-
-    const retrieveResult = await retrieveMetadata(projectId);
-    if (!retrieveResult.success) {
-      res.status(500).json({ status: false, error: `Retrieve failed: ${retrieveResult.error}`, components: [] });
       return;
     }
 
