@@ -1,6 +1,6 @@
 # SFDX Server API
 
-Base URL: `http://localhost:8000`
+SFDX Server is a stateless Docker service that executes Salesforce CLI operations on behalf of the Metaforce platform. It manages SFDX project directories, creates and deploys metadata (custom objects and fields), and syncs metadata from connected orgs. Base URL: `http://localhost:8000`.
 
 ---
 
@@ -8,25 +8,24 @@ Base URL: `http://localhost:8000`
 
 All endpoints except `GET /health` require the following headers:
 
-| Header            | Description                          | Example                              |
-| ----------------- | ------------------------------------ | ------------------------------------ |
-| `x-api-key`       | API key configured in `.env`         | `password`                           |
-| `x-project-id`    | Project ID (used to scope files)     | `my-project-01`                      |
-| `x-access-token`  | Salesforce org access token          | `00D...`                             |
-| `x-org-url`       | Salesforce org instance URL          | `https://myorg.salesforce.com`       |
+| Header | Description | Example |
+|---|---|---|
+| `x-api-key` | API key configured in server `.env` | `dev-api-key` |
+| `x-project-id` | Project ID used to scope SFDX project files | `my-project-01` |
+| `x-access-token` | Salesforce org access token | `00D...` |
+| `x-org-url` | Salesforce org instance URL | `https://myorg.my.salesforce.com` |
 
 ---
 
-## GET /health
+## Endpoints
 
-Health check. Returns `200` with a status payload.
+### GET /health
 
-### Headers
-None required.
+Health check. Returns server status and timestamp.
 
-### Response
+**Request** — No auth required.
 
-**Success — 200 OK**
+**Response**
 
 ```json
 {
@@ -37,300 +36,49 @@ None required.
 
 ---
 
-## POST /metadata/objects
+### POST /metadata/project-setup
 
-Creates a new custom object, stores the `object-meta.xml`, and deploys it to the target org.
+Initializes the SFDX project directory for a project and authenticates with the Salesforce org. If the project directory already exists, re-authenticates with the org instead.
 
-### Headers
+**Request** — Requires auth. No request body.
 
-Requires all auth headers listed above.
-
-### Request Body
+**Response**
 
 ```json
 {
-  "fullName": "MyObject__c",
-  "label": "My Object",
-  "pluralLabel": "My Objects",
-  "description": "A custom object for my app",
-  "deploymentStatus": "Deployed",
-  "sharingModel": "ReadWrite",
-  "visibility": "Public",
-  "nameField": {
-    "label": "My Object Name",
-    "type": "Text"
-  }
-}
-```
-
-#### Field Reference
-
-| Field               | Type     | Required | Description                                          |
-| ------------------- | -------- | -------- | ---------------------------------------------------- |
-| `fullName`          | string   | Yes      | API name. Must end in `__c`                          |
-| `label`             | string   | Yes      | Singular display label                               |
-| `pluralLabel`       | string   | Yes      | Plural display label                                 |
-| `description`       | string   | No       | Object description                                   |
-| `deploymentStatus`  | enum     | Yes      | `Deployed` or `InDevelopment`                        |
-| `sharingModel`      | enum     | Yes      | `ReadWrite`, `Private`, `ControlledByParent`         |
-| `visibility`        | enum     | Yes      | `Public` or `PackageProtected`                       |
-| `nameField`         | object   | Yes      | Name field spec (see below)                          |
-| `allowInChatterGroups` | bool  | No       | Allow in Chatter groups                              |
-| `enableActivities`  | bool     | No       | Enable Activities                                  |
-| `enableBulkApi`     | bool     | No       | Enable Bulk API                                    |
-| `enableFeeds`       | bool     | No       | Enable feeds                                       |
-| `enableHistory`     | bool     | No       | Enable history                                     |
-| `enableReports`     | bool     | No       | Enable reports                                     |
-| `enableSearch`      | bool     | No       | Enable search                                      |
-| `enableSharing`     | bool     | No       | Enable sharing                                     |
-| `enableStreamingApi`| bool     | No       | Enable Streaming API                               |
-
-#### `nameField` Spec
-
-| Field          | Type   | Required | Description                    |
-| -------------- | ------ | -------- | ------------------------------ |
-| `label`        | string | Yes      | Display label                  |
-| `type`         | string | Yes      | `Text` or `AutoNumber`         |
-| `displayFormat`| string | No       | Required for `AutoNumber`      |
-| `scale`        | number | No       | Scale for numeric types        |
-| `trackHistory` | bool   | No       | Track history                  |
-
-### Response
-
-**Success — 200 OK**
-
-```json
-{
-  "status": true,
+  "success": true,
   "error": null,
-  "createdItems": [
-    {
-      "name": "MyObject__c",
-      "type": "CustomObject",
-      "path": "/app/projects/my-project-01/force-app/objects/MyObject__c/MyObject__c.object-meta.xml"
-    }
-  ]
-}
-```
-
-**Validation Error — 500**
-
-```json
-{
-  "status": false,
-  "error": "Object creation failed: fullName is required",
-  "createdItems": []
+  "components": []
 }
 ```
 
 ---
 
-## POST /metadata/fields
+### POST /metadata/fetch-latest
 
-Creates a custom field on an existing custom object and deploys it.
+Ensures the project is set up (lazy init), then retrieves the latest metadata from the connected org using `sf project retrieve start` and syncs the local project directory.
 
-### Headers
+**Request** — Requires auth. No request body.
 
-Requires all auth headers listed above.
-
-### Request Body
+**Response**
 
 ```json
 {
-  "objectName": "MyObject__c",
-  "field": {
-    "fullName": "Description__c",
-    "label": "Description",
-    "type": "Text",
-    "length": 255,
-    "required": false
-  }
-}
-```
-
-#### `field` Spec
-
-| Field                 | Type     | Required | Description                                |
-| --------------------- | -------- | -------- | ------------------------------------------ |
-| `fullName`            | string   | Yes      | API name. Must end in `__c`               |
-| `label`               | string   | Yes      | Display label                              |
-| `type`                | string   | Yes      | See **Field Types** below                  |
-| `description`         | string   | No       | Field description                          |
-| `inlineHelpText`      | string   | No       | Help text                                  |
-| `required`            | bool     | No       | Required field                             |
-| `trackHistory`        | bool     | No       | Track history                              |
-| `trackTrending`       | bool     | No       | Track trending                             |
-| `length`              | number   | No       | Max length (Text/EncryptedText)            |
-| `externalId`          | bool     | No       | External ID                                |
-| `unique`              | bool     | No       | Unique                                     |
-| `visibleLines`        | number   | No       | Lines visible (LongTextArea/Html)          |
-| `precision`           | number   | No       | Precision (Number/Currency/Percent)      |
-| `scale`               | number   | No       | Scale (Number/Currency/Percent)           |
-| `displayLocationInDecimal` | bool | No       | Decimal location display (Location)       |
-| `defaultValue`        | bool     | No       | Default for Checkbox                       |
-| `displayFormat`       | string   | No       | AutoNumber format                          |
-| `referenceTo`         | string   | No       | Lookup/MasterDetail target                 |
-| `relationshipName`    | string   | No       | Relationship API name                       |
-| `relationshipLabel`   | string   | No       | Label for relationship                    |
-| `deleteConstraint`    | string   | No       | `SetNull`, `Restrict`, `Cascade`           |
-| `relationshipOrder`   | number   | No       | MasterDetail order                        |
-| `reparentableMasterDetail` | bool | No       | Reparentable MD                           |
-| `writeRequiresMasterRead` | bool  | No       | Write requires master read                 |
-| `valueSet`            | object   | No       | Picklist value set (Picklist types)        |
-| `formula`             | string   | No       | Formula expression (Formula)               |
-| `formulaTreatBlanksAs`| string   | No       | `BlankAsZero` or `BlankAsBlank`          |
-| `returnType`          | string   | No       | `Text`, `Number`, `Currency`, etc.      |
-| `summaryForeignKey`   | string   | No       | Summary relationship key                  |
-| `summaryOperation`    | string   | No       | `COUNT`, `SUM`, `MIN`, `MAX`             |
-| `summarizedField`     | string   | No       | Field to summarize                        |
-
-### Field Types
-
-`Text`, `TextArea`, `LongTextArea`, `Html`, `EncryptedText`, `Number`, `Currency`, `Percent`, `Location`, `Checkbox`, `Date`, `DateTime`, `Time`, `Email`, `Phone`, `Url`, `AutoNumber`, `Lookup`, `MasterDetail`, `Picklist`, `MultiselectPicklist`, `Formula`, `Summary`
-
-### Response
-
-**Success — 200 OK**
-
-```json
-{
-  "status": true,
+  "success": true,
   "error": null,
-  "createdItems": [
-    {
-      "name": "Description__c",
-      "type": "CustomField",
-      "path": "/app/projects/my-project-01/force-app/objects/MyObject__c/fields/Description__c.field-meta.xml"
-    }
-  ]
-}
-```
-
-**Validation Error — 500**
-
-```json
-{
-  "status": false,
-  "error": "Field creation failed: field fullName is required",
-  "createdItems": []
+  "components": []
 }
 ```
 
 ---
 
-## GET /metadata/objects
+### GET /metadata/objects
 
-Lists all custom objects in the project.
+Lists all custom objects in the project directory. Returns the XML content for each object.
 
-### Headers
+**Request** — Requires auth. No request body.
 
-Requires all auth headers.
-
-### Response
-
-**Success — 200 OK**
-
-```json
-{
-  "status": true,
-  "error": null,
-  "createdItems": [
-    {
-      "name": "MyObject__c",
-      "type": "CustomObject",
-      "path": "/app/projects/my-project-01/force-app/objects/MyObject__c/MyObject__c.object-meta.xml"
-    }
-  ]
-}
-```
-
----
-
-## GET /metadata/objects/:apiName
-
-Retrieves a specific custom object by API name, including its XML and child fields.
-
-### Headers
-
-Requires all auth headers.
-
-### URL Parameters
-
-| Param    | Description                         |
-| -------- | ----------------------------------- |
-| apiName  | API name of the object (e.g. `MyObject__c`) |
-
-### Response
-
-**Success — 200 OK**
-
-```json
-{
-  "status": true,
-  "error": null,
-  "createdItems": [
-    {
-      "name": "MyObject__c",
-      "type": "CustomObject",
-      "path": "/app/projects/my-project-01/force-app/objects/MyObject__c/MyObject__c.object-meta.xml"
-    }
-  ],
-  "detail": {
-    "apiName": "MyObject__c",
-    "xml": "<?xml version=...",
-    "fields": ["Description__c", "Amount__c"]
-  }
-}
-```
-
-**Not Found — 404**
-
-```json
-{
-  "status": false,
-  "error": "Custom object 'NonExistent__c' not found in project 'my-project-01'",
-  "createdItems": []
-}
-```
-
----
-
-## PUT /metadata/objects/:apiName
-
-Updates an existing custom object by overwriting its XML and redeploying to the org.
-
-### Headers
-
-Requires all auth headers listed above.
-
-### URL Parameters
-
-| Param | Description |
-| -------- | ----------------------------------- |
-| apiName | API name of the object to update (e.g. `MyObject__c`) |
-
-### Request Body
-
-Same shape as `POST /metadata/objects`. The `fullName` in the body must match the `:apiName` URL parameter.
-
-```json
-{
-  "fullName": "MyObject__c",
-  "label": "My Object",
-  "pluralLabel": "My Objects",
-  "deploymentStatus": "Deployed",
-  "sharingModel": "ReadWrite",
-  "visibility": "Public",
-  "nameField": {
-    "label": "My Object Name",
-    "type": "Text"
-  }
-}
-```
-
-### Response
-
-**Success — 200 OK**
+**Response**
 
 ```json
 {
@@ -346,62 +94,37 @@ Same shape as `POST /metadata/objects`. The `fullName` in the body must match th
 }
 ```
 
-**Not Found — 404**
-
-```json
-{
-  "status": false,
-  "error": "Custom object 'MyObject__c' not found in project 'my-project-01'",
-  "components": []
-}
-```
-
-**Mismatch — 400**
-
-```json
-{
-  "status": false,
-  "error": "fullName in body ('Other__c') must match URL param ('MyObject__c')",
-  "components": []
-}
-```
-
 ---
 
-## PUT /metadata/fields/:objectName/:fieldName
+### POST /metadata/objects
 
-Updates an existing custom field by overwriting its XML and redeploying to the org.
+Creates a custom object, writes its XML to the project directory, and deploys it to the org.
 
-### Headers
+**Request** — Requires auth.
 
-Requires all auth headers listed above.
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fullName` | string | Yes | API name. Must end in `__c` |
+| `label` | string | Yes | Singular display label |
+| `pluralLabel` | string | Yes | Plural display label |
+| `description` | string | No | Object description |
+| `deploymentStatus` | enum | No | See **Deployment Status**. Defaults to `Deployed` |
+| `sharingModel` | enum | Yes | See **Sharing Model** |
+| `externalSharingModel` | string | No | External sharing model |
+| `visibility` | enum | Yes | See **Visibility** |
+| `nameField` | object | Yes | See **Name Field Spec** |
+| `allowInChatterGroups` | boolean | No | Allow in Chatter groups |
+| `enableActivities` | boolean | No | Enable activities |
+| `enableBulkApi` | boolean | No | Enable Bulk API |
+| `enableFeeds` | boolean | No | Enable feeds |
+| `enableHistory` | boolean | No | Enable history |
+| `enableReports` | boolean | No | Enable reports |
+| `enableSearch` | boolean | No | Enable search |
+| `enableSharing` | boolean | No | Enable sharing |
+| `enableStreamingApi` | boolean | No | Enable Streaming API |
+| `compactLayoutAssignment` | string | No | Compact layout assignment |
 
-### URL Parameters
-
-| Param | Description |
-| ----------- | ----------------------------------- |
-| objectName | API name of the parent object (e.g. `MyObject__c`) |
-| fieldName | API name of the field to update (e.g. `Description__c`) |
-
-### Request Body
-
-Same shape as the `field` object in `POST /metadata/fields`. The `fullName` in the field spec must match the `:fieldName` URL parameter.
-
-```json
-{
-  "field": {
-    "fullName": "Description__c",
-    "label": "Description",
-    "type": "Text",
-    "length": 500,
-    "required": false
-  }
-}
-```
-
-### Response
-
-**Success — 200 OK**
+**Response**
 
 ```json
 {
@@ -409,43 +132,96 @@ Same shape as the `field` object in `POST /metadata/fields`. The `fullName` in t
   "error": null,
   "components": [
     {
-      "fullName": "Description__c",
-      "type": "CustomField",
+      "fullName": "MyObject__c",
+      "type": "CustomObject",
       "xml": "<?xml version=..."
     }
   ]
 }
 ```
 
-**Not Found — 404**
+---
+
+### GET /metadata/objects/:apiName
+
+Retrieves a specific custom object by API name, including its XML and all child field definitions.
+
+**Request** — Requires auth.
+
+| Param | Description |
+|---|---|
+| `apiName` | API name of the object (e.g. `MyObject__c`) |
+
+**Response**
 
 ```json
 {
-  "status": false,
-  "error": "Custom field 'Description__c' not found on object 'MyObject__c' in project 'my-project-01'",
-  "components": []
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "MyObject__c",
+      "type": "CustomObject",
+      "xml": "<?xml version=..."
+    }
+  ],
+  "detail": {
+    "apiName": "MyObject__c",
+    "xml": "<?xml version=...",
+    "fields": [
+      {
+        "fullName": "Description__c",
+        "type": "CustomField",
+        "xml": "<?xml version=..."
+      }
+    ]
+  }
 }
 ```
 
 ---
 
-## DELETE /metadata/objects/:apiName
+### PUT /metadata/objects/:apiName
 
-Deletes a custom object from the Salesforce org and removes its local files. The server first retrieves the latest metadata from the org to ensure local state is in sync, then executes `sf project delete source --metadata CustomObject:<apiName>` against the org.
+Updates an existing custom object by overwriting its XML and redeploying to the org. The `fullName` in the body must match the `:apiName` URL param.
 
-### Headers
-
-Requires all auth headers listed above.
-
-### URL Parameters
+**Request** — Requires auth.
 
 | Param | Description |
-| -------- | ----------------------------------- |
-| apiName | API name of the object to delete (e.g. `MyObject__c`) |
+|---|---|
+| `apiName` | API name of the object to update (e.g. `MyObject__c`) |
 
-### Response
+Request body is the same shape as `POST /metadata/objects`.
 
-**Success — 200 OK**
+**Response**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "MyObject__c",
+      "type": "CustomObject",
+      "xml": "<?xml version=..."
+    }
+  ]
+}
+```
+
+---
+
+### DELETE /metadata/objects/:apiName
+
+Deletes a custom object from the Salesforce org and removes its local project directory.
+
+**Request** — Requires auth.
+
+| Param | Description |
+|---|---|
+| `apiName` | API name of the object to delete (e.g. `MyObject__c`) |
+
+**Response**
 
 ```json
 {
@@ -460,46 +236,84 @@ Requires all auth headers listed above.
 }
 ```
 
-**Not Found — 404**
+---
+
+### POST /metadata/fields
+
+Creates a custom field on an existing object, writes its XML, and deploys it to the org.
+
+**Request** — Requires auth.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `objectName` | string | Yes | Parent object API name (e.g. `MyObject__c`) |
+| `field` | object | Yes | See **Field Spec** |
+
+**Response**
 
 ```json
 {
-  "status": false,
-  "error": "Custom object 'MyObject__c' not found in project 'my-project-01'",
-  "components": []
-}
-```
-
-**Org Delete Failed — 500**
-
-```json
-{
-  "status": false,
-  "error": "Delete from org failed: <SFDX error message>",
-  "components": []
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "Description__c",
+      "type": "CustomField",
+      "xml": "<?xml version=..."
+    }
+  ]
 }
 ```
 
 ---
 
-## DELETE /metadata/fields/:objectName/:fieldName
+### PUT /metadata/fields/:objectName/:fieldName
 
-Deletes a custom field from the Salesforce org and removes its local file. The server first retrieves the latest metadata from the org to ensure local state is in sync, then executes `sf project delete source --metadata CustomField:<objectName>.<fieldName>` against the org.
+Updates an existing custom field by overwriting its XML and redeploying to the org. The `fullName` in the field spec must match the `:fieldName` URL param.
 
-### Headers
-
-Requires all auth headers listed above.
-
-### URL Parameters
+**Request** — Requires auth.
 
 | Param | Description |
-| ----------- | ----------------------------------- |
-| objectName | API name of the parent object (e.g. `MyObject__c`) |
-| fieldName | API name of the field to delete (e.g. `Description__c`) |
+|---|---|
+| `objectName` | Parent object API name (e.g. `MyObject__c`) |
+| `fieldName` | API name of the field to update (e.g. `Description__c`) |
 
-### Response
+Request body shape:
 
-**Success — 200 OK**
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `field` | object | Yes | See **Field Spec** |
+
+**Response**
+
+```json
+{
+  "success": true,
+  "error": null,
+  "components": [
+    {
+      "fullName": "Description__c",
+      "type": "CustomField",
+      "xml": "<?xml version=..."
+    }
+  ]
+}
+```
+
+---
+
+### DELETE /metadata/fields/:objectName/:fieldName
+
+Deletes a custom field from the Salesforce org and removes its local XML file.
+
+**Request** — Requires auth.
+
+| Param | Description |
+|---|---|
+| `objectName` | Parent object API name (e.g. `MyObject__c`) |
+| `fieldName` | API name of the field to delete (e.g. `Description__c`) |
+
+**Response**
 
 ```json
 {
@@ -514,43 +328,160 @@ Requires all auth headers listed above.
 }
 ```
 
-**Not Found — 404**
+---
 
-```json
-{
-  "status": false,
-  "error": "Custom field 'Description__c' not found on object 'MyObject__c' in project 'my-project-01'",
-  "components": []
-}
-```
+## Name Field Spec
 
-**Org Delete Failed — 500**
+Used in custom object creation (`nameField` in request body).
 
-```json
-{
-  "status": false,
-  "error": "Delete from org failed: <SFDX error message>",
-  "components": []
-}
-```
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `label` | string | Yes | Display label |
+| `type` | enum | Yes | `Text` or `AutoNumber` |
+| `displayFormat` | string | No | Required when type is `AutoNumber` |
+| `scale` | number | No | Scale for numeric types |
+| `trackHistory` | boolean | No | Track field history |
 
 ---
 
-## Error Response Format
+## Field Spec
+
+All field types share a base set of properties, plus type-specific fields.
+
+### Base Fields
+
+All field specs include these:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fullName` | string | Yes | API name. Must end in `__c` |
+| `label` | string | Yes | Display label |
+| `type` | enum | Yes | See **Field Types** |
+| `description` | string | No | Field description |
+| `inlineHelpText` | string | No | Help text shown inline |
+| `required` | boolean | No | Whether the field is required |
+| `trackHistory` | boolean | No | Track field history |
+| `trackTrending` | boolean | No | Track trending |
+
+### Type-Specific Fields
+
+| Field | Type | Applies to | Required for | Description |
+|---|---|---|---|---|
+| `length` | number | Text, LongTextArea, Html, EncryptedText | EncryptedText | Max character length |
+| `externalId` | boolean | Text, Number, Email, AutoNumber, EncryptedText | — | Mark as external ID |
+| `unique` | boolean | Text, Number, Email | — | Enforce uniqueness |
+| `visibleLines` | number | LongTextArea, Html, MultiselectPicklist | LongTextArea, Html | Lines visible in UI |
+| `maskChar` | enum | EncryptedText | EncryptedText | `asterisk` or `X` |
+| `maskType` | enum | EncryptedText | EncryptedText | See **Mask Types** |
+| `precision` | number | Number, Currency, Percent, Formula | Number, Currency, Percent | Total digit count |
+| `scale` | number | Number, Currency, Percent, Location, Formula | Number, Currency, Percent | Decimal digit count |
+| `displayLocationInDecimal` | boolean | Location | — | Show location in decimal |
+| `defaultValue` | boolean | Checkbox | — | Default checked state |
+| `displayFormat` | string | AutoNumber | AutoNumber | Auto-number format string |
+| `referenceTo` | string | Lookup, MasterDetail | Lookup, MasterDetail | Target object API name |
+| `relationshipName` | string | Lookup, MasterDetail | Lookup, MasterDetail | Relationship API name |
+| `relationshipLabel` | string | Lookup, MasterDetail | Lookup, MasterDetail | Relationship display label |
+| `deleteConstraint` | enum | Lookup | — | `SetNull`, `Restrict`, or `Cascade` |
+| `relationshipOrder` | number | MasterDetail | MasterDetail | Order in master-detail |
+| `reparentableMasterDetail` | boolean | MasterDetail | — | Allow reparenting |
+| `writeRequiresMasterRead` | boolean | MasterDetail | — | Write requires master read |
+| `valueSet` | object | Picklist, MultiselectPicklist | Picklist, MultiselectPicklist | See **Value Set** |
+| `formula` | string | Formula | Formula | Formula expression |
+| `formulaTreatBlanksAs` | enum | Formula | — | `BlankAsZero` or `BlankAsBlank` |
+| `returnType` | enum | Formula | Formula | See **Formula Return Types** |
+| `summaryForeignKey` | string | Summary | Summary | Summary relationship key |
+| `summaryOperation` | enum | Summary | Summary | See **Summary Operations** |
+| `summarizedField` | string | Summary | Required when operation is not `COUNT` | Field to summarize |
+
+### Value Set
+
+Used by Picklist and MultiselectPicklist fields.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `restricted` | boolean | No | Restrict values to the defined set |
+| `sorted` | boolean | No | Sort values alphabetically |
+| `values` | array | Yes | Array of **Picklist Value** objects |
+
+### Picklist Value
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fullName` | string | Yes | API name of the value |
+| `label` | string | Yes | Display label |
+| `default` | boolean | No | Whether this is the default value |
+
+---
+
+## Field Types
+
+| Type | Category |
+|---|---|
+| `Text` | Text |
+| `TextArea` | Text |
+| `LongTextArea` | Text |
+| `Html` | Text |
+| `EncryptedText` | Text |
+| `Number` | Numeric |
+| `Currency` | Numeric |
+| `Percent` | Numeric |
+| `Location` | Numeric |
+| `Checkbox` | Boolean |
+| `Date` | Date/Time |
+| `DateTime` | Date/Time |
+| `Time` | Date/Time |
+| `Email` | Communication |
+| `Phone` | Communication |
+| `Url` | Communication |
+| `AutoNumber` | AutoNumber |
+| `Lookup` | Relationship |
+| `MasterDetail` | Relationship |
+| `Picklist` | Picklist |
+| `MultiselectPicklist` | Picklist |
+| `Formula` | Formula |
+| `Summary` | Rollup Summary |
+
+## Deployment Status
+
+`Deployed` | `InDevelopment`
+
+## Sharing Model
+
+`ReadWrite` | `Private` | `ControlledByParent`
+
+## Visibility
+
+`Public` | `PackageProtected`
+
+## Mask Types
+
+`all` | `lastFour` | `creditCard` | `sin` | `socialSecurityNumber` | `nino`
+
+## Formula Return Types
+
+`Text` | `Number` | `Currency` | `Percent` | `Date` | `DateTime` | `Checkbox`
+
+## Summary Operations
+
+`COUNT` | `SUM` | `MIN` | `MAX`
+
+---
+
+## Error Reference
 
 All error responses follow this structure:
 
 ```json
 {
-  "status": false,
+  "success": false,
   "error": "Human-readable error message",
-  "createdItems": []
+  "components": []
 }
 ```
 
-| Status | Meaning                                      |
-| ------ | -------------------------------------------- |
-| 400    | Missing required headers (`x-project-id`, etc.) |
-| 401    | Invalid or missing `x-api-key`               |
-| 404    | Resource not found                           |
-| 500    | Internal / validation / SFDX error           |
+| Status | Meaning |
+|---|---|
+| 400 | Missing or invalid request data (missing headers, body field, or param mismatch) |
+| 401 | Missing or invalid `x-api-key` |
+| 404 | Resource not found (object or field does not exist in project) |
+| 500 | Internal error (project setup failure, validation failure, SFDX deploy/retrieve/delete failure) |

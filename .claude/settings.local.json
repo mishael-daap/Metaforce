@@ -8,7 +8,9 @@
       "Bash(xargs grep -l -i requirement)",
       "Bash(xargs grep -l \"ai\\\\|tool\")",
       "Bash(sf version *)",
-      "Bash(docker compose build *)"
+      "Bash(docker compose build *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\MIshael\\\\Documents\\\\projects\\\\metaforce\\\\sfdx-server\\\\src\\\\routes\" -Recurse -Filter \"*.ts\")",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

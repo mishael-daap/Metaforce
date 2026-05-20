@@ -38,7 +38,7 @@ Status: completed
 Goal: Agent can prepare a set of tasks for a requirement in chat, user approves and agent completes the tasks via mocked tool calls and seek user approval, mark task as complete and repeat for next task
 
 ## 10. SFDX Server
-Status: in-progress
+Status: completed
 Goal: Dockerized Node.js service exposing CLI endpoints for creating Salesforce metadata
 
 ## 11. Metadata Library
