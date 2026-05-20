@@ -41,6 +41,10 @@ Goal: Agent can prepare a set of tasks for a requirement in chat, user approves 
 Status: completed
 Goal: Dockerized Node.js service exposing CLI endpoints for creating Salesforce metadata
 
+## 10.1. Handling Metadata components
+Status: pending
+Goal: after agent runs tools to create metadata components, save the metadata components to database
+
 ## 11. Metadata Library
 Status: pending
 Goal: Save every created metadata component to Supabase for reuse across orgs and projects
