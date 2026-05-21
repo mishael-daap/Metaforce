@@ -25,17 +25,35 @@ export function CreateProjectDialog({
   onOpenChange,
   onProjectCreated,
 }: CreateProjectDialogProps) {
+  const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [domainUrl, setDomainUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleNext = () => {
+    setError("");
+    if (!name.trim()) {
+      setError("Project name is required");
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    setError("");
+    setStep(1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!name.trim()) {
-      setError("Project name is required");
+    if (!domainUrl.trim() || !username.trim() || !accessToken.trim()) {
+      setError("All org fields are required");
       return;
     }
 
@@ -50,29 +68,41 @@ export function CreateProjectDialog({
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim(),
+          org: {
+            domain_url: domainUrl.trim(),
+            username: username.trim(),
+            access_token: accessToken.trim(),
+          },
         }),
       });
 
       if (response.ok) {
-        setName("");
-        setDescription("");
+        resetForm();
         onProjectCreated();
       } else {
         const data = await response.json();
         setError(data.error || "Failed to create project");
       }
-    } catch (error) {
+    } catch {
       setError("An error occurred while creating the project");
     } finally {
       setLoading(false);
     }
   };
 
+  const resetForm = () => {
+    setStep(1);
+    setName("");
+    setDescription("");
+    setDomainUrl("");
+    setUsername("");
+    setAccessToken("");
+    setError("");
+  };
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setName("");
-      setDescription("");
-      setError("");
+      resetForm();
     }
     onOpenChange(newOpen);
   };
@@ -83,58 +113,114 @@ export function CreateProjectDialog({
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
           <DialogDescription>
-            Create a new project to manage your Salesforce development work.
+            Step {step} of 2 —{" "}
+            {step === 1
+              ? "Enter your project details"
+              : "Connect your Salesforce org"}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Project Name *</Label>
-              <Input
-                id="name"
-                placeholder="My Salesforce Project"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-              />
+
+        {step === 1 ? (
+          <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Project Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="My Salesforce Project"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe your project..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={loading}
+                  rows={3}
+                  className="
+                    max-h-40
+                    min-h-40
+                    overflow-y-auto
+                    resize-none
+                    scrollbar-thin
+                    scrollbar-thumb-muted-foreground/30
+                    scrollbar-track-transparent
+                    pr-3
+                  "
+                />
+              </div>
+              {error && <div className="text-sm text-destructive">{error}</div>}
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe your project..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
                 disabled={loading}
-                rows={3}
-                className="
-    max-h-40
-    min-h-40
-    overflow-y-auto
-    resize-none
-    scrollbar-thin
-    scrollbar-thumb-muted-foreground/30
-    scrollbar-track-transparent
-    pr-3
-  "
-              />
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                Next
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="domainUrl">Instance URL *</Label>
+                <Input
+                  id="domainUrl"
+                  placeholder="https://myorg.my.salesforce.com"
+                  value={domainUrl}
+                  onChange={(e) => setDomainUrl(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="username">Username *</Label>
+                <Input
+                  id="username"
+                  placeholder="user@example.com"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="accessToken">Access Token *</Label>
+                <Input
+                  id="accessToken"
+                  type="password"
+                  placeholder="Session access token"
+                  value={accessToken}
+                  onChange={(e) => setAccessToken(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              {error && <div className="text-sm text-destructive">{error}</div>}
             </div>
-            {error && <div className="text-sm text-destructive">{error}</div>}
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Project"}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                disabled={loading}
+              >
+                Back
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Creating..." : "Create Project"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

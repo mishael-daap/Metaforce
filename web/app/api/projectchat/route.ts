@@ -3,7 +3,6 @@ import {
   streamText,
   convertToModelMessages,
   createIdGenerator,
-  tool,
   stepCountIs,
 } from "ai";
 import { wrapLanguageModel } from "ai";
@@ -58,7 +57,7 @@ async function handleBuildMode({ messages, projectId, projectName, projectDescri
   const result = streamText({
     model,
     system: `${getBuildPlanPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
-    tools: { ...createRequirementTools(projectId), ...createSfdxTools({ projectId, accessToken: "00DgK00000FEwjR!AQEAQBe.VpQJBpgsVVdlQJs9wy0kbpBZcv9tDx9Zh7gD9syprjjroK9mKFHgvWc6eaKH5nwbelV0BZGpKCHrwXfU4C4.db", orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com" }) },
+    tools: { ...createRequirementTools(projectId), ...createSfdxTools({ projectId, accessToken: "00DgK00000FEwjR!AQEAQNQ2HvBchlnITDyVv_TbjNGytlY0e9wuO608LrT1fKTy7SS6OEe1jwDzHWZcC0eSQHv_5Ce7GvYK961Pr3Zq0GSaYvso", orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com" }) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
   });

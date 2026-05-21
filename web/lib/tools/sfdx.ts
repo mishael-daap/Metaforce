@@ -108,23 +108,23 @@ const fieldSchema = z.object({
 
 export function createSfdxTools(ctx: SfdxCredentials) {
   return {
-    projectSetup: tool({
-      description:
-        "Initialize the SFDX project and authenticate with the Salesforce org. Call this before any other SFDX tool to ensure the project is ready.",
-      inputSchema: z.object({}),
-      execute: async () => {
-        return sfdxFetch("/metadata/project-setup", ctx, { method: "POST" });
-      },
-    }),
+    // projectSetup: tool({
+    //   description:
+    //     "Initialize the SFDX project and authenticate with the Salesforce org. Call this before any other SFDX tool to ensure the project is ready.",
+    //   inputSchema: z.object({}),
+    //   execute: async () => {
+    //     return sfdxFetch("/metadata/project-setup", ctx, { method: "POST" });
+    //   },
+    // }),
 
-    fetchLatest: tool({
-      description:
-        "Retrieve the latest metadata from the connected Salesforce org and sync the local project. Use this to refresh the project's metadata state from the org.",
-      inputSchema: z.object({}),
-      execute: async () => {
-        return sfdxFetch("/metadata/fetch-latest", ctx, { method: "POST" });
-      },
-    }),
+    // fetchLatest: tool({
+    //   description:
+    //     "Retrieve the latest metadata from the connected Salesforce org and sync the local project. Use this to refresh the project's metadata state from the org.",
+    //   inputSchema: z.object({}),
+    //   execute: async () => {
+    //     return sfdxFetch("/metadata/fetch-latest", ctx, { method: "POST" });
+    //   },
+    // }),
 
     listObjects: tool({
       description:
@@ -145,7 +145,7 @@ export function createSfdxTools(ctx: SfdxCredentials) {
         description: z.string().optional().describe("Object description"),
         deploymentStatus: z.enum(["Deployed", "InDevelopment"]).optional().describe("Defaults to Deployed"),
         sharingModel: z.enum(["ReadWrite", "Private", "ControlledByParent"]).describe("Sharing model"),
-        externalSharingModel: z.string().optional().describe("External sharing model"),
+        externalSharingModel: z.string().nullable().optional().describe("External sharing model"),
         visibility: z.enum(["Public", "PackageProtected"]).describe("Object visibility"),
         nameField: nameFieldSchema.describe("Name field specification"),
         allowInChatterGroups: z.boolean().optional().describe("Allow in Chatter groups"),
@@ -157,7 +157,7 @@ export function createSfdxTools(ctx: SfdxCredentials) {
         enableSearch: z.boolean().optional().describe("Enable search"),
         enableSharing: z.boolean().optional().describe("Enable sharing"),
         enableStreamingApi: z.boolean().optional().describe("Enable Streaming API"),
-        compactLayoutAssignment: z.string().optional().describe("Compact layout assignment"),
+        compactLayoutAssignment: z.string().nullable().optional().describe("Compact layout assignment"),
       }),
       execute: async (body) => {
         return sfdxFetch("/metadata/objects", ctx, {
@@ -189,7 +189,7 @@ export function createSfdxTools(ctx: SfdxCredentials) {
         description: z.string().optional().describe("Object description"),
         deploymentStatus: z.enum(["Deployed", "InDevelopment"]).optional().describe("Defaults to Deployed"),
         sharingModel: z.enum(["ReadWrite", "Private", "ControlledByParent"]).describe("Sharing model"),
-        externalSharingModel: z.string().optional().describe("External sharing model"),
+        externalSharingModel: z.string().nullable().optional().describe("External sharing model"),
         visibility: z.enum(["Public", "PackageProtected"]).describe("Object visibility"),
         nameField: nameFieldSchema.describe("Name field specification"),
         allowInChatterGroups: z.boolean().optional().describe("Allow in Chatter groups"),
@@ -201,7 +201,7 @@ export function createSfdxTools(ctx: SfdxCredentials) {
         enableSearch: z.boolean().optional().describe("Enable search"),
         enableSharing: z.boolean().optional().describe("Enable sharing"),
         enableStreamingApi: z.boolean().optional().describe("Enable Streaming API"),
-        compactLayoutAssignment: z.string().optional().describe("Compact layout assignment"),
+        compactLayoutAssignment: z.string().nullable().optional().describe("Compact layout assignment"),
       }),
       execute: async ({ apiName, ...body }) => {
         return sfdxFetch(`/metadata/objects/${encodeURIComponent(apiName)}`, ctx, {

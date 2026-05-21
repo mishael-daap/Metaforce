@@ -58,11 +58,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, org } = body;
 
     if (!name || typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
         { error: "Project name is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!org || !org.domain_url || !org.username || !org.access_token) {
+      return NextResponse.json(
+        { error: "Org details (instance URL, username, access token) are required" },
         { status: 400 }
       );
     }
@@ -110,7 +117,22 @@ export async function POST(request: Request) {
 
     if (conversationError) {
       console.error("Error creating conversation:", conversationError);
-      // Continue anyway, project is created
+    }
+
+    // Create org for this project
+    const { error: orgError } = await supabase.from("orgs").insert({
+      project_id: project.id,
+      domain_url: org.domain_url.trim(),
+      username: org.username.trim(),
+      access_token: org.access_token.trim(),
+    });
+
+    if (orgError) {
+      console.error("Error creating org:", orgError);
+      return NextResponse.json(
+        { error: "Project created but failed to create org" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(project, { status: 201 });
