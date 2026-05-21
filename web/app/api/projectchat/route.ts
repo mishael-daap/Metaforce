@@ -10,9 +10,9 @@ import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import {
   getConversationForProject,
-  loadMessages,
   saveMessages,
 } from "@/lib/chat-store";
+import { getOptimizedContext } from "@/lib/conversationMemory";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
 import { createSfdxTools } from "@/lib/tools/sfdx";
@@ -27,11 +27,11 @@ const model = wrapLanguageModel({
   middleware: devToolsMiddleware(),
 });
 
-async function handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+async function handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext }) {
   console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
   const result = streamText({
     model,
-    system: getRequirementsPrompt(projectName, projectDescription),
+    system: `${getRequirementsPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
     tools: { ...createRequirementTools(projectId) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -40,19 +40,24 @@ async function handlePlanMode({ messages, projectId, projectName, projectDescrip
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ responseMessage }) => {
+    onFinish: ({ responseMessage, usage }) => {
       if (!conversationId) return;
+      console.log(`[request-tokens] conversationId=${conversationId}`, {
+        promptTokens: usage?.promptTokens,
+        completionTokens: usage?.completionTokens,
+        totalTokens: usage?.totalTokens,
+      });
       console.log(" ai response message", responseMessage)
       saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
     },
   });
 }
 
-async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId }) {
+async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext }) {
   console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
   const result = streamText({
     model,
-    system: getBuildPlanPrompt(projectName, projectDescription),
+    system: `${getBuildPlanPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
     tools: { ...createRequirementTools(projectId), ...createSfdxTools({ projectId, accessToken: "00DgK00000FEwjR!AQEAQBe.VpQJBpgsVVdlQJs9wy0kbpBZcv9tDx9Zh7gD9syprjjroK9mKFHgvWc6eaKH5nwbelV0BZGpKCHrwXfU4C4.db", orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com" }) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -61,8 +66,13 @@ async function handleBuildMode({ messages, projectId, projectName, projectDescri
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ responseMessage }) => {
+    onFinish: ({ responseMessage, usage }) => {
       if (!conversationId) return;
+      console.log(`[request-tokens] conversationId=${conversationId}`, {
+        promptTokens: usage?.promptTokens,
+        completionTokens: usage?.completionTokens,
+        totalTokens: usage?.totalTokens,
+      });
       saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
     },
   });
@@ -98,18 +108,20 @@ export async function POST(req: Request) {
   let projectName = "not provided";
   let projectDescription = "not provided";
 
-  let chatHistory: UIMessage[] = [];
+  let summaryContext = "";
 
   if (projectId) {
     const conversation = await getConversationForProject(projectId);
     if (conversation) {
       conversationId = conversation.id;
       console.log("conversation id is", conversationId);
-      // Load full history from DB — the DB is source of truth, not the client.
-      // We only trust the new user message from the client; everything
-      // else is loaded fresh to prevent tampered or truncated history.
-      chatHistory = await loadMessages(conversation.id);
-      messages = [...chatHistory, newUserMessage];
+      const { summaryContext: ctx, messages: optimizedMessages } = await getOptimizedContext({
+        conversationId: conversation.id,
+        summary: conversation.summary,
+        lastSummarizedIndex: conversation.last_summarized_index ?? 0,
+      });
+      summaryContext = ctx;
+      messages = [...optimizedMessages, newUserMessage];
     }
     // Fetch project details to enrich the prompt
     try {
@@ -137,9 +149,9 @@ export async function POST(req: Request) {
 
    if (mode === "plan") {
     console.log("were in plan mode")
-    return handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId });
+    return handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext });
   } else if (mode === "build") {
-    return handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId });
+    return handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext });
   } else {
     return new Response("Bad Request: unknown mode", { status: 400 });
   }

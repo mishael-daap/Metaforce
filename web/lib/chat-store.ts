@@ -1,12 +1,13 @@
 import { supabase } from "./supabase";
 import { UIMessage } from "ai";
+import { Requirement } from "@/src/types/requirements";
 
 export async function getConversationForProject(
   projectId: string
-): Promise<{ id: string } | null> {
+): Promise<{ id: string; summary: string | null; last_summarized_index: number } | null> {
   const { data, error } = await supabase
     .from("conversations")
-    .select("id")
+    .select("id, summary, last_summarized_index")
     .eq("project_id", projectId)
     .maybeSingle();
 
@@ -55,6 +56,80 @@ export async function loadMessages(conversationId: string): Promise<UIMessage[]>
     .map((row) => row.ui_message as UIMessage)
     // Filter out any malformed rows that could break convertToModelMessages
     .filter((m) => m && m.id && m.role && Array.isArray(m.parts));
+}
+
+// export async function saveMessages({
+
+export async function loadRecentMessages(
+  conversationId: string,
+  limit: number = 20
+): Promise<UIMessage[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("ui_message, created_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(`Failed to load recent messages: ${error.message}`);
+  if (!data || data.length === 0) return [];
+
+  return data
+    .reverse()
+    .map((row) => row.ui_message as UIMessage)
+    .filter((m) => m && m.id && m.role && Array.isArray(m.parts));
+}
+
+export async function getTotalMessageCount(
+  conversationId: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("messages")
+    .select("*", { count: "exact", head: true })
+    .eq("conversation_id", conversationId);
+
+  if (error) throw new Error(`Failed to count messages: ${error.message}`);
+  return count ?? 0;
+}
+
+export async function loadMessageRange(
+  conversationId: string,
+  from: number,
+  to: number
+): Promise<UIMessage[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("ui_message, created_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true })
+    .range(from, to - 1);
+
+  if (error) throw new Error(`Failed to load message range: ${error.message}`);
+  if (!data || data.length === 0) return [];
+
+  return data
+    .map((row) => row.ui_message as UIMessage)
+    .filter((m) => m && m.id && m.role && Array.isArray(m.parts));
+}
+
+export async function updateConversationSummary({
+  conversationId,
+  summary,
+  lastSummarizedIndex,
+}: {
+  conversationId: string;
+  summary: string;
+  lastSummarizedIndex: number;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("conversations")
+    .update({
+      summary,
+      last_summarized_index: lastSummarizedIndex,
+    })
+    .eq("id", conversationId);
+
+  if (error) throw new Error(`Failed to update summary: ${error.message}`);
 }
 
 export async function saveMessages({
