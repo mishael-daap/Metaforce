@@ -19,10 +19,25 @@ import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
 
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+const nim = createOpenAICompatible({
+  name: 'nim',
+  baseURL: 'https://integrate.api.nvidia.com/v1',
+  headers: {
+    Authorization: `Bearer ${process.env.NIM_API_KEY}`,
+  },
+});
+
 export const maxDuration = 30;
 
+// const model = wrapLanguageModel({
+//   model: groq("openai/gpt-oss-120b"),
+//   middleware: devToolsMiddleware(),
+// });
+
 const model = wrapLanguageModel({
-  model: groq("openai/gpt-oss-120b"),
+  model: nim.chatModel('nvidia/nemotron-3-super-120b-a12b'),
   middleware: devToolsMiddleware(),
 });
 

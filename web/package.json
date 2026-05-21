@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/devtools": "^0.0.17",
     "@ai-sdk/groq": "^3.0.39",
+    "@ai-sdk/openai-compatible": "^2.0.47",
     "@ai-sdk/react": "^3.0.178",
     "@auth/supabase-adapter": "^1.11.2",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
