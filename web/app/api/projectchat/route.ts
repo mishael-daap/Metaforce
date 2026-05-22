@@ -14,12 +14,13 @@ import {
 import { getOptimizedContext } from "@/lib/conversationMemory";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
-import { createSfdxTools } from "@/lib/tools/sfdx";
+// import { createSfdxTools } from "@/lib/tools/sfdx";
 import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
-
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createSfdxTools } from "@/lib/sfdx/sfdx.index";
+
 
 const nim = createOpenAICompatible({
   name: 'nim',
@@ -68,11 +69,20 @@ async function handlePlanMode({ messages, projectId, projectName, projectDescrip
 }
 
 async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext }) {
+  console.log( process.env.SFDX_SERVER_URL!, process.env.SFDX_SERVER_API_KEY!,)
+  const BuildTools = createSfdxTools({
+    baseUrl:  "http://localhost:8000",
+    apiKey: "password",
+    projectId,
+    accessToken:"00DgK00000FEwjR!AQEAQLsnTH7jyAqyzdhWkUYXyUUOO61_1g7SQIakrM.5tRHJzDda99BxyJqPqr7lvIhr85g8ctAyJa1so3NWfj863Af_dcN6",
+    orgUrl:"https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",
+  });
+
   console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
   const result = streamText({
     model,
     system: `${getBuildPlanPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
-    tools: { ...createRequirementTools(projectId), ...createSfdxTools({ projectId, accessToken: "00DgK00000FEwjR!AQEAQNQ2HvBchlnITDyVv_TbjNGytlY0e9wuO608LrT1fKTy7SS6OEe1jwDzHWZcC0eSQHv_5Ce7GvYK961Pr3Zq0GSaYvso", orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com" }) },
+    tools: { ...createRequirementTools(projectId), ...BuildTools },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
   });
@@ -80,13 +90,13 @@ async function handleBuildMode({ messages, projectId, projectName, projectDescri
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ responseMessage, usage }) => {
+    onFinish: ({ responseMessage }) => {
       if (!conversationId) return;
-      console.log(`[request-tokens] conversationId=${conversationId}`, {
-        promptTokens: usage?.promptTokens,
-        completionTokens: usage?.completionTokens,
-        totalTokens: usage?.totalTokens,
-      });
+      // console.log(`[request-tokens] conversationId=${conversationId}`, {
+      //   promptTokens: usage?.promptTokens,
+      //   completionTokens: usage?.completionTokens,
+      //   totalTokens: usage?.totalTokens,
+      // });
       saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
     },
   });

@@ -35,9 +35,9 @@ Drop older less important details to make room for new ones.`,
     // completionTokens: usage?.completionTokens,
     // totalTokens: usage?.totalTokens,
     
-    inputTokens: usage?.inputTokens,
-    outputTokens: usage?.outputTokens,
-    totalTokens: usage?.totalTokens,
+    // inputTokens: usage?.inputTokens,
+    // outputTokens: usage?.outputTokens,
+    // totalTokens: usage?.totalTokens,
     
   });
 

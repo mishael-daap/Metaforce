@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Requirement, RequirementStatus } from '@/src/types/requirements';
@@ -133,9 +135,11 @@ export function RequirementsList({ requirements, onUpdate, onDelete }: Requireme
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        {requirement.description}
-                      </p>
+                      <div className="text-sm text-gray-700 leading-relaxed prose prose-sm prose-gray max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_p]:my-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_code]:text-xs [&_code]:bg-gray-200 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-gray-200 [&_pre]:rounded [&_pre]:p-2 [&_blockquote]:border-l-2 [&_blockquote]:border-gray-400 [&_blockquote]:pl-3 [&_blockquote]:italic">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {requirement.description}
+                        </ReactMarkdown>
+                      </div>
                       <div className="flex gap-3 mt-4">
                         <button
                           onClick={() => startEdit(requirement)}
