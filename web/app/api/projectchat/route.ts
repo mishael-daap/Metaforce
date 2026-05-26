@@ -175,11 +175,11 @@ export async function POST(req: Request) {
   }
 
   if (mode === "plan") {
-
+console.log("settign up project")
     const setup = await setupProject(
       projectId,
-      "00DgK00000FEwjR!AQEAQP_8CdiK6SAoorMB0oUNIayElCdIoTLdbpBx02DkeK62MnO1l6pfIdQG3EitklZ1JOfIzsUnF76xcdCJEG2vzSmUfgR8 ",
-      "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com "
+      "00DgK00000FEwjR!AQEAQP_8CdiK6SAoorMB0oUNIayElCdIoTLdbpBx02DkeK62MnO1l6pfIdQG3EitklZ1JOfIzsUnF76xcdCJEG2vzSmUfgR8",
+      "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com"
     );
     console.log("this is setup", setup);
 

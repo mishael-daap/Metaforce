@@ -8,10 +8,21 @@ import {
   updateConversationSummary,
 } from "./chat-store";
 
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+
+const nim = createOpenAICompatible({
+  name: "nim",
+  baseURL: "https://integrate.api.nvidia.com/v1",
+  headers: {
+    Authorization: `Bearer ${process.env.NIM_API_KEY}`,
+  },
+});
+
 const RECENT_WINDOW = 20;
 const SUMMARIZE_EVERY = 20;
 const SUMMARY_MAX_TOKENS = 400;
-const SUMMARY_MODEL = groq("llama-3.1-8b-instant");
+const SUMMARY_MODEL = nim.chatModel("nvidia/nemotron-3-super-120b-a12b");
+
 
 async function summarize(
   newMessages: UIMessage[],

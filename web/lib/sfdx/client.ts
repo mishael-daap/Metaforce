@@ -12,28 +12,49 @@ export function createClient(config: SfdxClientConfig) {
   };
 
   async function request(
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    path: string,
-    body?: unknown,
-  ): Promise<SfdxResponse> {
-    const url = `${baseUrl}${path}`;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  path: string,
+  body?: unknown,
+): Promise<SfdxResponse> {
+  const url = `${baseUrl}${path}`;
 
-    const res = await fetch(url, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+  console.log('[SFDX Request]', {
+    method,
+    url,
+    headers: {
+      ...headers,
+      'x-access-token': '***masked***',
+    },
+    body,
+  });
 
-    const data = (await res.json()) as SfdxResponse;
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
 
-    // Surface API-level errors as thrown errors so the agent
-    // receives a clear failure message via the tool result
-    if (!data.success) {
-      throw new Error(data.error ?? `SFDX API error on ${method} ${path}`);
-    }
+  console.log('[SFDX Response Status]', res.status, res.statusText);
 
-    return data;
+  // Read body ONCE as text
+  const rawText = await res.text();
+  console.log('[SFDX Raw Response]', rawText);
+
+  let data: SfdxResponse;
+  try {
+    data = JSON.parse(rawText) as SfdxResponse;
+  } catch {
+    throw new Error(`SFDX server returned non-JSON: ${rawText.slice(0, 200)}`);
   }
+
+  console.log('[SFDX Parsed]', data);
+
+  if (!data.success) {
+    throw new Error(data.error ?? `SFDX API error on ${method} ${path}`);
+  }
+
+  return data;
+}
 
   return { request };
 }
