@@ -33,7 +33,6 @@ sf org display --target-org MyOrgAlias
 - add access token button and run /project-setup and /fetch-latest after build toggle
 - implement end request 
 
-
 - implement save metadata after requests
 - implement metadata components section on the project details page
 - implement metadata library 
