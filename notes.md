@@ -28,6 +28,19 @@ sf org list
 
 sf org display --target-org MyOrgAlias
 
-fix the build tools issue on this bitch
+====================todo==============
+
+- add access token button and run /project-setup and /fetch-latest after build toggle
+- implement end request 
 
 
+- implement save metadata after requests
+- implement metadata components section on the project details page
+- implement metadata library 
+
+- build a landing page 
+- make the ui sexy 
+- add models
+
+=============done================
+- add feedback on tool calls and chain of actions and thought to chat interface
