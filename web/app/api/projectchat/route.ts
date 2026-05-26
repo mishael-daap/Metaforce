@@ -7,10 +7,7 @@ import {
 } from "ai";
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
-import {
-  getConversationForProject,
-  saveMessages,
-} from "@/lib/chat-store";
+import { getConversationForProject, saveMessages } from "@/lib/chat-store";
 import { getOptimizedContext } from "@/lib/conversationMemory";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
@@ -18,13 +15,13 @@ import { createRequirementTools } from "@/lib/tools/requirements";
 import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createSfdxTools } from "@/lib/sfdx/sfdx.index";
-
+import { setupProject, fetchLatest} from "@/lib/sfdx/project";
 
 const nim = createOpenAICompatible({
-  name: 'nim',
-  baseURL: 'https://integrate.api.nvidia.com/v1',
+  name: "nim",
+  baseURL: "https://integrate.api.nvidia.com/v1",
   headers: {
     Authorization: `Bearer ${process.env.NIM_API_KEY}`,
   },
@@ -32,18 +29,22 @@ const nim = createOpenAICompatible({
 
 export const maxDuration = 30;
 
-// const model = wrapLanguageModel({
-//   model: groq("openai/gpt-oss-120b"),
-//   middleware: devToolsMiddleware(),
-// });
+console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY)
+console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL)
 
 const model = wrapLanguageModel({
-  model: nim.chatModel('nvidia/nemotron-3-super-120b-a12b'),
+  model: nim.chatModel("nvidia/nemotron-3-super-120b-a12b"),
   middleware: devToolsMiddleware(),
 });
 
-async function handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext }) {
-  console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
+async function handlePlanMode({
+  messages,
+  projectId,
+  projectName,
+  projectDescription,
+  conversationId,
+  summaryContext,
+}) {
   const result = streamText({
     model,
     system: `${getRequirementsPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
@@ -55,30 +56,38 @@ async function handlePlanMode({ messages, projectId, projectName, projectDescrip
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ responseMessage, usage }) => {
+    onFinish: ({ responseMessage }) => {
       if (!conversationId) return;
-      console.log(`[request-tokens] conversationId=${conversationId}`, {
-        promptTokens: usage?.promptTokens,
-        completionTokens: usage?.completionTokens,
-        totalTokens: usage?.totalTokens,
-      });
-      console.log(" ai response message", responseMessage)
-      saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
+      saveMessages({ conversationId, messages: [responseMessage] }).catch(
+        console.error,
+      );
     },
   });
 }
 
-async function handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext }) {
-  console.log( process.env.SFDX_SERVER_URL!, process.env.SFDX_SERVER_API_KEY!,)
+async function handleBuildMode({
+  messages,
+  projectId,
+  projectName,
+  projectDescription,
+  conversationId,
+  summaryContext,
+}) {
+
+  if(!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
+    console.error("SFDX server configuration is missing");
+    return new Response("Internal Server Error: SFDX server not configured", { status: 500 });
+  }
+  
   const BuildTools = createSfdxTools({
-    baseUrl:  "http://localhost:8000",
-    apiKey: "password",
+    baseUrl: process.env.SFDX_SERVER_URL,
+    apiKey: process.env.SFDX_SERVER_API_KEY,
     projectId,
-    accessToken:"00DgK00000FEwjR!AQEAQLsnTH7jyAqyzdhWkUYXyUUOO61_1g7SQIakrM.5tRHJzDda99BxyJqPqr7lvIhr85g8ctAyJa1so3NWfj863Af_dcN6",
-    orgUrl:"https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",
+    accessToken:
+      "00DgK00000FEwjR!AQEAQLsnTH7jyAqyzdhWkUYXyUUOO61_1g7SQIakrM.5tRHJzDda99BxyJqPqr7lvIhr85g8ctAyJa1so3NWfj863Af_dcN6",
+    orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",
   });
 
-  console.log("messages", messages, "projectid", projectId, "projectName", projectName, "projectDescription", projectDescription, "conversation id", conversationId)
   const result = streamText({
     model,
     system: `${getBuildPlanPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
@@ -91,28 +100,23 @@ async function handleBuildMode({ messages, projectId, projectName, projectDescri
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
     onFinish: ({ responseMessage }) => {
-      if (!conversationId) return;
-      // console.log(`[request-tokens] conversationId=${conversationId}`, {
-      //   promptTokens: usage?.promptTokens,
-      //   completionTokens: usage?.completionTokens,
-      //   totalTokens: usage?.totalTokens,
-      // });
-      saveMessages({ conversationId, messages: [responseMessage] }).catch(console.error);
+      saveMessages({ conversationId, messages: [responseMessage] }).catch(
+        console.error,
+      );
     },
   });
 }
-
 
 export async function POST(req: Request) {
   const body = await req.json();
   const {
     messages: clientMessages,
     projectId,
-    mode
+    mode,
   }: {
     messages: UIMessage[];
     projectId?: string;
-    mode: string
+    mode: string;
   } = body;
 
   // Validate incoming data before touching the DB
@@ -138,12 +142,12 @@ export async function POST(req: Request) {
     const conversation = await getConversationForProject(projectId);
     if (conversation) {
       conversationId = conversation.id;
-      console.log("conversation id is", conversationId);
-      const { summaryContext: ctx, messages: optimizedMessages } = await getOptimizedContext({
-        conversationId: conversation.id,
-        summary: conversation.summary,
-        lastSummarizedIndex: conversation.last_summarized_index ?? 0,
-      });
+      const { summaryContext: ctx, messages: optimizedMessages } =
+        await getOptimizedContext({
+          conversationId: conversation.id,
+          summary: conversation.summary,
+          lastSummarizedIndex: conversation.last_summarized_index ?? 0,
+        });
       summaryContext = ctx;
       messages = [...optimizedMessages, newUserMessage];
     }
@@ -167,15 +171,42 @@ export async function POST(req: Request) {
   }
 
   if (conversationId) {
-    console.log("new user message is", newUserMessage)
     await saveMessages({ conversationId, messages: [newUserMessage] });
   }
 
-   if (mode === "plan") {
-    console.log("were in plan mode")
-    return handlePlanMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext });
+  if (mode === "plan") {
+
+    const setup = await setupProject(
+      projectId,
+      "00DgK00000FEwjR!AQEAQP_8CdiK6SAoorMB0oUNIayElCdIoTLdbpBx02DkeK62MnO1l6pfIdQG3EitklZ1JOfIzsUnF76xcdCJEG2vzSmUfgR8 ",
+      "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com "
+    );
+    console.log("this is setup", setup);
+
+    // const fetch = await fetchLatest(
+    //   projectId,
+    //   "00DgK00000FEwjR!AQEAQP_8CdiK6SAoorMB0oUNIayElCdIoTLdbpBx02DkeK62MnO1l6pfIdQG3EitklZ1JOfIzsUnF76xcdCJEG2vzSmUfgR8 ",
+    //   "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com "
+    // );
+    // console.log("this is fetch", fetch);
+
+    return handlePlanMode({
+      messages,
+      projectId,
+      projectName,
+      projectDescription,
+      conversationId,
+      summaryContext,
+    });
   } else if (mode === "build") {
-    return handleBuildMode({ messages, projectId, projectName, projectDescription, conversationId, summaryContext });
+    return handleBuildMode({
+      messages,
+      projectId,
+      projectName,
+      projectDescription,
+      conversationId,
+      summaryContext,
+    });
   } else {
     return new Response("Bad Request: unknown mode", { status: 400 });
   }

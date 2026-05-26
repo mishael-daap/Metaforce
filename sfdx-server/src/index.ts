@@ -10,6 +10,8 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const API_KEY = process.env.API_KEY || 'dev-api-key';
 
+console.log("process.env.API_KEY ", process.env.API_KEY)
+
 // Middleware
 app.use(express.json());
 

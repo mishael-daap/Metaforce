@@ -20,8 +20,6 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
   const accessToken = req.headers['x-access-token'];
   const orgUrl = req.headers['x-org-url'];
 
-  console.log("details from extract project context", projectId, accessToken, orgUrl)
-
   if (!projectId) {
     res.status(400).json({
       success: false,

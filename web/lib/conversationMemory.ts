@@ -29,18 +29,6 @@ Drop older less important details to make room for new ones.`,
     prompt: `Existing summary:\n${existingSummary ?? "None yet."}\n\nNew messages:\n${JSON.stringify(newMessages)}\n\nReturn updated summary now.`,
   });
 
-  console.log(`[summary-tokens] conversationId=${conversationId}`, {
-    model: "llama-3.1-8b-instant",
-    // promptTokens: usage?.promptTokens,
-    // completionTokens: usage?.completionTokens,
-    // totalTokens: usage?.totalTokens,
-    
-    // inputTokens: usage?.inputTokens,
-    // outputTokens: usage?.outputTokens,
-    // totalTokens: usage?.totalTokens,
-    
-  });
-
   return text;
 }
 
@@ -80,10 +68,6 @@ export async function getOptimizedContext({
       lastSummarizedIndex: oldMessageCount,
     });
 
-    console.log(
-      `[summary] updated for conversationId=${conversationId}`,
-      `lastSummarizedIndex=${oldMessageCount}`
-    );
   }
 
   const recentMessages = await loadRecentMessages(

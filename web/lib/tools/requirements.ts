@@ -3,7 +3,6 @@ import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 
 export function createRequirementTools(projectId: string) {
-  console.log("project id from prompt", projectId)
   return {
     createRequirement: tool({
       description:
