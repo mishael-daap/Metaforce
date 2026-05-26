@@ -12,6 +12,7 @@ import { RequirementsList } from "@/components/chat/requirements-list";
 import {Chat } from "./chat"
 import { useProjectName } from "@/hooks/use-project-name";
 import { useRequirements } from "@/hooks/use-requirements";
+import { cn } from "@/lib/utils";
 
 interface ProjectChatProps {
   projectId: string;
@@ -52,7 +53,15 @@ export default function ProjectChat({ projectId, initialMessages }: ProjectChatP
       </div>
 
       <ResizablePanelGroup orientation="horizontal" className="w-screen">
-        <ResizablePanel defaultSize="60%">
+        <ResizablePanel defaultSize="60%" className={cn(
+    "max-w-4xl max-h-[90vh] px-10",
+    "flex-1 overflow-y-auto",
+    "[&::-webkit-scrollbar]:w-2",
+    "[&::-webkit-scrollbar-track]:bg-transparent",
+    "[&::-webkit-scrollbar-thumb]:bg-border",
+    "[&::-webkit-scrollbar-thumb]:rounded-full",
+    "hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30",
+  )}>
           <Chat
             projectId={projectId}
             initialMessages={initialMessages}
@@ -62,10 +71,8 @@ export default function ProjectChat({ projectId, initialMessages }: ProjectChatP
           />
         </ResizablePanel>
 
-        <ResizableHandle className="bg-transparent" withHandle />
-
         {showPanel && (
-          <ResizablePanel className="pt-4 pr-4 pb-4 animate-in slide-in-from-right">
+          <ResizablePanel className="pt-4 px-4 pb-4 animate-in slide-in-from-right">
             <div className="h-full overflow-y-auto">
               {loading ? (
                 <div className="flex h-full items-center justify-center">
