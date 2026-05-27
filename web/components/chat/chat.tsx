@@ -38,7 +38,7 @@ import {
   ToolOutput,
 } from "@/src/components/ai-elements/tool";
 import { type ToolUIPart } from "ai";
-
+import {ConnectOrgDialog} from "@/components/chat/connect-org-dialog";
 interface ChatProps {
   projectId: string;
   initialMessages: UIMessage[];
@@ -55,6 +55,7 @@ export function Chat({
   setMode,
 }: ChatProps) {
   const [input, setInput] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
 
   const { messages, sendMessage, status } = useChat({
     id: projectId,
@@ -184,18 +185,25 @@ export function Chat({
           />
 
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMode(mode === "plan" ? "build" : "plan")}
-            className={cn(
-              "absolute bottom-1 left-1 h-7 px-2 rounded-full border transition-colors",
-              mode === "build"
-                ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-                : "border-border text-muted-foreground hover:bg-accent",
-            )}
-          >
-            <span className="text-xs capitalize">{mode}</span>
-          </Button>
+  variant="ghost"
+  size="sm"
+  onClick={() => {
+    if (mode === "plan") {
+      setShowDialog(true); // ← plan → build opens dialog
+    } else {
+      setMode("plan");     // ← build → plan switches instantly
+    }
+  }}
+  className={cn(
+    "absolute bottom-1 left-1 h-7 px-2 rounded-full border transition-colors",
+    mode === "build"
+      ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+      : "border-border text-muted-foreground hover:bg-accent",
+  )}
+>
+  <span className="text-xs capitalize">{mode}</span>
+</Button>
+      
 
           <PromptInputSubmit
             status={status === "streaming" ? "streaming" : "ready"}
@@ -203,6 +211,13 @@ export function Chat({
             className="absolute bottom-1 right-1"
           />
         </PromptInput>
+
+         <ConnectOrgDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        projectId={projectId}
+        onSuccess={() => setMode("build")}
+      />
       </div>
     </div>
   );

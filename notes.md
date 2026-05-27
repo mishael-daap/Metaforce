@@ -1,4 +1,5 @@
-things that should be on the dashboard 
+things that should be on the dashboard
+
 - models
 - metadata library
 
@@ -20,26 +21,27 @@ If you are fully in sync: It will state No files will be deployed.
 
 Notes on Source Tracking
 
-to pull from manifest 
+to pull from manifest
 
 sf project retrieve start --manifest manifest/package.xml --target-org MySandboxAlias
 
-sf org list 
+sf org list
 
 sf org display --target-org MyOrgAlias
 
 ====================todo==============
 
 - add access token button and run /project-setup and /fetch-latest after build toggle
-- implement end request 
+- implement end request
 
 - implement save metadata after requests
 - implement metadata components section on the project details page
-- implement metadata library 
+- implement metadata library
 
-- build a landing page 
-- make the ui sexy 
+- build a landing page
+- make the ui sexy
 - add models
 
 =============done================
+
 - add feedback on tool calls and chain of actions and thought to chat interface
