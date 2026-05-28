@@ -140,6 +140,7 @@ export interface SfdxClientConfig {
   baseUrl: string;
   apiKey: string;
   projectId: string;
-  accessToken: string;
-  orgUrl: string;
+  // Only required for project-setup/fetch-latest; build tools use projectId only
+  accessToken?: string;
+  orgUrl?: string;
 }

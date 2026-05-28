@@ -7,9 +7,15 @@ export function createClient(config: SfdxClientConfig) {
     'Content-Type': 'application/json',
     'x-api-key': apiKey,
     'x-project-id': projectId,
-    'x-access-token': accessToken,
-    'x-org-url': orgUrl,
   };
+
+  if (accessToken !== undefined) {
+    headers['x-access-token'] = accessToken;
+  }
+
+  if (orgUrl !== undefined) {
+    headers['x-org-url'] = orgUrl;
+  }
 
   async function request(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',

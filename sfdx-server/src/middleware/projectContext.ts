@@ -1,10 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
-import { access } from 'fs';
 
 export interface ProjectContext {
   projectId: string;
-  accessToken: string;
-  orgUrl: string;
 }
 
 declare global {
@@ -15,10 +12,8 @@ declare global {
   }
 }
 
-export function extractProjectContext(req: Request, res: Response, next: NextFunction) {
+export function extractProjectContext(req: Request, res:Response, next: NextFunction) {
   const projectId = req.headers['x-project-id'];
-  const accessToken = req.headers['x-access-token'];
-  const orgUrl = req.headers['x-org-url'];
 
   if (!projectId) {
     res.status(400).json({
@@ -29,28 +24,8 @@ export function extractProjectContext(req: Request, res: Response, next: NextFun
     return;
   }
 
-  if (!accessToken) {
-    res.status(400).json({
-      status: false,
-      error: 'Bad Request: x-access-token header is required',
-      components: []
-    });
-    return;
-  }
-
-  if (!orgUrl) {
-    res.status(400).json({
-      status: false,
-      error: 'Bad Request: x-org-url header is required',
-      components: []
-    });
-    return;
-  }
-
   req.projectContext = {
     projectId: String(projectId),
-    accessToken: String(accessToken),
-    orgUrl: String(orgUrl)
   };
 
   next();

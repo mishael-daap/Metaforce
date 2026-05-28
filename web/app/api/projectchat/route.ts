@@ -83,9 +83,7 @@ async function handleBuildMode({
     baseUrl: process.env.SFDX_SERVER_URL,
     apiKey: process.env.SFDX_SERVER_API_KEY,
     projectId,
-    accessToken:
-      "00DgK00000FEwjR!AQEAQLsnTH7jyAqyzdhWkUYXyUUOO61_1g7SQIakrM.5tRHJzDda99BxyJqPqr7lvIhr85g8ctAyJa1so3NWfj863Af_dcN6",
-    orgUrl: "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com",
+    // Build tools no longer need accessToken/orgUrl after the server refactor
   });
 
   const result = streamText({
