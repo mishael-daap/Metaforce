@@ -17,7 +17,6 @@ import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createSfdxTools } from "@/lib/sfdx/sfdx.index";
-import { setupProject, fetchLatest} from "@/lib/sfdx/project";
 
 const nim = createOpenAICompatible({
   name: "nim",
@@ -32,10 +31,20 @@ export const maxDuration = 30;
 console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY)
 console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL)
 
-const model = wrapLanguageModel({
-  model: nim.chatModel("nvidia/nemotron-3-super-120b-a12b"),
-  middleware: devToolsMiddleware(),
-});
+const baseModel = nim.chatModel("nvidia/nemotron-3-super-120b-a12b");
+
+const model = process.env.NODE_ENV === "development"
+  ? wrapLanguageModel({ model: baseModel, middleware: devToolsMiddleware() })
+  : baseModel;
+
+interface ModeHandlerParams {
+  messages: UIMessage[];
+  projectId: string;
+  projectName: string;
+  projectDescription: string;
+  conversationId: string | undefined;
+  summaryContext: string;
+}
 
 async function handlePlanMode({
   messages,
@@ -44,7 +53,7 @@ async function handlePlanMode({
   projectDescription,
   conversationId,
   summaryContext,
-}) {
+}: ModeHandlerParams) {
   const result = streamText({
     model,
     system: `${getRequirementsPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
@@ -72,7 +81,7 @@ async function handleBuildMode({
   projectDescription,
   conversationId,
   summaryContext,
-}) {
+}: ModeHandlerParams) {
 
   if(!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
     console.error("SFDX server configuration is missing");
@@ -97,10 +106,11 @@ async function handleBuildMode({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
     onFinish: ({ responseMessage }) => {
-      saveMessages({ conversationId, messages: [responseMessage] }).catch(
-        console.error,
-      );
-    },
+  if (!conversationId) return;
+  saveMessages({ conversationId, messages: [responseMessage] }).catch(
+    console.error,
+  );
+},
   });
 }
 
@@ -171,14 +181,13 @@ export async function POST(req: Request) {
     await saveMessages({ conversationId, messages: [newUserMessage] });
   }
 
+
+    if (!projectId) {
+  return new Response("Bad Request: missing projectId", { status: 400 });
+}
+
   if (mode === "plan") {
 
-    // const fetch = await fetchLatest(
-    //   projectId,
-    //   "00DgK00000FEwjR!AQEAQP_8CdiK6SAoorMB0oUNIayElCdIoTLdbpBx02DkeK62MnO1l6pfIdQG3EitklZ1JOfIzsUnF76xcdCJEG2vzSmUfgR8 ",
-    //   "https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com "
-    // );
-    // console.log("this is fetch", fetch);
 
     return handlePlanMode({
       messages,
