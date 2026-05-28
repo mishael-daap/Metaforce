@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
 
+console.log("what the fuck ")
+
 export function useProjectName(projectId: string) {
   const [projectName, setProjectName] = useState(projectId);
 
@@ -22,6 +24,8 @@ export function useProjectName(projectId: string) {
         console.error("Failed to fetch project name:", err);
       }
     };
+
+    console.log("data from project id in useProjectName", projectId);
 
     fetchProjectName();
   }, [projectId]);

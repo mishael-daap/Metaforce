@@ -10,9 +10,29 @@ const router = Router();
  */
 router.post('/project-setup', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const projectId = req.projectContext!.projectId;
+    const accessToken = req.headers['x-access-token'];
+    const orgUrl = req.headers['x-org-url'];
 
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
+    if (!accessToken) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-access-token header is required',
+        components: []
+      });
+      return;
+    }
+
+    if (!orgUrl) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-org-url header is required',
+        components: []
+      });
+      return;
+    }
+
+    const setupResult = await ensureProjectExists({ projectId, orgUrl: String(orgUrl), accessToken: String(accessToken) });
     if (!setupResult.success) {
       res.status(500).json({ success: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
       return;
@@ -31,7 +51,27 @@ router.post('/project-setup', async (req, res) => {
  */
 router.post('/fetch-latest', async (req, res) => {
   try {
-    const { projectId } = req.projectContext!;
+    const projectId = req.projectContext!.projectId;
+    const accessToken = req.headers['x-access-token'];
+    const orgUrl = req.headers['x-org-url'];
+
+    if (!accessToken) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-access-token header is required',
+        components: []
+      });
+      return;
+    }
+
+    if (!orgUrl) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-org-url header is required',
+        components: []
+      });
+      return;
+    }
 
     const retrieveResult = await retrieveMetadata(projectId);
     if (!retrieveResult.success) {

@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     );
 
     if (!fs.existsSync(projectPath)) {
-      res.json({ success: true, error: null, components: [] });
+      res.json({ success: false, error: "Project not found, run POST /project-setup to create it", components: [] });
       return;
     }
 
