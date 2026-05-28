@@ -31,13 +31,7 @@ router.post('/project-setup', async (req, res) => {
  */
 router.post('/fetch-latest', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
-
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
-    if (!setupResult.success) {
-      res.status(500).json({ success: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
+    const { projectId } = req.projectContext!;
 
     const retrieveResult = await retrieveMetadata(projectId);
     if (!retrieveResult.success) {
@@ -48,7 +42,7 @@ router.post('/fetch-latest', async (req, res) => {
     res.json({ success: true, error: null, components: [] });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ success: false, error: errorMessage, components: [] });
+    res.status(500).json({ success: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { ensureProjectExists } from '../../services/projectSetup.js';
 import { createCustomObject } from '../../services/customObject.js';
 import { deployMetadata } from '../../services/deploy.js';
 import { deleteMetadata } from '../../services/deleteMetadata.js';
@@ -14,13 +13,8 @@ const router = Router();
  */
 router.get('/', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
 
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
-    if (!setupResult.success) {
-      res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
 
     const projectPath = path.join(
       process.cwd(), 'projects', projectId,
@@ -45,7 +39,7 @@ router.get('/', async (req, res) => {
     res.json({ status: true, error: null, components: objects });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ status: false, error: errorMessage, components: [] });
+    res.status(500).json({ status: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 
@@ -55,14 +49,9 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const objectSpec: any = req.body;
 
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
-    if (!setupResult.success) {
-      res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
 
     const createResult = await createCustomObject(projectId, objectSpec);
     if (!createResult.success) {
@@ -87,7 +76,7 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ status: false, error: errorMessage, components: [] });
+    res.status(500).json({ status: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 
@@ -137,7 +126,7 @@ router.get('/:apiName', (req, res) => {
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ status: false, error: errorMessage, components: [] });
+    res.status(500).json({ status: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 
@@ -147,7 +136,7 @@ router.get('/:apiName', (req, res) => {
  */
 router.put('/:apiName', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const { apiName } = req.params;
     const objectSpec: any = req.body;
 
@@ -165,11 +154,6 @@ router.put('/:apiName', async (req, res) => {
       return;
     }
 
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
-    if (!setupResult.success) {
-      res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
 
     const objectMetaPath = path.join(
       process.cwd(), 'projects', projectId,
@@ -207,7 +191,7 @@ router.put('/:apiName', async (req, res) => {
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ status: false, error: errorMessage, components: [] });
+    res.status(500).json({ status: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 
@@ -217,14 +201,9 @@ router.put('/:apiName', async (req, res) => {
  */
 router.delete('/:apiName', async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const { apiName } = req.params;
 
-    const setupResult = await ensureProjectExists({ projectId, orgUrl, accessToken });
-    if (!setupResult.success) {
-      res.status(500).json({ status: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
-      return;
-    }
 
     const objectDir = path.join(
       process.cwd(), 'projects', projectId,
@@ -252,7 +231,7 @@ router.delete('/:apiName', async (req, res) => {
     res.json({ success: true, error: null, components: [{ fullName: apiName, type: 'CustomObject' }] });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    res.status(500).json({ status: false, error: errorMessage, components: [] });
+    res.status(500).json({ status: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
   }
 });
 

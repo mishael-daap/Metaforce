@@ -1,7 +1,7 @@
 const BASE_URL = 'http://localhost:8000';
 const API_KEY = 'password';
 const PROJECT_ID = 'tester-project-01';
-const ACCESS_TOKEN = '00DgK00000FEwjR!AQEAQNE4m1q4lnm_UEG0T7Fl65ROWfFX4yHB4tGs09qsX8aS15Xj5obSFU3FoMAFPMTMrZNoisXk_CnUlKoHDvUVnPgKxw42';
+const ACCESS_TOKEN = '00DgK00000FEwjR!AQEAQOxFSzGwg46wBGtjAAIX2d11IXp8LVrMQKlv4sRk20zqrjwfUUoayefFWncfCiFnJwuyiHOpXO2UrEu6WJn2Dsti6mHz';
 const ORG_URL = 'https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com';
 
 const headers: Record<string, string> = {
@@ -73,7 +73,13 @@ async function run() {
   // 1. Health check
   await request('Health Check', 'GET', '/health');
 
-  // 2. Create first custom object
+  // 2. Set up project (authenticate with Salesforce org)
+  await request('Project Setup', 'POST', '/metadata/project-setup');
+
+  // 3. Fetch latest metadata from org
+  await request('Fetch Latest', 'POST', '/metadata/fetch-latest');
+
+  // 4. Create first custom object
   await request('Create Object: TesterObj__c', 'POST', '/metadata/objects', {
     fullName: 'TesterObj__c',
     label: 'Tester Object',
@@ -85,7 +91,7 @@ async function run() {
     nameField: { label: 'Tester Obj Name', type: 'Text' },
   });
 
-  // 3. Create second custom object
+  // 5. Create second custom object
   await request('Create Object: SecondObj__c', 'POST', '/metadata/objects', {
     fullName: 'SecondObj__c',
     label: 'Second Object',
@@ -96,13 +102,13 @@ async function run() {
     nameField: { label: 'Second Obj Name', type: 'AutoNumber', displayFormat: 'SEC-{00000}' },
   });
 
-  // 4. List all objects
+  // 6. List all objects
   await request('List All Objects', 'GET', '/metadata/objects');
 
-  // 5. Get specific object
+  // 7. Get specific object
   await request('Get Object: TesterObj__c', 'GET', '/metadata/objects/TesterObj__c');
 
-  // 6. Create a Text field
+  // 8. Create a Text field
   await request('Create Field: Description__c on TesterObj__c', 'POST', '/metadata/fields', {
     objectName: 'TesterObj__c',
     field: {
@@ -114,7 +120,7 @@ async function run() {
     },
   });
 
-  // 7. Create a Number field
+  // 9. Create a Number field
   await request('Create Field: Score__c on TesterObj__c', 'POST', '/metadata/fields', {
     objectName: 'TesterObj__c',
     field: {
@@ -127,7 +133,7 @@ async function run() {
     },
   });
 
-  // 8. Create a Checkbox field on SecondObj__c
+  // 10. Create a Checkbox field on SecondObj__c
   await request('Create Field: Active__c on SecondObj__c', 'POST', '/metadata/fields', {
     objectName: 'SecondObj__c',
     field: {
@@ -138,10 +144,10 @@ async function run() {
     },
   });
 
-  // 9. Get object with its fields
+  // 11. Get object with its fields
   await request('Get Object with Fields: TesterObj__c', 'GET', '/metadata/objects/TesterObj__c');
 
-  // 10. Update the object (change description + enable reports)
+  // 12. Update the object (change description + enable reports)
   await request('Update Object: TesterObj__c', 'PUT', '/metadata/objects/TesterObj__c', {
     fullName: 'TesterObj__c',
     label: 'Tester Object',
@@ -154,7 +160,7 @@ async function run() {
     nameField: { label: 'Tester Obj Name', type: 'Text' },
   });
 
-  // 11. Update a field (change label + length)
+  // 13. Update a field (change label + length)
   await request('Update Field: Description__c on TesterObj__c', 'PUT', '/metadata/fields/TesterObj__c/Description__c', {
     field: {
       fullName: 'Description__c',
@@ -165,22 +171,22 @@ async function run() {
     },
   });
 
-  // 12. List all objects after updates
+  // 14. List all objects after updates
   await request('List All Objects (after updates)', 'GET', '/metadata/objects');
 
-  // 13. Delete a field from TesterObj__c
+  // 15. Delete a field from TesterObj__c
   await request('Delete Field: Score__c from TesterObj__c', 'DELETE', '/metadata/fields/TesterObj__c/Score__c');
 
-  // 14. Delete a field from SecondObj__c
+  // 16. Delete a field from SecondObj__c
   await request('Delete Field: Active__c from SecondObj__c', 'DELETE', '/metadata/fields/SecondObj__c/Active__c');
 
-  // 15. Delete TesterObj__c
+  // 17. Delete TesterObj__c
   await request('Delete Object: TesterObj__c', 'DELETE', '/metadata/objects/TesterObj__c');
 
-  // 16. Delete SecondObj__c
+  // 18. Delete SecondObj__c
   await request('Delete Object: SecondObj__c', 'DELETE', '/metadata/objects/SecondObj__c');
 
-  // 17. List all objects (should be empty)
+  // 19. List all objects (should be empty)
   await request('List All Objects (should be empty)', 'GET', '/metadata/objects');
 
   // ---- Summary ----

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { ensureProjectExists } from "../../services/projectSetup.js";
 import { createCustomField } from "../../services/customField.js";
 import { deployMetadata } from "../../services/deploy.js";
 import { deleteMetadata } from "../../services/deleteMetadata.js";
@@ -14,7 +13,7 @@ const router = Router();
  */
 router.post("/", async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const { objectName, field } = req.body;
 
     if (!objectName) {
@@ -35,19 +34,6 @@ router.post("/", async (req, res) => {
       return;
     }
 
-    const setupResult = await ensureProjectExists({
-      projectId,
-      orgUrl,
-      accessToken,
-    });
-    if (!setupResult.success) {
-      res.status(500).json({
-        status: false,
-        error: `Project setup failed: ${setupResult.error}`,
-        components: [],
-      });
-      return;
-    }
 
     const createResult = await createCustomField(projectId, objectName, field);
     if (!createResult.success) {
@@ -94,7 +80,7 @@ router.post("/", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage, components: [] });
+      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 
@@ -104,7 +90,7 @@ router.post("/", async (req, res) => {
  */
 router.put("/:objectName/:fieldName", async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const { objectName, fieldName } = req.params;
     const { field } = req.body;
 
@@ -126,19 +112,6 @@ router.put("/:objectName/:fieldName", async (req, res) => {
       return;
     }
 
-    const setupResult = await ensureProjectExists({
-      projectId,
-      orgUrl,
-      accessToken,
-    });
-    if (!setupResult.success) {
-      res.status(500).json({
-        status: false,
-        error: `Project setup failed: ${setupResult.error}`,
-        components: [],
-      });
-      return;
-    }
 
     const fieldFilePath = path.join(
       process.cwd(),
@@ -198,7 +171,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage, components: [] });
+      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 
@@ -208,22 +181,9 @@ router.put("/:objectName/:fieldName", async (req, res) => {
  */
 router.delete("/:objectName/:fieldName", async (req, res) => {
   try {
-    const { projectId, accessToken, orgUrl } = req.projectContext!;
+    const { projectId } = req.projectContext!;
     const { objectName, fieldName } = req.params;
 
-    const setupResult = await ensureProjectExists({
-      projectId,
-      orgUrl,
-      accessToken,
-    });
-    if (!setupResult.success) {
-      res.status(500).json({
-        status: false,
-        error: `Project setup failed: ${setupResult.error}`,
-        components: [],
-      });
-      return;
-    }
 
     const fieldFilePath = path.join(
       process.cwd(),
@@ -275,7 +235,7 @@ router.delete("/:objectName/:fieldName", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage, components: [] });
+      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 
