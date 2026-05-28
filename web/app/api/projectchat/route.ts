@@ -26,7 +26,7 @@ const nim = createOpenAICompatible({
   },
 });
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY)
 console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL)

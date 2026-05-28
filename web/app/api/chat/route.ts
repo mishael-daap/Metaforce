@@ -13,7 +13,7 @@ const nim = createOpenAICompatible({
 });
 
 // Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const baseModel = nim.chatModel("nvidia/nemotron-3-super-120b-a12b");
 
