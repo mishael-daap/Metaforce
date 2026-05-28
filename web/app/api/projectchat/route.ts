@@ -28,14 +28,15 @@ const nim = createOpenAICompatible({
 
 export const maxDuration = 60;
 
-console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY)
-console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL)
+console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY);
+console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL);
 
 const baseModel = nim.chatModel("nvidia/nemotron-3-super-120b-a12b");
 
-const model = process.env.NODE_ENV === "development"
-  ? wrapLanguageModel({ model: baseModel, middleware: devToolsMiddleware() })
-  : baseModel;
+const model =
+  process.env.NODE_ENV === "development"
+    ? wrapLanguageModel({ model: baseModel, middleware: devToolsMiddleware() })
+    : baseModel;
 
 interface ModeHandlerParams {
   messages: UIMessage[];
@@ -82,17 +83,25 @@ async function handleBuildMode({
   conversationId,
   summaryContext,
 }: ModeHandlerParams) {
-
-  if(!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
+  if (!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
     console.error("SFDX server configuration is missing");
-    return new Response("Internal Server Error: SFDX server not configured", { status: 500 });
+    return new Response("Internal Server Error: SFDX server not configured", {
+      status: 500,
+    });
   }
-  
-  const BuildTools = createSfdxTools({
-    baseUrl: process.env.SFDX_SERVER_URL,
-    apiKey: process.env.SFDX_SERVER_API_KEY,
-    projectId,
-  });
+
+  let BuildTools;
+  try {
+    BuildTools = createSfdxTools({
+      baseUrl: process.env.SFDX_SERVER_URL!,
+      apiKey: process.env.SFDX_SERVER_API_KEY!,
+      projectId,
+    });
+    console.log("[DEBUG] SFDX tools created successfully");
+  } catch (e) {
+    console.error("[DEBUG] Failed to create SFDX tools:", e);
+    throw e;
+  }
 
   const result = streamText({
     model,
@@ -105,17 +114,34 @@ async function handleBuildMode({
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-    onFinish: ({ responseMessage }) => {
-  if (!conversationId) return;
-  saveMessages({ conversationId, messages: [responseMessage] }).catch(
-    console.error,
-  );
-},
+    // More robust save pattern
+    onFinish: async ({ responseMessage }) => {
+      if (!conversationId) {
+        console.warn("[DEBUG] No conversationId, skipping save");
+        return;
+      }
+      try {
+        await saveMessages({ conversationId, messages: [responseMessage] });
+        console.log("[DEBUG] Assistant message saved");
+      } catch (err) {
+        console.error("[DEBUG] Failed to save assistant message:", err);
+      }
+    },
   });
 }
 
 export async function POST(req: Request) {
   const body = await req.json();
+
+  // At the very top of POST, log the environment state
+console.log("[DEBUG] Environment check:", {
+  hasSfdxKey: !!process.env.SFDX_SERVER_API_KEY,
+  hasSfdxUrl: !!process.env.SFDX_SERVER_URL,
+  nodeEnv: process.env.NODE_ENV,
+  projectId: body.projectId,
+  mode: body.mode,
+});
+
   const {
     messages: clientMessages,
     projectId,
@@ -181,14 +207,11 @@ export async function POST(req: Request) {
     await saveMessages({ conversationId, messages: [newUserMessage] });
   }
 
-
-    if (!projectId) {
-  return new Response("Bad Request: missing projectId", { status: 400 });
-}
+  if (!projectId) {
+    return new Response("Bad Request: missing projectId", { status: 400 });
+  }
 
   if (mode === "plan") {
-
-
     return handlePlanMode({
       messages,
       projectId,
