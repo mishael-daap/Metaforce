@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
 
-console.log("what the fuck ")
-
 export function useProjectName(projectId: string) {
   const [projectName, setProjectName] = useState(projectId);
 
