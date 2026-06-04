@@ -9,7 +9,7 @@ export async function GET(
   try {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -26,16 +26,7 @@ export async function GET(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Verify user owns this project
-    const userEmail = session.user.email;
-    const { data: user, error: userError } = await supabase
-      .schema("next_auth")
-      .from("users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !user || project.created_by !== user.id) {
+    if (project.created_by !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -51,12 +42,12 @@ export async function GET(
 
 export async function PUT(
   request: Request,
- { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -82,16 +73,7 @@ export async function PUT(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Verify user owns this project
-    const userEmail = session.user.email;
-    const { data: user, error: userError } = await supabase
-      .schema("next_auth")
-      .from("users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !user || project.created_by !== user.id) {
+    if (project.created_by !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -126,12 +108,12 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
- { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -148,16 +130,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Verify user owns this project
-    const userEmail = session.user.email;
-    const { data: user, error: userError } = await supabase
-      .schema("next_auth")
-      .from("users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !user || project.created_by !== user.id) {
+    if (project.created_by !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

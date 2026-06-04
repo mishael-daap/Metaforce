@@ -6,30 +6,14 @@ export async function GET() {
   try {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user email from session
-    const userEmail = session.user.email;
-
-    // Fetch user from database
-    const { data: user, error: userError } = await supabase
-      .schema("next_auth")
-      .from("users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Fetch projects created by this user
     const { data: projects, error: projectsError } = await supabase
       .from("projects")
       .select("*")
-      .eq("created_by", user.id)
+      .eq("created_by", session.user.id)
       .order("created_at", { ascending: false });
 
     if (projectsError) {
@@ -53,7 +37,7 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -74,28 +58,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user email from session
-    const userEmail = session.user.email;
-
-    // Fetch user from database
-    const { data: user, error: userError } = await supabase
-      .schema("next_auth")
-      .from("users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
     // Create project
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .insert({
         name: name.trim(),
         description: description?.trim() || null,
-        created_by: user.id,
+        created_by: session.user.id,
       })
       .select()
       .single();
