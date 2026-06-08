@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { MessageSquare, MoreVertical } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import {
   PromptInputMessage,
   PromptInput,
@@ -217,9 +217,9 @@ export function Chat({
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute bottom-1 left-[4.5rem] h-7 w-7 p-0 rounded-full border border-border text-muted-foreground hover:bg-accent"
+                className="absolute bottom-1 left-[4.5rem] h-7 px-2 rounded-full border border-border text-muted-foreground hover:bg-accent"
               >
-                <MoreVertical className="h-3.5 w-3.5" />
+                Actions
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
