@@ -27,7 +27,7 @@ export async function POST(
     // Verify project ownership
     const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("id",)
+      .select("id, created_by")
       .eq("id", projectId)
       .single();
 

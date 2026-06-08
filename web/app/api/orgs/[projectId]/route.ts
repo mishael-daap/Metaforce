@@ -17,7 +17,7 @@ export async function GET(
     // Verify project exists and caller owns it
     const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("id")
+      .select("id, created_by")
       .eq("id", projectId)
       .single();
 
