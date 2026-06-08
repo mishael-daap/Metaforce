@@ -7,6 +7,7 @@ import {
 } from "ai";
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
+import { auth } from "@/app/auth";
 import { getConversationForProject, saveMessages } from "@/lib/chat-store";
 import { getOptimizedContext } from "@/lib/conversationMemory";
 import type { UIMessage } from "ai";
@@ -57,7 +58,9 @@ async function handlePlanMode({
 }: ModeHandlerParams) {
   const result = streamText({
     model,
-    system: `${getRequirementsPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
+    system: `${getRequirementsPrompt(projectName, projectDescription)}${
+      summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""
+    }`,
     tools: { ...createRequirementTools(projectId) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -69,7 +72,7 @@ async function handlePlanMode({
     onFinish: ({ responseMessage }) => {
       if (!conversationId) return;
       saveMessages({ conversationId, messages: [responseMessage] }).catch(
-        console.error,
+        console.error
       );
     },
   });
@@ -85,9 +88,10 @@ async function handleBuildMode({
 }: ModeHandlerParams) {
   if (!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
     console.error("SFDX server configuration is missing");
-    return new Response("Internal Server Error: SFDX server not configured", {
-      status: 500,
-    });
+    return new Response(
+      "Internal Server Error: SFDX server not configured",
+      { status: 500 }
+    );
   }
 
   let BuildTools;
@@ -105,7 +109,9 @@ async function handleBuildMode({
 
   const result = streamText({
     model,
-    system: `${getBuildPlanPrompt(projectName, projectDescription)}${summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""}`,
+    system: `${getBuildPlanPrompt(projectName, projectDescription)}${
+      summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""
+    }`,
     tools: { ...createRequirementTools(projectId), ...BuildTools },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -134,21 +140,50 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   // At the very top of POST, log the environment state
-console.log("[DEBUG] Environment check:", {
-  hasSfdxKey: !!process.env.SFDX_SERVER_API_KEY,
-  hasSfdxUrl: !!process.env.SFDX_SERVER_URL,
-  nodeEnv: process.env.NODE_ENV,
-  projectId: body.projectId,
-  mode: body.mode,
-});
+  console.log("[DEBUG] Environment check:", {
+    hasSfdxKey: !!process.env.SFDX_SERVER_API_KEY,
+    hasSfdxUrl: !!process.env.SFDX_SERVER_URL,
+    nodeEnv: process.env.NODE_ENV,
+    projectId: body.projectId,
+    mode: body.mode,
+  });
+
+  // ── Ownership check ──────────────────────────────────────────
+  // Every other API route validates that the caller owns the project
+  // before touching any data. The chat route was missing this gate
+  // entirely — without it any authenticated user who guesses a
+  // projectId can read its conversation and trigger SFDX commands
+  // against its connected org.
+  const session = await auth();
+  if (!session?.user?.id) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const { projectId } = body;
+  if (!projectId) {
+    return new Response("Bad Request: missing projectId", { status: 400 });
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("id", projectId)
+    .single();
+
+  if (projectError || !project) {
+    return new Response("Project not found", { status: 404 });
+  }
+
+  if (project.created_by !== session.user.id) {
+    return new Response("Unauthorized", { status: 403 });
+  }
+  // ─────────────────────────────────────────────────────────────
 
   const {
     messages: clientMessages,
-    projectId,
     mode,
   }: {
     messages: UIMessage[];
-    projectId?: string;
     mode: string;
   } = body;
 
@@ -205,10 +240,6 @@ console.log("[DEBUG] Environment check:", {
 
   if (conversationId) {
     await saveMessages({ conversationId, messages: [newUserMessage] });
-  }
-
-  if (!projectId) {
-    return new Response("Bad Request: missing projectId", { status: 400 });
   }
 
   if (mode === "plan") {
