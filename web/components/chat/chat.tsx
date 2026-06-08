@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { MessageCircle } from "lucide-react";
+import { MessageSquare, MoreVertical } from "lucide-react";
 import {
   PromptInputMessage,
   PromptInput,
@@ -38,7 +38,16 @@ import {
   ToolOutput,
 } from "@/src/components/ai-elements/tool";
 import { type ToolUIPart } from "ai";
-import {ConnectOrgDialog} from "@/components/chat/connect-org-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ProjectSetupModal } from "@/components/chat/project-setup-modal";
+import { FetchLatestModal } from "@/components/chat/fetch-latest-modal";
+
 interface ChatProps {
   projectId: string;
   initialMessages: UIMessage[];
@@ -55,7 +64,8 @@ export function Chat({
   setMode,
 }: ChatProps) {
   const [input, setInput] = useState("");
-  const [showDialog, setShowDialog] = useState(false);
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [fetchModalOpen, setFetchModalOpen] = useState(false);
 
   const { messages, sendMessage, status } = useChat({
     id: projectId,
@@ -78,26 +88,29 @@ export function Chat({
     }
   };
 
+  const toggleMode = () => {
+    setMode((prev) => (prev === "plan" ? "build" : "plan"));
+  };
+
   return (
     <div className="flex flex-col">
       <Conversation className="flex-1 overflow-y-auto scrollbar-thin">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
-              icon={<MessageCircle className="size-12" />}
+              icon={<MessageSquare className="size-12" />}
               title="Start a conversation"
               description="Type a message below to begin chatting"
             />
           ) : (
             messages.map((message) => {
               const hasThinking = message.parts.some(
-                (p) => p.type === "reasoning" || p.type.startsWith("tool-"),
+                (p) => p.type === "reasoning" || p.type.startsWith("tool-")
               );
 
               return (
                 <Message from={message.role} key={message.id}>
                   <MessageContent>
-                    {/* ChainOfThought block — only rendered for assistant messages with tool calls or reasoning */}
                     {message.role === "assistant" && hasThinking && (
                       <ChainOfThought>
                         <ChainOfThoughtHeader>Thinking</ChainOfThoughtHeader>
@@ -107,7 +120,7 @@ export function Chat({
                               return (
                                 <ChainOfThoughtStep
                                   key={`${message.id}-${i}`}
-                                  label="Reasoning" // ← required prop
+                                  label="Reasoning"
                                 >
                                   {part.text}
                                 </ChainOfThoughtStep>
@@ -115,7 +128,6 @@ export function Chat({
                             }
 
                             if (part.type.startsWith("tool-")) {
-                              // Cast so TS knows this is a ToolUIPart
                               const toolPart = part as ToolUIPart;
                               return (
                                 <Tool key={`${message.id}-${i}`}>
@@ -129,12 +141,13 @@ export function Chat({
                                       output={
                                         toolPart.output ? (
                                           <MessageResponse>
-                                            {typeof toolPart.output === "string"
+                                            {typeof toolPart.output ===
+                                            "string"
                                               ? toolPart.output
                                               : JSON.stringify(
                                                   toolPart.output,
                                                   null,
-                                                  2,
+                                                  2
                                                 )}
                                           </MessageResponse>
                                         ) : undefined
@@ -152,7 +165,6 @@ export function Chat({
                       </ChainOfThought>
                     )}
 
-                    {/* Text parts — same as before */}
                     {message.parts.map((part, i) => {
                       switch (part.type) {
                         case "text":
@@ -184,26 +196,41 @@ export function Chat({
             onChange={(e) => setInput(e.currentTarget.value)}
           />
 
+          {/* Mode toggle button */}
           <Button
-  variant="ghost"
-  size="sm"
-  onClick={() => {
-    if (mode === "plan") {
-      setShowDialog(true); // ← plan → build opens dialog
-    } else {
-      setMode("plan");     // ← build → plan switches instantly
-    }
-  }}
-  className={cn(
-    "absolute bottom-1 left-1 h-7 px-2 rounded-full border transition-colors",
-    mode === "build"
-      ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-      : "border-border text-muted-foreground hover:bg-accent",
-  )}
->
-  <span className="text-xs capitalize">{mode}</span>
-</Button>
-      
+            variant="ghost"
+            size="sm"
+            onClick={toggleMode}
+            className={cn(
+              "absolute bottom-1 left-1 h-7 px-3 rounded-full border transition-colors",
+              mode === "build"
+                ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                : "border-border text-muted-foreground hover:bg-accent"
+            )}
+          >
+            <span className="text-xs capitalize">{mode}</span>
+          </Button>
+
+          {/* Actions dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute bottom-1 left-[4.5rem] h-7 w-7 p-0 rounded-full border border-border text-muted-foreground hover:bg-accent"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onSelect={() => setSetupModalOpen(true)}>
+                Project Setup
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setFetchModalOpen(true)}>
+                Fetch Latest
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <PromptInputSubmit
             status={status === "streaming" ? "streaming" : "ready"}
@@ -212,12 +239,16 @@ export function Chat({
           />
         </PromptInput>
 
-         <ConnectOrgDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
-        projectId={projectId}
-        onSuccess={() => setMode("build")}
-      />
+        <ProjectSetupModal
+          open={setupModalOpen}
+          onOpenChange={setSetupModalOpen}
+          projectId={projectId}
+        />
+        <FetchLatestModal
+          open={fetchModalOpen}
+          onOpenChange={setFetchModalOpen}
+          projectId={projectId}
+        />
       </div>
     </div>
   );
