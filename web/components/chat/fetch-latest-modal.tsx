@@ -34,7 +34,7 @@ export function FetchLatestModal({
   const [orgUrl, setOrgUrl] = useState("");
   const [username, setUsername] = useState("");
   const [phase, setPhase] = useState<Phase>("input");
-  const [steps] = useState<StepLog[]>([
+  const [steps, setSteps] = useState<StepLog[]>([
     { label: "Fetch Latest Metadata", status: "pending" },
   ]);
   const [error, setError] = useState<string | null>(null);
