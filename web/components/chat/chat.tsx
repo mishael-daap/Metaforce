@@ -196,13 +196,22 @@ export function Chat({
             onChange={(e) => setInput(e.currentTarget.value)}
           />
 
-          {/* Mode toggle button */}
+          <PromptInputSubmit
+            status={status === "streaming" ? "streaming" : "ready"}
+            disabled={!input.trim()}
+            className="absolute bottom-1 right-1"
+          />
+        </PromptInput>
+
+        {/* Controls row below input */}
+        <div className="flex items-center gap-2 mt-2 w-full max-w-2xl mx-auto">
+          {/* Mode toggle */}
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleMode}
             className={cn(
-              "absolute bottom-1 left-1 h-7 px-3 rounded-full border transition-colors",
+              "h-7 px-3 rounded-full border transition-colors",
               mode === "build"
                 ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
                 : "border-border text-muted-foreground hover:bg-accent"
@@ -217,7 +226,7 @@ export function Chat({
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute bottom-1 left-[4.5rem] h-7 px-2 rounded-full border border-border text-muted-foreground hover:bg-accent"
+                className="h-7 px-2 rounded-full border border-border text-muted-foreground hover:bg-accent"
               >
                 Actions
               </Button>
@@ -231,13 +240,7 @@ export function Chat({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <PromptInputSubmit
-            status={status === "streaming" ? "streaming" : "ready"}
-            disabled={!input.trim()}
-            className="absolute bottom-1 right-1"
-          />
-        </PromptInput>
+        </div>
 
         <ProjectSetupModal
           open={setupModalOpen}
