@@ -1,4 +1,3 @@
-import { groq } from "@ai-sdk/groq";
 import {
   streamText,
   convertToModelMessages,
@@ -8,8 +7,7 @@ import {
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import { auth } from "@/app/auth";
-import { getConversationForProject, saveMessages } from "@/lib/chat-store";
-import { getOptimizedContext } from "@/lib/conversationMemory";
+import { getConversationForProject, loadMessages, saveMessages } from "@/lib/chat-store";
 import type { UIMessage } from "ai";
 import { createRequirementTools } from "@/lib/tools/requirements";
 // import { createSfdxTools } from "@/lib/tools/sfdx";
@@ -29,9 +27,6 @@ const nim = createOpenAICompatible({
 
 export const maxDuration = 60;
 
-console.log("this is the sfdx server api key", process.env.SFDX_SERVER_API_KEY);
-console.log("this is the sfdx server url", process.env.SFDX_SERVER_URL);
-
 const baseModel = nim.chatModel("nvidia/nemotron-3-super-120b-a12b");
 
 const model =
@@ -45,7 +40,6 @@ interface ModeHandlerParams {
   projectName: string;
   projectDescription: string;
   conversationId: string | undefined;
-  summaryContext: string;
 }
 
 async function handlePlanMode({
@@ -54,13 +48,10 @@ async function handlePlanMode({
   projectName,
   projectDescription,
   conversationId,
-  summaryContext,
 }: ModeHandlerParams) {
   const result = streamText({
     model,
-    system: `${getRequirementsPrompt(projectName, projectDescription)}${
-      summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""
-    }`,
+    system: getRequirementsPrompt(projectName, projectDescription),
     tools: { ...createRequirementTools(projectId) },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -84,7 +75,6 @@ async function handleBuildMode({
   projectName,
   projectDescription,
   conversationId,
-  summaryContext,
 }: ModeHandlerParams) {
   if (!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
     console.error("SFDX server configuration is missing");
@@ -109,9 +99,7 @@ async function handleBuildMode({
 
   const result = streamText({
     model,
-    system: `${getBuildPlanPrompt(projectName, projectDescription)}${
-      summaryContext ? `\n## Conversation History Summary\n${summaryContext}` : ""
-    }`,
+    system: getBuildPlanPrompt(projectName, projectDescription),
     tools: { ...createRequirementTools(projectId), ...BuildTools },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
@@ -139,14 +127,10 @@ async function handleBuildMode({
 export async function POST(req: Request) {
   const body = await req.json();
 
-  // At the very top of POST, log the environment state
-  console.log("[DEBUG] Environment check:", {
-    hasSfdxKey: !!process.env.SFDX_SERVER_API_KEY,
-    hasSfdxUrl: !!process.env.SFDX_SERVER_URL,
-    nodeEnv: process.env.NODE_ENV,
-    projectId: body.projectId,
-    mode: body.mode,
-  });
+  const { projectId } = body;
+  if (!projectId) {
+    return new Response("Bad Request: missing projectId", { status: 400 });
+  }
 
   // ── Ownership check ──────────────────────────────────────────
   // Every other API route validates that the caller owns the project
@@ -157,11 +141,6 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
-  }
-
-  const { projectId } = body;
-  if (!projectId) {
-    return new Response("Bad Request: missing projectId", { status: 400 });
   }
 
   const { data: project, error: projectError } = await supabase
@@ -204,20 +183,11 @@ export async function POST(req: Request) {
   let projectName = "not provided";
   let projectDescription = "not provided";
 
-  let summaryContext = "";
-
   if (projectId) {
     const conversation = await getConversationForProject(projectId);
     if (conversation) {
       conversationId = conversation.id;
-      const { summaryContext: ctx, messages: optimizedMessages } =
-        await getOptimizedContext({
-          conversationId: conversation.id,
-          summary: conversation.summary,
-          lastSummarizedIndex: conversation.last_summarized_index ?? 0,
-        });
-      summaryContext = ctx;
-      messages = [...optimizedMessages, newUserMessage];
+      messages = (await loadMessages(conversation.id)).slice(-50);
     }
     // Fetch project details to enrich the prompt
     try {
@@ -249,7 +219,6 @@ export async function POST(req: Request) {
       projectName,
       projectDescription,
       conversationId,
-      summaryContext,
     });
   } else if (mode === "build") {
     return handleBuildMode({
@@ -258,7 +227,6 @@ export async function POST(req: Request) {
       projectName,
       projectDescription,
       conversationId,
-      summaryContext,
     });
   } else {
     return new Response("Bad Request: unknown mode", { status: 400 });
