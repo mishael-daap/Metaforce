@@ -8,9 +8,11 @@ import metadataRoutes from "./routes/metadata/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-const API_KEY = process.env.API_KEY || 'dev-api-key';
+const API_KEY = process.env.API_KEY;
 
-console.log("process.env.API_KEY ", process.env.API_KEY)
+if (!API_KEY) {
+  throw new Error("FATAL: API_KEY environment variable is not set. The server cannot start without it.");
+}
 
 // Middleware
 app.use(express.json());
@@ -50,5 +52,4 @@ app.use((err: any, req: express.Request, res: express.Response) => {
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`SFDX Server running on http://0.0.0.0:${PORT}`);
-  console.log(`API Key: ${API_KEY.substring(0, 4)}...${API_KEY.slice(-4)}`);
-});
+  });

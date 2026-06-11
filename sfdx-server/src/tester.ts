@@ -1,5 +1,9 @@
 const BASE_URL = 'http://localhost:8000';
-const API_KEY = 'password';
+const API_KEY = process.env.API_KEY;
+
+if (!API_KEY) {
+  throw new Error("FATAL: API_KEY environment variable is not set. Set it before running the tester.");
+}
 const PROJECT_ID = 'tester-project-01';
 const ACCESS_TOKEN = '00DgK00000FEwjR!AQEAQOxFSzGwg46wBGtjAAIX2d11IXp8LVrMQKlv4sRk20zqrjwfUUoayefFWncfCiFnJwuyiHOpXO2UrEu6WJn2Dsti6mHz';
 const ORG_URL = 'https://orgfarm-cf567c8e83-dev-ed.develop.my.salesforce.com';

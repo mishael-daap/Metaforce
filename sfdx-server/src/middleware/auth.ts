@@ -1,6 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
 
-const API_KEY = process.env.API_KEY || 'dev-api-key';
+const API_KEY = process.env.API_KEY;
+
+if (!API_KEY) {
+  throw new Error("FATAL: API_KEY environment variable is not set. The server cannot start without it.");
+}
 
 
 export function validateApiKey(req: Request, res: Response, next: NextFunction) {

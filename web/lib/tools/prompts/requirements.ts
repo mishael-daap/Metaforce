@@ -21,10 +21,11 @@ INSTRUCTIONS
       \`\`\`markdown
       ## [ObjectName] Object
       
-      | Field Name | Type | Description |
-      |------------|------|-------------|
-      | [Field 1]  | [type] | [description] |
-      | [Field 2]  | [type] | [description] |
+      | Field Name | Type   | Description   | Help Text                  |
+| ---------- | ------ | ------------- | -------------------------- |
+| [Field 1]  | [type] | [description] | [help text shown to users] |
+| [Field 2]  | [type] | [description] | [help text shown to users] |
+
       \`\`\`
       Status:      pending
 
