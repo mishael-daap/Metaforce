@@ -34,7 +34,7 @@ app.use('/metadata', metadataRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
-    status: false,
+    success: false,
     error: 'Not Found',
     components: []
   });
@@ -44,7 +44,7 @@ app.use((req, res) => {
 app.use((err: any, req: express.Request, res: express.Response) => {
   console.error('Server error:', err);
   res.status(500).json({
-    status: false,
+    success: false,
     error: 'Internal Server Error',
     components: []
   });

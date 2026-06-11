@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
 
     if (!objectName) {
       res.status(400).json({
-        status: false,
+        success: false,
         error: "objectName is required in request body",
         components: [],
       });
@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
 
     if (!field) {
       res.status(400).json({
-        status: false,
+        success: false,
         error: "field spec is required in request body",
         components: [],
       });
@@ -80,7 +80,7 @@ router.post("/", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
+      .json({ success: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 
@@ -96,7 +96,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
 
     if (!field || !field.fullName) {
       res.status(400).json({
-        status: false,
+        success: false,
         error: "field spec with fullName is required in request body",
         components: [],
       });
@@ -105,7 +105,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
 
     if (field.fullName !== fieldName) {
       res.status(400).json({
-        status: false,
+        success: false,
         error: `fullName in body ('${field.fullName}') must match URL param ('${fieldName}')`,
         components: [],
       });
@@ -127,7 +127,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
     );
     if (!fs.existsSync(fieldFilePath)) {
       res.status(404).json({
-        status: false,
+        success: false,
         error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'`,
         components: [],
       });
@@ -137,7 +137,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
     const createResult = await createCustomField(projectId, objectName, field);
     if (!createResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Field update failed: ${createResult.error}`,
         components: [],
       });
@@ -150,7 +150,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
     });
     if (!deployResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Deployment failed: ${deployResult.error}`,
         components: [
           { fullName: fieldName, type: "CustomField", xml: createResult.xml! },
@@ -171,7 +171,7 @@ router.put("/:objectName/:fieldName", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
+      .json({ success: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 
@@ -199,7 +199,7 @@ router.delete("/:objectName/:fieldName", async (req, res) => {
     );
     if (!fs.existsSync(fieldFilePath)) {
       res.status(404).json({
-        status: false,
+        success: false,
         error: `Custom field '${fieldName}' not found on object '${objectName}' in project '${projectId}'`,
         components: [],
       });
@@ -214,7 +214,7 @@ router.delete("/:objectName/:fieldName", async (req, res) => {
     });
     if (!deleteResult.success) {
       res.status(500).json({
-        status: false,
+        success: false,
         error: `Delete from org failed: ${deleteResult.error}`,
         components: [],
       });
@@ -235,7 +235,7 @@ router.delete("/:objectName/:fieldName", async (req, res) => {
       err instanceof Error ? err.message : "Unknown error occurred";
     res
       .status(500)
-      .json({ status: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
+      .json({ success: false, error: errorMessage + " Hint: Run POST /project-setup to set up and authenticate the project.", components: [] });
   }
 });
 

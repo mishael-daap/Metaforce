@@ -1,5 +1,7 @@
 const BASE_URL = 'http://localhost:8000';
-const API_KEY = process.env.API_KEY;
+const API_KEY = "password"
+  
+console.log("api key is", API_KEY)
 
 if (!API_KEY) {
   throw new Error("FATAL: API_KEY environment variable is not set. Set it before running the tester.");
