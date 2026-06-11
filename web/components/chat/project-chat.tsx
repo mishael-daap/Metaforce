@@ -19,9 +19,44 @@ interface ProjectChatProps {
   initialMessages: UIMessage[];
 }
 
+function usePersistedState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [state, setState] = useState<T>(defaultValue);
+
+  // Read from localStorage only on the client, after initial mount.
+  // This avoids SSR hydration mismatches: both server and client render
+  // the same defaultValue first, then the client applies stored value.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored !== null) {
+        setState(JSON.parse(stored) as T);
+      }
+    } catch {
+      // corrupt data or unavailable storage — keep default
+    }
+  }, [key]);
+
+  // Write to localStorage whenever state changes on the client.
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch {
+      // storage full or unavailable — silently fail
+    }
+  }, [key, state]);
+
+  return [state, setState];
+}
+
 export default function ProjectChat({ projectId, initialMessages }: ProjectChatProps) {
-  const [showPanel, setShowPanel] = useState(false);
-  const [mode, setMode] = useState<"plan" | "build">("plan");
+  const [showPanel, setShowPanel] = usePersistedState<boolean>(
+    `metaforce:${projectId}:showPanel`,
+    false
+  );
+  const [mode, setMode] = usePersistedState<"plan" | "build">(
+    `metaforce:${projectId}:mode`,
+    "plan"
+  );
 
   const projectName = useProjectName(projectId);
   const {
