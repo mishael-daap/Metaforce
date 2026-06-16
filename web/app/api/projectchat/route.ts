@@ -15,7 +15,8 @@ import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { createSfdxTools } from "@/lib/sfdx/sfdx.index";
+import { createSfdxJobTools } from "@/lib/sfdx/job-tools";
+import { createJobStatusTools } from "@/lib/tools/jobs";
 
 const nim = createOpenAICompatible({
   name: "nim",
@@ -82,32 +83,19 @@ async function handleBuildMode({
   projectDescription,
   conversationId,
 }: ModeHandlerParams) {
-  if (!process.env.SFDX_SERVER_API_KEY || !process.env.SFDX_SERVER_URL) {
-    console.error("[BuildMode] SFDX server not configured");
-    return new Response(
-      "Internal Server Error: SFDX server not configured",
-      { status: 500 }
-    );
-  }
-
-  let BuildTools;
-  try {
-    BuildTools = createSfdxTools({
-      baseUrl: process.env.SFDX_SERVER_URL!,
-      apiKey: process.env.SFDX_SERVER_API_KEY!,
-      projectId,
-    });
-  } catch (e) {
-    console.error("[BuildMode] Failed to create SFDX tools:", e);
-    throw e;
-  }
-
   console.log("[BuildMode] Starting streamText", { conversationId, messageCount: messages.length });
+
+  const sfdxJobTools = createSfdxJobTools(projectId);
+  const jobStatusTools = createJobStatusTools(projectId);
 
   const result = streamText({
     model,
     system: getBuildPlanPrompt(projectName, projectDescription),
-    tools: { ...createRequirementTools(projectId), ...BuildTools },
+    tools: {
+      ...createRequirementTools(projectId),
+      ...sfdxJobTools,
+      ...jobStatusTools,
+    },
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(50),
   });
