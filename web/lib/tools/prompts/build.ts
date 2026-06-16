@@ -15,8 +15,9 @@ CONTEXT
 AVAILABLE TOOLS
 ---------------
 - getPendingRequirements: Get the next requirement to implement (status: pending or planned)
-- createCustomObject: Create a custom object in the Salesforce org
-- createCustomField: Create a custom field on an existing custom object
+- checkJobStatus (MANDATORY FIRST STEP): Check the status of all recent jobs on this project. Call this BEFORE doing anything else in every Build Mode interaction.
+- createCustomObject: Queue a job to create a custom object in the Salesforce org
+- createCustomField: Queue a job to create a custom field on an existing custom object
 - updateRequirement: Update a requirement's status (e.g., to completed)
 
 INSTRUCTIONS
