@@ -4,6 +4,8 @@ dotenv.config();
 import { createClient } from '@supabase/supabase-js';
 import express from 'express';
 import { startPolling } from './worker/poller.js';
+import { ensureProjectExists } from './services/projectSetup.js';
+import { retrieveMetadata } from './services/retrieveMetadata.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -13,7 +15,7 @@ if (!API_KEY) {
   throw new Error("FATAL: API_KEY environment variable is not set. The server cannot start without it.");
 }
 
-// Supabase client for the worker
+// ── Supabase client for the worker ─────────────────────
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -32,22 +34,129 @@ if (supabase) {
   console.error('[Worker] Could not start polling loop - Supabase not configured');
 }
 
-// Minimal express server for health checks and existing endpoints
 app.use(express.json());
 
-// Health check
+// ── Middleware ─────────────────────────────────────────
+
+function validateApiKey(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey) {
+    res.status(401).json({
+      success: false,
+      error: 'Unauthorized: x-api-key header is required',
+      components: []
+    });
+    return;
+  }
+
+  if (apiKey !== API_KEY) {
+    res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Invalid API key',
+      components: []
+    });
+    return;
+  }
+
+  next();
+}
+
+function extractProjectContext(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const projectId = req.headers['x-project-id'];
+
+  if (!projectId) {
+    res.status(400).json({
+      success: false,
+      error: 'Bad Request: x-project-id header is required',
+      components: []
+    });
+    return;
+  }
+
+  (req as any).projectContext = {
+    projectId: String(projectId),
+  };
+
+  next();
+}
+
+// Apply auth + project context middleware for protected routes
+const protectedMiddleware = [validateApiKey, extractProjectContext];
+
+// ── Health check ───────────────────────────────────────
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Keep project-setup and fetch-latest endpoints (they work fine)
-app.post('/project-setup', async (req, res) => {
-  // Keep existing implementation or proxy to your existing route
-  res.json({ success: true, message: 'project-setup still supported' });
+// ── project-setup ──────────────────────────────────────
+/**
+ * POST /metadata/project-setup
+ * Ensures the SFDX project exists and the org is authenticated.
+ */
+app.post('/metadata/project-setup', ...protectedMiddleware, async (req, res) => {
+  try {
+    const projectId = (req as any).projectContext!.projectId;
+    const accessToken = req.headers['x-access-token'];
+    const orgUrl = req.headers['x-org-url'];
+
+    if (!accessToken) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-access-token header is required',
+        components: []
+      });
+      return;
+    }
+
+    if (!orgUrl) {
+      res.status(400).json({
+        success: false,
+        error: 'Bad Request: x-org-url header is required',
+        components: []
+      });
+      return;
+    }
+
+    const setupResult = await ensureProjectExists({
+      projectId,
+      orgUrl: String(orgUrl),
+      accessToken: String(accessToken)
+    });
+
+    if (!setupResult.success) {
+      res.status(500).json({ success: false, error: `Project setup failed: ${setupResult.error}`, components: [] });
+      return;
+    }
+
+    res.json({ success: true, error: null, components: [] });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    res.status(500).json({ success: false, error: errorMessage, components: [] });
+  }
 });
 
-app.post('/fetch-latest', async (req, res) => {
-  res.json({ success: true, message: 'fetch-latest still supported' });
+// ── fetch-latest ──────────────────────────────────────
+/**
+ * POST /metadata/fetch-latest
+ * Retrieves the latest metadata from the org and syncs the local project.
+ */
+app.post('/metadata/fetch-latest', ...protectedMiddleware, async (req, res) => {
+  try {
+    const projectId = (req as any).projectContext!.projectId;
+
+    const retrieveResult = await retrieveMetadata(projectId);
+    if (!retrieveResult.success) {
+      res.status(500).json({ success: false, error: `Retrieve failed: ${retrieveResult.error}`, components: [] });
+      return;
+    }
+
+    res.json({ success: true, error: null, components: [] });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    res.status(500).json({ success: false, error: errorMessage + ' Hint: Run POST /project-setup to set up and authenticate the project.', components: [] });
+  }
 });
 
 app.listen(Number(PORT), '0.0.0.0', () => {
