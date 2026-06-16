@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 import express from 'express';
 import { startPolling } from './worker/poller.js';
 import { ensureProjectExists } from './services/projectSetup.js';
@@ -24,7 +25,9 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 const supabase = SUPABASE_URL && SUPABASE_SERVICE_KEY
-  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      realtime: { transport: WebSocket as any },
+    })
   : null;
 
 if (supabase) {
