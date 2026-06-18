@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { MessageSquare } from "lucide-react";
 import {
   PromptInputMessage,
@@ -67,7 +67,7 @@ export function Chat({
   const [setupModalOpen, setSetupModalOpen] = useState(false);
   const [fetchModalOpen, setFetchModalOpen] = useState(false);
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, addToolOutput, status } = useChat({
     id: projectId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -76,8 +76,40 @@ export function Chat({
         return { body: { messages, projectId: id, ...body } };
       },
     }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onFinish: async ({ messages: finalMessages }) => {
       onFinish?.(finalMessages);
+    },
+    async onToolCall({ toolCall }) {
+      if (toolCall.dynamic) return;
+
+      const response = await fetch("/api/tools", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolName: toolCall.toolName,
+          input: toolCall.input,
+          projectId,
+        }),
+      });
+
+      if (!response.ok) {
+        addToolOutput({
+          tool: toolCall.toolName,
+          toolCallId: toolCall.toolCallId,
+          state: "output-error",
+          errorText: `Tool execution failed: ${await response.text()}`,
+        });
+        return;
+      }
+
+      const result = await response.json();
+
+      addToolOutput({
+        tool: toolCall.toolName,
+        toolCallId: toolCall.toolCallId,
+        output: result,
+      });
     },
   });
 

@@ -2,21 +2,19 @@ import {
   streamText,
   convertToModelMessages,
   createIdGenerator,
-  stepCountIs,
 } from "ai";
 import { wrapLanguageModel } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import { auth } from "@/app/auth";
 import { getConversationForProject, loadMessages, saveMessages } from "@/lib/chat-store";
 import type { UIMessage } from "ai";
-import { createRequirementTools } from "@/lib/tools/requirements";
-// import { createSfdxTools } from "@/lib/tools/sfdx";
+import { requirementToolSchemas } from "@/lib/tools/schemas/requirements";
+import { sfdxToolSchemas } from "@/lib/tools/schemas/sfdx";
+import { jobStatusToolSchema } from "@/lib/tools/schemas/jobs";
 import { getRequirementsPrompt } from "@/lib/tools/prompts/requirements";
 import { getBuildPlanPrompt } from "@/lib/tools/prompts/build";
 import { supabase } from "@/lib/supabase";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { createSfdxJobTools } from "@/lib/sfdx/job-tools";
-import { createJobStatusTools } from "@/lib/tools/jobs";
 
 const nim = createOpenAICompatible({
   name: "nim",
@@ -55,9 +53,8 @@ async function handlePlanMode({
   const result = streamText({
     model,
     system: getRequirementsPrompt(projectName, projectDescription),
-    tools: { ...createRequirementTools(projectId) },
+    tools: { ...requirementToolSchemas() },
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(50),
   });
 
   return result.toUIMessageStreamResponse({
@@ -85,19 +82,15 @@ async function handleBuildMode({
 }: ModeHandlerParams) {
   console.log("[BuildMode] Starting streamText", { conversationId, messageCount: messages.length });
 
-  const sfdxJobTools = createSfdxJobTools(projectId);
-  const jobStatusTools = createJobStatusTools(projectId);
-
   const result = streamText({
     model,
     system: getBuildPlanPrompt(projectName, projectDescription),
     tools: {
-      ...createRequirementTools(projectId),
-      ...sfdxJobTools,
-      ...jobStatusTools,
+      ...requirementToolSchemas(),
+      ...sfdxToolSchemas(),
+      ...jobStatusToolSchema(),
     },
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(50),
   });
 
   return result.toUIMessageStreamResponse({
