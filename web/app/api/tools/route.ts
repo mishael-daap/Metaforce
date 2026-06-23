@@ -8,7 +8,7 @@ import {
   deleteRequirement,
   getPendingRequirements,
 } from "@/lib/tools/executors/requirements";
-import { checkJobStatus } from "@/lib/tools/executors/jobs";
+import { checkJobStatus, getJobsByRequirementId } from "@/lib/tools/executors/jobs";
 import {
   queueCreateObjectJob,
   queueUpdateObjectJob,
@@ -78,6 +78,9 @@ export async function POST(req: Request) {
         break;
       case "checkJobStatus":
         result = await checkJobStatus(projectId);
+        break;
+      case "getJobsByRequirementId":
+        result = await getJobsByRequirementId(projectId, input?.requirementId);
         break;
       case "createObject":
         result = await queueCreateObjectJob(projectId, input);

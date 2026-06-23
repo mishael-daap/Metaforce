@@ -509,6 +509,9 @@ export type PromptInputProps = Omit<
     message: PromptInputMessage,
     event: FormEvent<HTMLFormElement>
   ) => void | Promise<void>;
+  /** Rendered outside of the InputGroup but still inside the form. Use for
+   *  buttons that should remain interactive even when the form is disabled. */
+  footer?: ReactNode;
 };
 
 export const PromptInput = ({
@@ -522,6 +525,7 @@ export const PromptInput = ({
   onError,
   onSubmit,
   children,
+  footer,
   ...props
 }: PromptInputProps) => {
   // Try to use a provider controller if present
@@ -922,6 +926,7 @@ export const PromptInput = ({
         {...props}
       >
         <InputGroup className="overflow-hidden">{children}</InputGroup>
+        {footer}
       </form>
     </>
   );

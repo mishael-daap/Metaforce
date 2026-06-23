@@ -67,7 +67,7 @@ export function Chat({
   const [setupModalOpen, setSetupModalOpen] = useState(false);
   const [fetchModalOpen, setFetchModalOpen] = useState(false);
 
-  const { messages, sendMessage, addToolOutput, status } = useChat({
+  const { messages, sendMessage, addToolOutput, status, stop } = useChat({
     id: projectId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -113,7 +113,10 @@ export function Chat({
     },
   });
 
+  const isGenerating = status === "submitted" || status === "streaming";
+
   const handleSubmit = (message: PromptInputMessage) => {
+    if (isGenerating) return;
     if (message.text.trim()) {
       sendMessage({ text: message.text }, { body: { projectId, mode } });
       setInput("");
@@ -221,17 +224,20 @@ export function Chat({
         <PromptInput
           onSubmit={handleSubmit}
           className="w-full max-w-2xl mx-auto"
+          footer={
+            <PromptInputSubmit
+              status={isGenerating ? status : "ready"}
+              onStop={stop}
+              disabled={!isGenerating && !input.trim()}
+              className="absolute bottom-1 right-1"
+            />
+          }
         >
           <PromptInputTextarea
             value={input}
             placeholder="What are you working on?"
             onChange={(e) => setInput(e.currentTarget.value)}
-          />
-
-          <PromptInputSubmit
-            status={status === "streaming" ? "streaming" : "ready"}
-            disabled={!input.trim()}
-            className="absolute bottom-1 right-1"
+            disabled={isGenerating}
           />
         </PromptInput>
 
