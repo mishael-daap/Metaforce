@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { MessageSquare } from "lucide-react";
@@ -113,7 +113,20 @@ export function Chat({
     },
   });
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
+
   const isGenerating = status === "submitted" || status === "streaming";
+
+  // Show loading dots until the assistant produces its first thinking part
+  const lastAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant");
+  const hasThinkingStarted = lastAssistantMessage?.parts.some(
+    (p) => p.type === "reasoning" || p.type.startsWith("tool-")
+  );
+  const showLoading = isGenerating && !hasThinkingStarted;
 
   const handleSubmit = (message: PromptInputMessage) => {
     if (isGenerating) return;
@@ -138,85 +151,110 @@ export function Chat({
               description="Type a message below to begin chatting"
             />
           ) : (
-            messages.map((message) => {
-              const hasThinking = message.parts.some(
-                (p) => p.type === "reasoning" || p.type.startsWith("tool-")
-              );
+            <>
+              {messages.map((message) => {
+                const hasThinking = message.parts.some(
+                  (p) => p.type === "reasoning" || p.type.startsWith("tool-")
+                );
 
-              return (
-                <Message from={message.role} key={message.id}>
-                  <MessageContent>
-                    {message.role === "assistant" && hasThinking && (
-                      <ChainOfThought>
-                        <ChainOfThoughtHeader>Thinking</ChainOfThoughtHeader>
-                        <ChainOfThoughtContent>
-                          {message.parts.map((part, i) => {
-                            if (part.type === "reasoning") {
-                              return (
-                                <ChainOfThoughtStep
-                                  key={`${message.id}-${i}`}
-                                  label="Reasoning"
-                                >
-                                  {part.text}
-                                </ChainOfThoughtStep>
-                              );
-                            }
+                return (
+                  <Message from={message.role} key={message.id}>
+                    <MessageContent>
+                      {message.role === "assistant" && hasThinking && (
+                        <ChainOfThought>
+                          <ChainOfThoughtHeader>Thinking</ChainOfThoughtHeader>
+                          <ChainOfThoughtContent>
+                            {message.parts.map((part, i) => {
+                              if (part.type === "reasoning") {
+                                return (
+                                  <ChainOfThoughtStep
+                                    key={`${message.id}-${i}`}
+                                    label="Reasoning"
+                                  >
+                                    {part.text}
+                                  </ChainOfThoughtStep>
+                                );
+                              }
 
-                            if (part.type.startsWith("tool-")) {
-                              const toolPart = part as ToolUIPart;
-                              return (
-                                <Tool key={`${message.id}-${i}`}>
-                                  <ToolHeader
-                                    type={toolPart.type}
-                                    state={toolPart.state}
-                                  />
-                                  <ToolContent>
-                                    <ToolInput input={toolPart.input} />
-                                    <ToolOutput
-                                      output={
-                                        toolPart.output ? (
-                                          <MessageResponse>
-                                            {typeof toolPart.output ===
-                                            "string"
-                                              ? toolPart.output
-                                              : JSON.stringify(
-                                                  toolPart.output,
-                                                  null,
-                                                  2
-                                                )}
-                                          </MessageResponse>
-                                        ) : undefined
-                                      }
-                                      errorText={toolPart.errorText}
+                              if (part.type.startsWith("tool-")) {
+                                const toolPart = part as ToolUIPart;
+                                return (
+                                  <Tool key={`${message.id}-${i}`}>
+                                    <ToolHeader
+                                      type={toolPart.type}
+                                      state={toolPart.state}
                                     />
-                                  </ToolContent>
-                                </Tool>
-                              );
-                            }
+                                    <ToolContent>
+                                      <ToolInput input={toolPart.input} />
+                                      <ToolOutput
+                                        output={
+                                          toolPart.output ? (
+                                            <MessageResponse>
+                                              {typeof toolPart.output ===
+                                              "string"
+                                                ? toolPart.output
+                                                : JSON.stringify(
+                                                    toolPart.output,
+                                                    null,
+                                                    2
+                                                  )}
+                                            </MessageResponse>
+                                          ) : undefined
+                                        }
+                                        errorText={toolPart.errorText}
+                                      />
+                                    </ToolContent>
+                                  </Tool>
+                                );
+                              }
 
+                              return null;
+                            })}
+                          </ChainOfThoughtContent>
+                        </ChainOfThought>
+                      )}
+
+                      {message.parts.map((part, i) => {
+                        switch (part.type) {
+                          case "text":
+                            return (
+                              <MessageResponse key={`${message.id}-${i}`}>
+                                {part.text}
+                              </MessageResponse>
+                            );
+                          default:
                             return null;
-                          })}
-                        </ChainOfThoughtContent>
-                      </ChainOfThought>
-                    )}
+                        }
+                      })}
+                    </MessageContent>
+                  </Message>
+                );
+              })}
 
-                    {message.parts.map((part, i) => {
-                      switch (part.type) {
-                        case "text":
-                          return (
-                            <MessageResponse key={`${message.id}-${i}`}>
-                              {part.text}
-                            </MessageResponse>
-                          );
-                        default:
-                          return null;
-                      }
-                    })}
+              {/* Loading indicator — shown until first thinking part arrives */}
+              {showLoading && (
+                <Message from="assistant" key="loading-indicator">
+                  <MessageContent>
+                    <div className="flex items-center gap-1.5 py-3">
+                      <span
+                        className="size-2 rounded-full bg-muted-foreground/60 animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      />
+                      <span
+                        className="size-2 rounded-full bg-muted-foreground/60 animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      />
+                      <span
+                        className="size-2 rounded-full bg-muted-foreground/60 animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      />
+                    </div>
                   </MessageContent>
                 </Message>
-              );
-            })
+              )}
+            </>
           )}
+          <div ref={bottomRef} />
         </ConversationContent>
       </Conversation>
 
