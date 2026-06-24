@@ -14,15 +14,9 @@ const openSansOpenSans = Open_Sans({subsets:['latin'],weight:['300','400','500',
 import { SessionProvider } from "next-auth/react";
 import { auth } from "./auth";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistGeist = Geist({subsets:['latin'],weight:['100','200','300','400','500','600','700','800','900'],variable:'--font-geist'});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMonoGeistMono = Geist_Mono({subsets:['latin'],weight:['100','200','300','400','500','600','700','800','900'],variable:'--font-geist-mono'});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -38,7 +32,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
+      className={cn("h-full", "antialiased", geistGeist.variable, geistMonoGeistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
     >
       {/* <body className="min-h-full flex flex-col"><TooltipProvider>{children}</TooltipProvider></body> */}
       <body>

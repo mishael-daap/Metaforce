@@ -9,6 +9,9 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
+  PromptInputProvider,
+  PromptInputBody,
+  PromptInputFooter
 } from "@/src/components/ai-elements/prompt-input";
 import {
   Conversation,
@@ -259,27 +262,23 @@ export function Chat({
       </Conversation>
 
       <div className="sticky bottom-0 bg-background p-4">
-        <PromptInput
+        <PromptInputProvider>
+          <PromptInput
           onSubmit={handleSubmit}
-          className="w-full max-w-2xl mx-auto"
-          footer={
-            <PromptInputSubmit
-              status={isGenerating ? status : "ready"}
-              onStop={stop}
-              disabled={!isGenerating && !input.trim()}
-              className="absolute bottom-1 right-1"
-            />
-          }
+          className="w-full max-w-2xl mx-auto "
         >
-          <PromptInputTextarea
+          <PromptInputBody>
+            <PromptInputTextarea
             value={input}
             placeholder="What are you working on?"
             onChange={(e) => setInput(e.currentTarget.value)}
             disabled={isGenerating}
           />
-        </PromptInput>
+          </PromptInputBody>
 
-        {/* Controls row below input */}
+          <PromptInputFooter>
+
+            {/* Controls row below input */}
         <div className="flex items-center gap-2 mt-2 w-full max-w-2xl mx-auto">
           {/* Mode toggle */}
           <Button
@@ -317,6 +316,19 @@ export function Chat({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        
+            <PromptInputSubmit
+              status={isGenerating ? status : "ready"}
+              onStop={stop}
+              disabled={!isGenerating && !input.trim()}
+              // className="absolute bottom-1 right-1"
+            />
+          </PromptInputFooter>
+        </PromptInput>
+        </PromptInputProvider>
+
+        
 
         <ProjectSetupModal
           open={setupModalOpen}
