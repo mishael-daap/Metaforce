@@ -9,24 +9,27 @@ import {
   SidebarInset,
   SidebarHeader,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Folder, User, PanelLeft } from "lucide-react";
+import { Folder, LogOut, PanelLeft } from "lucide-react";
 import StaticLoader from "@/components/ui/logo-static";
+import { signOut, useSession } from "next-auth/react";
 
 const navigation = [
   { name: "Projects", href: "/dashboard/projects", icon: Folder },
-  { name: "User Profile", href: "/dashboard/profile", icon: User },
 ];
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { toggleSidebar, state } = useSidebar(); // ← use shadcn's own state
+  const { toggleSidebar, state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <>
@@ -107,6 +110,58 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
+
+        <SidebarFooter className="border-t">
+          <div
+            className={cn(
+              "flex items-center p-2",
+              isCollapsed ? "justify-center" : "justify-between gap-2",
+            )}
+          >
+            {user?.image ? (
+              <img
+                src={user.image}
+                alt={user.name ?? "User avatar"}
+                className={cn(
+                  "rounded-full object-cover",
+                  isCollapsed ? "h-7 w-7" : "h-8 w-8",
+                )}
+              />
+            ) : (
+              <div
+                className={cn(
+                  "rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-medium",
+                  isCollapsed ? "h-7 w-7 text-xs" : "h-8 w-8 text-sm",
+                )}
+              >
+                {user?.name?.charAt(0).toUpperCase() ??
+                  user?.email?.charAt(0).toUpperCase() ??
+                  "U"}
+              </div>
+            )}
+
+            {!isCollapsed && (
+              <div className="flex min-w-0 flex-1 flex-col ml-2">
+                <span className="text-sm font-medium truncate">
+                  {user?.name ?? "User"}
+                </span>
+                <span className="text-xs text-muted-foreground truncate">
+                  {user?.email}
+                </span>
+              </div>
+            )}
+
+            {!isCollapsed && (
+              <button
+                onClick={() => signOut({ callbackUrl: "/signin" })}
+                className="p-2 rounded hover:bg-sidebar-accent text-muted-foreground hover:text-sidebar-foreground"
+                aria-label="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </SidebarFooter>
       </Sidebar>
 
       <SidebarInset className="flex-1 overflow-auto">{children}</SidebarInset>
