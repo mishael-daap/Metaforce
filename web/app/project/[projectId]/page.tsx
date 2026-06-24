@@ -1,5 +1,10 @@
+import { Metadata } from "next";
 import { getConversationForProject, createConversation, loadMessages } from "@/lib/chat-store";
 import ProjectChat from "@/components/chat/project-chat"
+
+export const metadata: Metadata = {
+  title: "Project",
+};
 
 export default async function ProjectChatPage({
   params,
