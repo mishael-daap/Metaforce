@@ -16,6 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Folder, User, PanelLeft } from "lucide-react";
+import StaticLoader from "@/components/ui/logo-static";
 
 const navigation = [
   { name: "Projects", href: "/dashboard/projects", icon: Folder },
@@ -44,14 +45,14 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
                 className="p-1 rounded hover:bg-sidebar-accent"
                 aria-label="Open sidebar"
               >
-                <PanelLeft className="h-4 w-4 rotate-180" />
+                <StaticLoader className="h-7 w-7" />
               </button>
             </div>
           ) : (
             // Expanded: logo + name on left, toggle on right
             <div className="flex h-16 items-center justify-between px-3">
               <div className="flex items-center gap-2">
-                <Folder className="h-5 w-5 shrink-0" />
+                <StaticLoader className="h-7 w-7 shrink-0" />
                 <span className="font-semibold">Metaforce</span>
               </div>
               <button

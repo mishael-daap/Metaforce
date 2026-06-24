@@ -6,6 +6,7 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
+
 import { MessageSquare } from "lucide-react";
 import {
   PromptInputMessage,
@@ -53,7 +54,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProjectSetupModal } from "@/components/chat/project-setup-modal";
 import { FetchLatestModal } from "@/components/chat/fetch-latest-modal";
-import StaticLoader from "../ui/logo-static";
+
 interface ChatProps {
   projectId: string;
   initialMessages: UIMessage[];
@@ -264,7 +265,6 @@ export function Chat({
           )}
           <div ref={bottomRef} />
         </ConversationContent>
-        <StaticLoader className="h-10 w-10"/>
       </Conversation>
 
       <div className="sticky bottom-0 bg-background p-4">

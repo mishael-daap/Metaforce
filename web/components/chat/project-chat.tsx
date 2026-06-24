@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { UIMessage } from "@ai-sdk/react";
-import { File } from "lucide-react";
+import { PanelRight } from "lucide-react";
+import StaticLoader from "@/components/ui/logo-static";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -80,8 +81,11 @@ export default function ProjectChat({ projectId, initialMessages }: ProjectChatP
   return (
     <div className="h-screen flex flex-col p-4 overflow-hidden">
       <div className="flex justify-between items-center">
-        <div className="text-lg font-medium">{projectName}</div>
-        <File
+        <div className="flex items-center gap-2 text-lg font-medium">
+          <StaticLoader className="h-7 w-7" />
+          {projectName}
+        </div>
+        <PanelRight
           className="cursor-pointer"
           onClick={() => setShowPanel((prev) => !prev)}
         />
