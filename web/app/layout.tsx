@@ -32,7 +32,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistGeist.variable, geistMonoGeistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
+      className={cn("h-full dark", "antialiased", geistGeist.variable, geistMonoGeistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
     >
       {/* <body className="min-h-full flex flex-col"><TooltipProvider>{children}</TooltipProvider></body> */}
       <body>

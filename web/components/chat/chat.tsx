@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { UIMessage, useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
 import { MessageSquare } from "lucide-react";
 import {
   PromptInputMessage,
@@ -11,7 +14,7 @@ import {
   PromptInputSubmit,
   PromptInputProvider,
   PromptInputBody,
-  PromptInputFooter
+  PromptInputFooter,
 } from "@/src/components/ai-elements/prompt-input";
 import {
   Conversation,
@@ -125,9 +128,11 @@ export function Chat({
   const isGenerating = status === "submitted" || status === "streaming";
 
   // Show loading dots until the assistant produces its first thinking part
-  const lastAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant");
+  const lastAssistantMessage = [...messages]
+    .reverse()
+    .find((m) => m.role === "assistant");
   const hasThinkingStarted = lastAssistantMessage?.parts.some(
-    (p) => p.type === "reasoning" || p.type.startsWith("tool-")
+    (p) => p.type === "reasoning" || p.type.startsWith("tool-"),
   );
   const showLoading = isGenerating && !hasThinkingStarted;
 
@@ -157,7 +162,7 @@ export function Chat({
             <>
               {messages.map((message) => {
                 const hasThinking = message.parts.some(
-                  (p) => p.type === "reasoning" || p.type.startsWith("tool-")
+                  (p) => p.type === "reasoning" || p.type.startsWith("tool-"),
                 );
 
                 return (
@@ -199,7 +204,7 @@ export function Chat({
                                                 : JSON.stringify(
                                                     toolPart.output,
                                                     null,
-                                                    2
+                                                    2,
                                                   )}
                                             </MessageResponse>
                                           ) : undefined
@@ -264,71 +269,67 @@ export function Chat({
       <div className="sticky bottom-0 bg-background p-4">
         <PromptInputProvider>
           <PromptInput
-          onSubmit={handleSubmit}
-          className="w-full max-w-2xl mx-auto "
-        >
-          <PromptInputBody>
-            <PromptInputTextarea
-            value={input}
-            placeholder="What are you working on?"
-            onChange={(e) => setInput(e.currentTarget.value)}
-            disabled={isGenerating}
-          />
-          </PromptInputBody>
-
-          <PromptInputFooter>
-
-            {/* Controls row below input */}
-        <div className="flex items-center gap-2 mt-2 w-full max-w-2xl mx-auto">
-          {/* Mode toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMode}
-            className={cn(
-              "h-7 px-3 rounded-full border transition-colors",
-              mode === "build"
-                ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-                : "border-border text-muted-foreground hover:bg-accent"
-            )}
+            onSubmit={handleSubmit}
+            className="w-full max-w-2xl mx-auto "
           >
-            <span className="text-xs capitalize">{mode}</span>
-          </Button>
+            <PromptInputBody>
+              <PromptInputTextarea
+                value={input}
+                placeholder="What are you working on?"
+                onChange={(e) => setInput(e.currentTarget.value)}
+                disabled={isGenerating}
+              />
+            </PromptInputBody>
 
-          {/* Actions dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 rounded-full border border-border text-muted-foreground hover:bg-accent"
-              >
-                Actions
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onSelect={() => setSetupModalOpen(true)}>
-                Project Setup
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setFetchModalOpen(true)}>
-                Fetch Latest
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            <PromptInputFooter>
+              {/* Controls row below input */}
+              <div className="flex items-center gap-2 mt-2 w-full max-w-2xl mx-auto">
+                {/* Mode toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleMode}
+                  className={cn(
+                    "h-7 px-3 rounded-full border transition-colors",
+                    mode === "build"
+                      ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                      : "border-border text-muted-foreground hover:bg-accent",
+                  )}
+                >
+                  <span className="text-xs capitalize">{mode}</span>
+                </Button>
 
-        
-            <PromptInputSubmit
-              status={isGenerating ? status : "ready"}
-              onStop={stop}
-              disabled={!isGenerating && !input.trim()}
-              // className="absolute bottom-1 right-1"
-            />
-          </PromptInputFooter>
-        </PromptInput>
+                {/* Actions dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 rounded-full border border-border text-muted-foreground hover:bg-accent"
+                    >
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem onSelect={() => setSetupModalOpen(true)}>
+                      Project Setup
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setFetchModalOpen(true)}>
+                      Fetch Latest
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <PromptInputSubmit
+                status={isGenerating ? status : "ready"}
+                onStop={stop}
+                disabled={!isGenerating && !input.trim()}
+                // className="absolute bottom-1 right-1"
+              />
+            </PromptInputFooter>
+          </PromptInput>
         </PromptInputProvider>
-
-        
 
         <ProjectSetupModal
           open={setupModalOpen}
