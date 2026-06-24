@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -99,7 +100,14 @@ export function DeleteProjectDialog({
             onClick={handleDelete}
             disabled={loading}
           >
-            {loading ? "Deleting..." : "Delete Project"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Project"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

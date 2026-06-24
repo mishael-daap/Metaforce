@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
+import ShimmerLoader from "@/components/ui/logo-animated-loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -117,7 +118,7 @@ export default function ProjectsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Loading projects...</div>
+        <ShimmerLoader className="w-20 h-20" />
       </div>
     );
   }

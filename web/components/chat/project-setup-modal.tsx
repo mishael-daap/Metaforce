@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, CheckCircle2, AlertCircle, Terminal } from "lucide-react";
+import { CheckCircle2, AlertCircle, Terminal } from "lucide-react";
+import ShimmerLoader from "@/components/ui/logo-animated-loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,7 +162,7 @@ export function ProjectSetupModal({
                   <span className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
                 )}
                 {step.status === "running" && (
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <ShimmerLoader className="w-5 h-5" />
                 )}
                 {step.status === "success" && (
                   <CheckCircle2 className="h-5 w-5 text-green-500" />

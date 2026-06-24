@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -216,7 +217,14 @@ export function CreateProjectDialog({
                 Back
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Project"}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Project"
+                )}
               </Button>
             </DialogFooter>
           </form>

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, MessageSquare, Edit, Trash2, Plus } from "lucide-react";
+import ShimmerLoader from "@/components/ui/logo-animated-loading";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -130,7 +131,7 @@ export default function ProjectDetailPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Loading project details...</div>
+        <ShimmerLoader className="w-20 h-20" />
       </div>
     );
   }

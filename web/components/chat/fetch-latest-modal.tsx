@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, CheckCircle2, AlertCircle, Terminal } from "lucide-react";
+import { CheckCircle2, AlertCircle, Terminal } from "lucide-react";
+import ShimmerLoader from "@/components/ui/logo-animated-loading";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -127,7 +128,7 @@ export function FetchLatestModal({
               <div key={step.label} className="rounded-lg border p-3 space-y-2">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   {isRunning && (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <ShimmerLoader className="w-5 h-5" />
                   )}
                   {isSuccess && (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />

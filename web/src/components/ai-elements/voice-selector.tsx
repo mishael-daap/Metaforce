@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
+import ShimmerLoader from "@/components/ui/logo-animated-loading";
 import { cn } from "@/lib/utils";
 import {
   CircleSmallIcon,
@@ -502,7 +502,7 @@ export const VoiceSelectorPreview = ({
   let icon = <PlayIcon className="size-3" />;
 
   if (loading) {
-    icon = <Spinner className="size-3" />;
+    icon = <ShimmerLoader className="w-3 h-3" />;
   } else if (playing) {
     icon = <PauseIcon className="size-3" />;
   }
