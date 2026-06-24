@@ -53,7 +53,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProjectSetupModal } from "@/components/chat/project-setup-modal";
 import { FetchLatestModal } from "@/components/chat/fetch-latest-modal";
-
+import StaticLoader from "../ui/logo-static";
 interface ChatProps {
   projectId: string;
   initialMessages: UIMessage[];
@@ -264,6 +264,7 @@ export function Chat({
           )}
           <div ref={bottomRef} />
         </ConversationContent>
+        <StaticLoader className="h-10 w-10"/>
       </Conversation>
 
       <div className="sticky bottom-0 bg-background p-4">
@@ -275,7 +276,7 @@ export function Chat({
             <PromptInputBody>
               <PromptInputTextarea
                 value={input}
-                placeholder="What are you working on?"
+                placeholder="Ask metaforce..."
                 onChange={(e) => setInput(e.currentTarget.value)}
                 disabled={isGenerating}
               />
