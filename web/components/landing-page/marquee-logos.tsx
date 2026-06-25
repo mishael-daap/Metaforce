@@ -9,7 +9,7 @@ interface Company {
 }
 
 interface MarqueeLogosProps {
-  companies: Company[];
+  companies: readonly Company[];
   className?: string;
 }
 
