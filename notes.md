@@ -11,3 +11,6 @@ the input element sits on this panel and it doesnt look good the input should si
 
 when the agent is thinking, the thinking drop down element should be opened and as the agent thinkis, it should scroll, and when the agent is done thinking, it should close and show the agent's output, also we should add the shimmer effect when the agent is thinking
 
+
+ we are building a landing page. this is our example page: .claude\context\linkify\src\app\(marketing)\page.tsx and this is the one we are building: 
+  web\app\page.tsx, we have implemented quite a few. 

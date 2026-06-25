@@ -40,7 +40,7 @@ export default async function RootLayout({
       className={cn("h-full dark", "antialiased", geistGeist.variable, geistMonoGeistMono.variable, openSansOpenSans.variable, poppinsPoppins.variable, jetbrainsMonoJetbrainsMono.variable)}
     >
       {/* <body className="min-h-full flex flex-col"><TooltipProvider>{children}</TooltipProvider></body> */}
-      <body>
+      <body className="min-h-screen overflow-x-hidden bg-background text-foreground">
         <SessionProvider session={session}><TooltipProvider>{children}</TooltipProvider></SessionProvider>
       </body>
       {/* <body className="min-h-full flex flex-col">{children}</body> */}
