@@ -19,6 +19,7 @@ import {
 import { Folder, LogOut, PanelLeft } from "lucide-react";
 import StaticLoader from "@/components/ui/logo-static";
 import { signOut, useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const navigation = [
   { name: "Projects", href: "/dashboard/projects", icon: Folder },
@@ -119,14 +120,14 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
             )}
           >
             {user?.image ? (
-              <img
-                src={user.image}
-                alt={user.name ?? "User avatar"}
-                className={cn(
-                  "rounded-full object-cover",
-                  isCollapsed ? "h-7 w-7" : "h-8 w-8",
-                )}
-              />
+
+              <Avatar>
+                    <AvatarImage
+                      src={user.image}
+                      alt={user.name ?? "User avatar"}
+                    />
+                    <AvatarFallback>{user.name ?? "U"}</AvatarFallback>
+                  </Avatar>
             ) : (
               <div
                 className={cn(

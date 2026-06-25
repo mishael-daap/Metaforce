@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface Project {
   id: string;
@@ -88,11 +89,6 @@ export function ProjectCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-sm text-muted-foreground">
-          Created {formatDate(project.created_at)}
-        </div>
-      </CardContent>
-      <CardFooter>
         <Button
           variant="outline"
           size="sm"
@@ -102,6 +98,18 @@ export function ProjectCard({
           <MessageSquare className="mr-2 h-4 w-4" />
           Open Chat
         </Button>
+      </CardContent>
+      <CardFooter className="flex gap-2">
+        <Avatar>
+      <AvatarImage
+        src="https://github.com/shadcn.png"
+        alt="@shadcn"
+      />
+      <AvatarFallback>CN</AvatarFallback>
+    </Avatar>
+        <div className="text-sm text-muted-foreground">
+          Created {formatDate(project.created_at)}
+        </div>
       </CardFooter>
     </Card>
   );
