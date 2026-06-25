@@ -45,7 +45,7 @@ const LogoLoading = React.forwardRef<SVGSVGElement, LogoLoadingProps>(
       speed === "fast" ? "1s" : speed === "slow" ? "3s" : speed;
     return (
       <svg
-        ref={ref}
+        
         viewBox={`${-127.051 / 4} ${-397.662 / 4} ${(127.051 * 9) / 4} ${(397.662 * 5) / 4}`}
         xmlns="http://www.w3.org/2000/svg"
         className={cn("", className)}
