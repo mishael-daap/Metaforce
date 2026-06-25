@@ -57,7 +57,7 @@ const Navbar = () => {
               </span>
             </Link>
 
-            <NavigationMenu className="hidden lg:flex">
+            {/* <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList>
                 {NAV_LINKS.map((link) => (
                   <NavigationMenuItem key={link.title}>
@@ -120,7 +120,7 @@ const Navbar = () => {
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
-            </NavigationMenu>
+            </NavigationMenu> */}
           </div>
 
            <div className="hidden lg:flex items-center">

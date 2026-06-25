@@ -116,6 +116,10 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --font-geist: var(--font-geist);
   --font-geist-mono: var(--font-geist-mono);
+  --animate-flip: flip 6s infinite steps(2, end);
+  --animate-rotate: rotate 3s linear infinite both;
+  --animate-image-glow: image-glow 4s ease-out 0.6s forwards;
+  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -201,6 +205,38 @@ body {
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     letter-spacing: var(--font-body-tracking);
+}
+
+@keyframes flip {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotate {
+  to { transform: rotate(90deg); }
+}
+
+@keyframes image-glow {
+  0% {
+    opacity: 0;
+    animation-timing-function: cubic-bezier(.74, .25, .76, 1);
+  }
+  10% {
+    opacity: 0.5;
+    animation-timing-function: cubic-bezier(.12, .01, .08, .99);
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.gradient {
+  background: conic-gradient(from 230.29deg at 51.63% 52.16%, rgb(36, 0, 255) 0deg, rgb(0, 135, 255) 67.5deg, rgb(108, 39, 157) 198.75deg, rgb(24, 38, 163) 251.25deg, rgb(54, 103, 196) 301.88deg, rgb(105, 30, 255) 360deg);
 }
 /* 
 .scrollbar-thin {
