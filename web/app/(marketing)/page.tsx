@@ -1,9 +1,15 @@
+
 import { Metadata } from "next";
 import { auth } from "../auth";
 import MaxWidthWrapper from "@/components/landing-page/max-width-wrapper";
 import AnimationContainer from "@/components/landing-page/animation-container";
 import { BorderBeam } from "@/components/landing-page/border-beam";
 import Image from "next/image";
+import { COMPANIES } from "@/lib/utils";
+import MarqueeLogos from "@/components/landing-page/marquee-logos";
+import FAQSection from "@/components/landing-page/faq";
+import TestimonialsSection from "@/components/landing-page/testimonials";
+import FeaturesSection from "@/components/landing-page/features";
 
 export const metadata: Metadata = {
   title: "Home",
@@ -12,7 +18,8 @@ export const metadata: Metadata = {
 export default async function Page() {
   const session = await auth();
   return (
-    <MaxWidthWrapper>
+    <div>
+      <MaxWidthWrapper>
       <div className="flex flex-col items-center justify-center w-full text-center bg-gradient-to-t from-background">
         <AnimationContainer className="flex flex-col items-center justify-center w-full text-center">
           <button className="group relative grid overflow-hidden rounded-full px-4 py-1 shadow-[0_1000px_0_0_hsl(0_0%_20%)_inset] transition-colors duration-200">
@@ -22,7 +29,7 @@ export default async function Page() {
             <span className="backdrop absolute inset-[1px] rounded-full bg-neutral-950 transition-colors duration-200 group-hover:bg-neutral-900" />
             <span className="h-full w-full blur-md absolute bottom-0 inset-x-0 bg-gradient-to-tr from-primary/20"></span>
             <span className="z-10 py-0.5 text-sm text-neutral-100 flex items-center justify-center gap-1">
-              Agentic Development
+              Agentic Salesforce Development
             </span>
           </button>
           <h1 className="text-foreground text-center py-6 text-5xl font-medium tracking-normal text-balance sm:text-6xl md:text-7xl lg:text-8xl !leading-[1.15] w-full font-heading">
@@ -67,5 +74,21 @@ export default async function Page() {
         </AnimationContainer>
       </div>
     </MaxWidthWrapper>
+
+    {/* Companies Section */}
+    <MaxWidthWrapper>
+      <AnimationContainer delay={0.4}>
+        <div className="py-14">
+          <h2 className="text-center text-sm font-medium font-heading text-neutral-400 uppercase">
+            Trusted by
+          </h2>
+          <MarqueeLogos companies={COMPANIES} className="mt-8 max-w-lg mx-auto" />
+        </div>
+      </AnimationContainer>
+    </MaxWidthWrapper>
+    <FeaturesSection />
+<TestimonialsSection />
+    <FAQSection />
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import Navbar from "@/components/landing-page/Navbar";
 import { ReactNode } from "react";
+import Footer from "@/components/landing-page/footer";
 
 export default function MarketingLayout({
   children,
@@ -14,6 +15,7 @@ export default function MarketingLayout({
       />
       <Navbar />
       <main className="mt-20 mx-auto w-full z-0 relative">{children}</main>
+      <Footer />
     </>
   );
 }

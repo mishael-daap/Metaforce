@@ -238,26 +238,25 @@ body {
 .gradient {
   background: conic-gradient(from 230.29deg at 51.63% 52.16%, rgb(36, 0, 255) 0deg, rgb(0, 135, 255) 67.5deg, rgb(108, 39, 157) 198.75deg, rgb(24, 38, 163) 251.25deg, rgb(54, 103, 196) 301.88deg, rgb(105, 30, 255) 360deg);
 }
-/* 
-.scrollbar-thin {
-  scrollbar-width: thin;                   
-  scrollbar-color: transparent transparent; 
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+/* Hide scrollbar globally */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+html::-webkit-scrollbar {
+  display: none;
 }
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 999px;
-  transition: background 0.2s;
-}
-
-.scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-} */
