@@ -32,7 +32,7 @@ export const TextHoverEffect = ({
             ref={svgRef}
             width="100%"
             height="100%"
-            viewBox="0 0 600 100"
+            viewBox="0 0 300 100"
             xmlns="http://www.w3.org/2000/svg"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
@@ -43,9 +43,19 @@ export const TextHoverEffect = ({
                 <linearGradient
                     id="textGradient"
                     gradientUnits="userSpaceOnUse"
+                    cx="50%"
+                    cy="50%"
+                    r="25%"
                 >
-                    <stop offset="0%" stopColor="#1447E6" />
-                    <stop offset="100%" stopColor="#91efff" />
+                    {hovered && (
+                        <>
+                            <stop offset="0%" stopColor={"var(--indigo-500)"} />
+                            <stop offset="25%" stopColor={"var(--violet-500)"} />
+                            <stop offset="50%" stopColor={"var(--purple-500)"} />
+                            <stop offset="75%" stopColor={"var(--fuchsia-500)"} />
+                            <stop offset="100%" stopColor={"var(--rose-500)"} />
+                        </>
+                    )}
                 </linearGradient>
 
                 <motion.radialGradient
@@ -54,6 +64,14 @@ export const TextHoverEffect = ({
                     r="20%"
                     animate={maskPosition}
                     transition={{ duration: duration ?? 0, ease: "easeOut" }}
+
+                // example for a smoother animation below
+
+                //   transition={{
+                //     type: "spring",
+                //     stiffness: 300,
+                //     damping: 50,
+                //   }}
                 >
                     <stop offset="0%" stopColor="white" />
                     <stop offset="100%" stopColor="black" />
@@ -68,28 +86,43 @@ export const TextHoverEffect = ({
                     />
                 </mask>
             </defs>
-
-            {/* Subtle background outline - always visible */}
             <text
                 x="50%"
                 y="50%"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 strokeWidth="0.3"
-                className="font-[helvetica] font-bold fill-transparent text-7xl"
-                style={{ stroke: "rgba(255, 255, 255, 0.06)" }}
+                className="font-[helvetica] font-bold stroke-neutral-800 fill-transparent text-7xl"
+                style={{ opacity: hovered ? 0.7 : 0 }}
             >
                 {text}
             </text>
-
-            {/* Gradient stroke - follows mouse via mask */}
+            <motion.text
+                x="50%"
+                y="50%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                strokeWidth="0.3"
+                className="font-[helvetica] font-bold fill-transparent text-7xl stroke-neutral-800"
+                initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
+                animate={{
+                    strokeDashoffset: 0,
+                    strokeDasharray: 1000,
+                }}
+                transition={{
+                    duration: 4,
+                    ease: "easeInOut",
+                }}
+            >
+                {text}
+            </motion.text>
             <text
                 x="50%"
                 y="50%"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 stroke="url(#textGradient)"
-                strokeWidth="0.4"
+                strokeWidth="0.3"
                 mask="url(#textMask)"
                 className="font-[helvetica] font-bold fill-transparent text-7xl"
             >

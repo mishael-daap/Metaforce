@@ -50,7 +50,7 @@ const Navbar = () => {
       <AnimationContainer reverse delay={0.1} className="size-full">
         <MaxWidthWrapper className="flex items-center justify-between">
           <div className="flex items-center space-x-12">
-            <Link className="flex gap-1" href="/#home">
+            <Link className="flex gap-1" href="/">
             <StaticLoader className="w-5 h-5" />
               <span className="text-lg font-bold font-heading !leading-none">
                 Metaforce

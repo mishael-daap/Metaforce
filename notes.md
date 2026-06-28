@@ -161,4 +161,7 @@ when the agent is thinking, the thinking drop down element should be opened and 
 //     )
 // }
 
-// export default Footer
+ <div
+          className="absolute inset-0 max-w-[1200px] mx-auto border-x border-[#2a2a2a] pointer-events-none z-[1]"
+          aria-hidden="true"
+        />

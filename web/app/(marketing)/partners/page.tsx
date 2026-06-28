@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import MaxWidthWrapper from "@/components/landing-page/max-width-wrapper";
 import Image from "next/image";
-import MaxWidthWrapper from "./max-width-wrapper";
 
 interface Testimonial {
   id: number;
@@ -139,13 +139,13 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   const active = testimonials[activeIndex];
 
   return (
-    <div className={cn("bg-black text-white font-sans", className)}>
+    <div className={cn(" text-white font-sans", className)}>
       <div className="relative w-full">
         <MaxWidthWrapper>
           {/* Left Column */}
-              <div className="flex flex-col justify-start border-x border-b p-20">
+              <div className="flex flex-col justify-start border-b pb-10">
                 <h2 className="text-[32px] md:text-[42px] font-semibold leading-[1.2] text-[#e8e8e8] m-0 tracking-[-0.5px] mb-6">
-                  Our Testimonial.
+                  Our Partners
                 </h2>
                 <p className="text-[#6b6b6b] text-base leading-[1.8] m-0 max-w-[380px]">
                   Built by Salesforce developers, for Salesforce developers.
@@ -178,4 +178,11 @@ See how teams are cutting metadata creation time from hours to minutes.
   );
 };
 
-export default TestimonialsSection;
+
+export default function Page(){
+    return <div className="border-b pb-20">
+<MaxWidthWrapper>
+    <TestimonialsSection />
+</MaxWidthWrapper>
+    </div>
+}

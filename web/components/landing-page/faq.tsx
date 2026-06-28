@@ -7,27 +7,29 @@ interface FAQItem {
   answer: string;
 }
 
+import MaxWidthWrapper from './max-width-wrapper';
+
 interface FAQSectionProps {
   className?: string;
 }
 
 const faqData: FAQItem[] = [
   {
-    question: 'How to use this component?',
-    answer: 'To use this component, you need to import it in your project and use it in your JSX code. Here\'s an example of how to use it:',
+    question: 'How does Metaforce connect to my Salesforce org?',
+    answer: 'Metaforce uses a Chrome extension to extract your active session token and instance URL from an open Salesforce tab. No OAuth setup, no connected apps, and no AppExchange installation required. Your credentials are encrypted and stored securely in Supabase against your project.',
   },
   {
-    question: 'Are there any other components available?',
-    answer: 'Yes, we offer a wide range of components including navigation, forms, data display, and feedback components. Check our documentation for the full list.',
+    question: 'What can Metaforce actually build?',
+    answer: 'During the current proof-of-concept phase, Metaforce supports custom objects and custom fields. You describe what you need in natural language, and the AI translates that into the correct SFDX operations to create and deploy the metadata directly to your org.',
   },
   {
-    question: 'Are components responsive?',
-    answer: 'All components are built with responsive design in mind. They adapt seamlessly to different screen sizes and devices using modern CSS techniques.',
+    question: 'Is it safe to let an AI deploy to my org?',
+    answer: 'Yes. Metaforce operates on an approval-based workflow. The AI plans every SFDX operation in an ephemeral task list, but nothing executes until you explicitly approve each step. If an operation fails, the AI diagnoses the error and proposes a fix before retrying.',
   },
   {
-    question: 'Can I customize the components?',
-    answer: 'Absolutely. Every component accepts className props and uses Tailwind CSS utility classes, making it easy to override styles and match your brand.',
-  },
+    question: 'Can my team collaborate on the same project?',
+    answer: 'Absolutely. Every project has a single shared conversation and requirements list. All collaborators see updates in real time via Supabase Realtime, so your team stays aligned on scope and implementation status without scattered docs or Slack threads.',
+  }
 ];
 
 const FAQSection: React.FC<FAQSectionProps> = ({ className }) => {
@@ -39,40 +41,42 @@ const FAQSection: React.FC<FAQSectionProps> = ({ className }) => {
 
   return (
     <div className={cn('bg-black text-white font-sans', className)}>
-      <div className="relative w-full">
-        {/* Vertical grid lines */}
-        <div 
-          className="absolute inset-0 max-w-[1200px] mx-auto border-x border-[#2a2a2a] pointer-events-none z-[1]" 
-          aria-hidden="true" 
-        />
+      <div className="relative w-full border">
+        
+<MaxWidthWrapper>
 
-        <div className="w-full border-b border-[#2a2a2a]">
-          <div className="max-w-[1200px] mx-auto px-8 md:px-16 py-16 md:py-24">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+  <div className='border-x h-40'>
+
+  </div>
+
+        <div className="w-full border-b">
+          <div className="mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 border-x border-t">
               
               {/* Left Column */}
-              <div className="flex flex-col justify-start">
-                <h2 className="text-[32px] md:text-[42px] font-semibold leading-[1.2] text-[#e8e8e8] m-0 tracking-[-0.5px] mb-6">
+              <div className="flex flex-col border-r items-center justify-center ">
+                <h2 className="text-[32px] md:text-[42px] font-semibold leading-[1.2] text-[#e8e8e8] m-0 tracking-[-0.5px] mb-6 ">
                   Asked Questions.
                 </h2>
                 <p className="text-[#6b6b6b] text-base leading-[1.8] m-0 max-w-[380px]">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed odio sit amet nibh vulputate cursus a sit amet mauris. Morbi accumsan ipsum velit.
+                 Quick answers to how Metaforce connects to your org, keeps your data safe, and handles AI-driven deployments.
+
                 </p>
               </div>
 
               {/* Right Column - Accordion */}
               <div>
-                <div className="mb-6">
-                  <span className="text-[#e8e8e8] text-sm font-medium tracking-wide uppercase">
+                <div className="px-10 py-5 text-2xl">
+                  <span className="text-[#e8e8e8] text-2xl font-extralight tracking-wide uppercase ">
                     &ldquo;GENERAL&rdquo;
                   </span>
                 </div>
 
-                <div className="border-t border-[#2a2a2a]">
+                <div className="border-t border-[#2a2a2a] p-4">
                   {faqData.map((item, index) => (
                     <div 
                       key={index} 
-                      className="border-b border-[#2a2a2a]"
+                      className="border-b"
                     >
                       <button
                         onClick={() => toggleItem(index)}
@@ -104,6 +108,8 @@ const FAQSection: React.FC<FAQSectionProps> = ({ className }) => {
             </div>
           </div>
         </div>
+</MaxWidthWrapper>
+
       </div>
     </div>
   );
