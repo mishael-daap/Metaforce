@@ -105,7 +105,7 @@ export function ProjectCard({
       <CardFooter className="flex gap-2">
         <Avatar>
           <AvatarImage
-            src={user?.image}
+            src={ user?.image ?? undefined}
             alt={user?.name ?? "User avatar"}
           />
           <AvatarFallback>
