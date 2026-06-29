@@ -1,11 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Card, CardContent } from '@/components/ui/card';
 import { Requirement, RequirementStatus } from '@/src/types/requirements';
 
 const statusConfig: Record<
@@ -46,8 +54,8 @@ export function RequirementsList({ requirements, onUpdate, onDelete }: Requireme
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
-  const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
+  const handleValueChange = (value: string) => {
+    setExpandedId(value || null);
   };
 
   const startEdit = (requirement: Requirement) => {
@@ -68,52 +76,54 @@ export function RequirementsList({ requirements, onUpdate, onDelete }: Requireme
   };
 
   return (
-    <div className="w-full">
-      <div className="space-y-2">
-        {requirements.map((requirement) => {
-          const isExpanded = expandedId === requirement.id;
-          const status = statusConfig[requirement.status];
+    <Card className="w-full p-1">
+      <CardContent className="px-1">
+        <Accordion
+          type="single"
+          collapsible
+          value={expandedId ?? ''}
+          onValueChange={handleValueChange}
+        >
+          {requirements.map((requirement) => {
+            const status = statusConfig[requirement.status];
 
-          return (
-            <div
-              key={requirement.id}
-              className="bg-gray-100 rounded-lg overflow-hidden transition-all duration-200"
-            >
-              <button
-                onClick={() => toggleExpand(requirement.id)}
-                className="w-full px-4 py-3 flex justify-between hover:bg-gray-200 transition-colors"
+            return (
+              <AccordionItem
+                key={requirement.id}
+                value={requirement.id}
+                className="border-none"
               >
-                <div className="flex justify-between gap-3 flex-1 text-left">
-                  <ChevronDown
-                    className={`w-5 h-5 text-gray-600 transition-transform duration-200 shrink-0 ${
-                      isExpanded ? 'rotate-180' : ''
-                    }`}
-                  />
-                  <h3 className={`font-medium text-gray-900 text-sm ${requirement.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
-                    {requirement.title}
-                  </h3>
-                  <Badge
-                    className={`${status.bgColor} ${status.color} text-xs font-semibold`}
-                  >
-                    {status.label}
-                  </Badge>
-                </div>
-              </button>
-
-              {isExpanded && (
-                <div className="px-4 py-3 bg-gray-50">
+                <AccordionTrigger>
+                  <div className="flex items-center justify-between gap-3 w-full pr-4">
+                    <h3
+                      className={`font-medium text-sm text-left leading-snug ${
+                        requirement.status === 'completed'
+                          ? 'line-through text-muted-foreground'
+                          : 'text-foreground'
+                      }`}
+                    >
+                      {requirement.title}
+                    </h3>
+                    <Badge
+                      className={`${status.bgColor} ${status.color} text-xs font-semibold shrink-0`}
+                    >
+                      {status.label}
+                    </Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
                   {editingId === requirement.id ? (
-                    <div className="space-y-3">
-                      <input
+                    <div className="space-y-3 px-4 py-3">
+                      <Input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full px-2 py-1 text-sm rounded bg-white text-gray-900 focus:outline-none"
+                        className="text-sm"
                       />
                       <textarea
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
-                        className="w-full px-2 py-1 text-sm rounded bg-white text-gray-900 focus:outline-none resize-none"
+                        className="w-full min-h-[80px] rounded-lg border border-input bg-background px-2.5 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 resize-none"
                         rows={3}
                       />
                       <div className="flex gap-2">
@@ -126,44 +136,47 @@ export function RequirementsList({ requirements, onUpdate, onDelete }: Requireme
                         </Button>
                         <Button
                           size="sm"
+                          variant="outline"
                           onClick={cancelEdit}
-                          className="bg-gray-400 hover:bg-gray-500 text-white"
                         >
                           Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <>
-                      <div className="text-sm text-gray-700 leading-relaxed prose prose-sm prose-gray max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_p]:my-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_code]:text-xs [&_code]:bg-gray-200 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-gray-200 [&_pre]:rounded [&_pre]:p-2 [&_blockquote]:border-l-2 [&_blockquote]:border-gray-400 [&_blockquote]:pl-3 [&_blockquote]:italic">
+                    <div className="px-4 py-3">
+                      <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {requirement.description}
                         </ReactMarkdown>
                       </div>
-                      <div className="flex gap-3 mt-4">
-                        <button
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="xs"
+                          variant="ghost"
                           onClick={() => startEdit(requirement)}
-                          className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
                         >
-                          <Edit2 className="w-3 h-3" />
+                          <Edit2 className="size-3 mr-1" />
                           Edit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="ghost"
                           onClick={() => onDelete?.(requirement.id)}
-                          className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 transition-colors"
+                          className="text-destructive hover:text-destructive/80"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="size-3 mr-1" />
                           Delete
-                        </button>
+                        </Button>
                       </div>
-                    </>
+                    </div>
                   )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      </CardContent>
+    </Card>
   );
 }

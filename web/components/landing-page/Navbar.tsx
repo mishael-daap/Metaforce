@@ -126,7 +126,7 @@ const Navbar = () => {
            <div className="hidden lg:flex items-center">
                         {session?.user ? (
                             <div className="flex items-center">
-                                <Link href="/dashboard" className={buttonVariants({ size: "sm", })}>
+                                <Link href="/dashboard/projects" className={buttonVariants({ size: "sm", })}>
                                     Dashboard
                                 </Link>
                             </div>

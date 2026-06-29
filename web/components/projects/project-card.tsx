@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useSession } from "next-auth/react";
 
 interface Project {
   id: string;
@@ -41,6 +42,8 @@ export function ProjectCard({
   onEditClick,
   onDeleteClick,
 }: ProjectCardProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -101,12 +104,16 @@ export function ProjectCard({
       </CardContent>
       <CardFooter className="flex gap-2">
         <Avatar>
-      <AvatarImage
-        src="https://github.com/shadcn.png"
-        alt="@shadcn"
-      />
-      <AvatarFallback>CN</AvatarFallback>
-    </Avatar>
+          <AvatarImage
+            src={user?.image}
+            alt={user?.name ?? "User avatar"}
+          />
+          <AvatarFallback>
+            {user?.name?.charAt(0).toUpperCase() ??
+              user?.email?.charAt(0).toUpperCase() ??
+              "U"}
+          </AvatarFallback>
+        </Avatar>
         <div className="text-sm text-muted-foreground">
           Created {formatDate(project.created_at)}
         </div>

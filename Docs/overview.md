@@ -15,7 +15,7 @@ Salesforce development is slow, repetitive, and requires deep platform knowledge
 - Conversational requirement gathering via a shared AI chat interface
 - Incremental requirement planning — add, remove, and refine before execution
 - Step-by-step action execution with per-action approval and error recovery
-- Salesforce org connection via a Chrome extension (no OAuth setup required)
+- Salesforce org connection via sf cli (no OAuth setup required just copy auth details from sf cli )
 - Team collaboration — multiple users can work within the same project and shared conversation
 - Metadata reuse library — every created component is saved for future reuse
 
