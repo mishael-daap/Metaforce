@@ -1,68 +1,277 @@
-what is metaforce and who was it built for? 
-- It is an ai powered platform that accelerates salesforce development
-- It has an interface that lets you talk to an agent just like you would with chatgpt and claude 
-- you can describe what you want it to build for example, custom objects and fields or flows or permission sets
-- the agent will plan, build and deploy your requirements in salesforce
-- right now the agent can only handle custom objects and fields, but we plan to expand it's capabilities with subsequent releases
-- it was built for salesforce developers, but anyone who wants to build in salesforce can use it
+# 🎙️ Podcast Outline
 
+---
 
-why metaforce?
-- In July 2025 that's About a year ago, I was doing a intensive Salesforce CPQ training program with Oxfordable Careers. At the end of it, we were handed a capstone project to build out.
+# 🎙️ Section 1: What is Metaforce and Who Was It Built For?
 
-- The requirements themselves weren't complex. Honestly, they were simple enough that you could explain the concept to an 8-year-old and they’d get it right away. I had a crystal-clear picture of what needed to be built. The problem wasn't the what—it was the how.
+## Key Talking Points
 
-- I tried using tools like Gemini to help me build it. But I found myself stuck in this exhausting loop: taking screenshots of my Salesforce setup, copying and pasting error messages, and trying to pass context back and forth.
+### What it is
+Metaforce is an AI-powered platform that accelerates Salesforce development.
 
-- Then i realized I had the intent and the access to Salesforce, but lacked the technical understanding. Gemini had the the technical understanding, but it had no access to my Salesforce org.
+### The Interface
+It features an interface that lets you talk to an AI agent just like you would with ChatGPT or Claude.
 
-- I didnt complete the project and ended up failing the program, and that was quite a tough pill to swallow
+### How it works
+You can describe exactly what you want it to build—for example:
 
-- But I knew If I could just drag and drop this entire requirement document into an agent that actually has direct access to my Salesforce org, it could execute the plan flawlessly and that is why I built this platform, to bridge the divide between the what and the how on salesforce. 
+- Custom objects and fields
+- Flows
+- Permission sets
 
-Demo
+The agent will then plan, build, and deploy your requirements directly into Salesforce.
 
-3 tabs: 
-- metaforce
-- slide
-- salesforce org
+### Current Scope vs. Future Vision
+Right now, the agent can only handle custom objects and fields, but we plan to expand its capabilities with subsequent releases.
 
-flow
-- sign up
-- create project
-    - The Avocados 🥑
-    - [compose a description]
-- connect org: open sf cli and copy details
-- go to chat
-- message: "I am configuring a salesforce org for an indie rock band called The Avocados. I want to keep track of three core things: Gigs, Merchandise, and Fan Club Members."
-- message2: 1. Gigs Object (3 Fields)
-Gig_Date__c (Date) – When the concert is happening.
+### Target Audience
+It was built primarily for Salesforce developers, but anyone who wants to build components in Salesforce can use it.
 
-Venue_Name__c (Text) – The location or venue name.
+---
 
-Ticket_Price__c (Currency) – The cost of admission.
+# 💡 Section 2: Why Metaforce? (The Origin Story)
 
-2. Songs Object (3 Fields)
-Release_Date__c (Date) – When the track was dropped.
+## Key Talking Points
 
-Track_Duration__c (Text or Number) – The length of the song (e.g., 3:45).
+### The Spark (July 2025)
+About a year ago, I was undergoing an intensive Salesforce CPQ training program with Oxfordable Careers. At the end of the training, we were handed a capstone project to build out.
 
-Streaming_Count__c (Number) – Total plays to track popularity.
+### The Conflict
+The requirements themselves weren't complex. Honestly, they were simple enough that you could explain the concept to an 8-year-old, and they'd get it right away. I had a crystal-clear picture of what needed to be built. The problem wasn't the *what*—it was the *how*.
 
-3. Fan Club Members Object (5 Fields)
-Join_Date__c (Date) – When the fan signed up.
+### The Friction
+I tried using tools like Gemini to help me build it. But I found myself stuck in this exhausting loop:
 
-Email__c (Email) – For newsletter and updates.
+- Taking screenshots of my Salesforce setup
+- Copying and pasting error messages
+- Desperately trying to pass context back and forth
 
-Tier__c (Picklist) – Membership level (e.g., VIP, General).
+### The Realization
+I realized that I had the intent and the access to Salesforce, but I lacked the technical understanding. Gemini had the technical understanding, but it had no access to my Salesforce org.
 
-Total_Spent__c (Currency) – Lifetime financial support from the fan.
+### The Failure
+Because of that barrier, I didn't complete the project and ended up failing the program. That was quite a tough pill to swallow.
 
-Favorite_Track__c (Text) – Personalization data.
-- 
+### The Solution
+But I knew that if I could just drag and drop the entire requirement document into an agent that actually had direct access to my Salesforce org, it could execute the plan flawlessly.
 
-- create the three requirements
+That is exactly why I built this platform: to bridge the divide between the *what* and the *how* on Salesforce.
 
+---
 
+# 🖥️ Section 3: Live Demo Walkthrough
 
+## Browser Tab Setup
 
+1. **Metaforce Platform**
+2. **Presentation Slides**
+3. **Salesforce Org (Object Manager)**
+
+## Action Flow & Script
+
+### 1. Onboarding
+
+- Sign up for a fresh account.
+- Create a new project.
+
+**Project Name**
+
+> The Avocados 🥑
+
+**Project Description**
+
+> Compose a brief description explaining that this workspace is dedicated to configuring data models for the indie rock band, The Avocados.
+
+---
+
+### 2. Environment Connection
+
+Connect the org by opening the Salesforce CLI (`sf` CLI) on your machine, copying the authentication details, and pasting them directly into Metaforce.
+
+---
+
+### 3. The Intent (Message 1)
+
+Navigate to the chat interface and send the first prompt:
+
+> I am configuring a Salesforce org for an indie rock band called The Avocados. I want to keep track of Gigs.
+
+---
+
+### 4. The Details (Message 2)
+
+Send the second prompt to define the schema:
+
+> Please generate the following three custom fields for the Gigs object:
+>
+> 1. **Gig_Date__c** (Date) – When the concert is happening.
+> 2. **Venue_Name__c** (Text) – The location or venue name.
+> 3. **Ticket_Price__c** (Currency) – The cost of admission.
+
+---
+
+### 5. Execution & Deployment
+# 🎙️ Podcast Outline
+
+---
+
+# 🎙️ Section 1: What is Metaforce and Who Was It Built For?
+
+## Key Talking Points
+
+### What it is
+Metaforce is an AI-powered platform that accelerates Salesforce development.
+
+### The Interface
+It features an interface that lets you talk to an AI agent just like you would with ChatGPT or Claude.
+
+### How it works
+You can describe exactly what you want it to build—for example:
+
+- Custom objects and fields
+- Flows
+- Permission sets
+
+The agent will then plan, build, and deploy your requirements directly into Salesforce.
+
+### Current Scope vs. Future Vision
+Right now, the agent can only handle custom objects and fields, but we plan to expand its capabilities with subsequent releases.
+
+### Target Audience
+It was built primarily for Salesforce developers, but anyone who wants to build components in Salesforce can use it.
+
+---
+
+# 💡 Section 2: Why Metaforce? (The Origin Story)
+
+## Key Talking Points
+
+### The Spark (July 2025)
+About a year ago, I was undergoing an intensive Salesforce CPQ training program with Oxfordable Careers. At the end of the training, we were handed a capstone project to build out.
+
+### The Conflict
+The requirements themselves weren't complex. Honestly, they were simple enough that you could explain the concept to an 8-year-old, and they'd get it right away. I had a crystal-clear picture of what needed to be built. The problem wasn't the *what*—it was the *how*.
+
+### The Friction
+I tried using tools like Gemini to help me build it. But I found myself stuck in this exhausting loop:
+
+- Taking screenshots of my Salesforce setup
+- Copying and pasting error messages
+- Desperately trying to pass context back and forth
+
+### The Realization
+I realized that I had the intent and the access to Salesforce, but I lacked the technical understanding. Gemini had the technical understanding, but it had no access to my Salesforce org.
+
+### The Failure
+Because of that barrier, I didn't complete the project and ended up failing the program. That was quite a tough pill to swallow.
+
+### The Solution
+But I knew that if I could just drag and drop the entire requirement document into an agent that actually had direct access to my Salesforce org, it could execute the plan flawlessly.
+
+That is exactly why I built this platform: to bridge the divide between the *what* and the *how* on Salesforce.
+
+---
+
+# 🖥️ Section 3: Live Demo Walkthrough
+
+## Browser Tab Setup
+
+1. **Metaforce Platform**
+2. **Presentation Slides**
+3. **Salesforce Org (Object Manager)**
+
+## Action Flow & Script
+
+### 1. Onboarding
+
+- Sign up for a fresh account.
+- Create a new project.
+
+**Project Name**
+
+> The Avocados 🥑
+
+**Project Description**
+
+> Compose a brief description explaining that this workspace is dedicated to configuring data models for the indie rock band, The Avocados.
+
+---
+
+### 2. Environment Connection
+
+Connect the org by opening the Salesforce CLI (`sf` CLI) on your machine, copying the authentication details, and pasting them directly into Metaforce.
+
+---
+
+### 3. The Intent (Message 1)
+
+Navigate to the chat interface and send the first prompt:
+
+> I am configuring a Salesforce org for an indie rock band called The Avocados. I want to keep track of Gigs.
+
+---
+
+### 4. The Details (Message 2)
+
+Send the second prompt to define the schema:
+
+> Please generate the following three custom fields for the Gigs object:
+>
+> 1. **Gig_Date__c** (Date) – When the concert is happening.
+> 2. **Venue_Name__c** (Text) – The location or venue name.
+> 3. **Ticket_Price__c** (Currency) – The cost of admission.
+
+---
+
+### 5. Execution & Deployment
+
+Let the agent process the three requirements, generate the execution plan, and build them natively in Salesforce.
+
+---
+
+### 6. The Proof
+
+Switch over to your Salesforce Org tab, refresh the Object Manager, and visually show the audience the newly deployed custom object and fields.
+
+---
+
+# 🚀 Section 4: What Are the Next Steps for Metaforce?
+
+## Key Talking Points
+
+### Early Stage Beta
+This is a brand-new software platform.
+
+### Continuous Improvement
+As people begin to use it in real-world scenarios, we will naturally discover new edge cases and bugs.
+
+### Iteration
+Our immediate focus is to fix the issues we discover alongside our early users.
+
+### Expanding the Skillset
+Moving forward, we will actively expand the agent's capabilities to support more complex Salesforce metadata components beyond custom objects and fields.
+Let the agent process the three requirements, generate the execution plan, and build them natively in Salesforce.
+
+---
+
+### 6. The Proof
+
+Switch over to your Salesforce Org tab, refresh the Object Manager, and visually show the audience the newly deployed custom object and fields.
+
+---
+
+# 🚀 Section 4: What Are the Next Steps for Metaforce?
+
+## Key Talking Points
+
+### Early Stage Beta
+This is a brand-new software platform.
+
+### Continuous Improvement
+As people begin to use it in real-world scenarios, we will naturally discover new edge cases and bugs.
+
+### Iteration
+Our immediate focus is to fix the issues we discover alongside our early users.
+
+### Expanding the Skillset
+Moving forward, we will actively expand the agent's capabilities to support more complex Salesforce metadata components beyond custom objects and fields.
