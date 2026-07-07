@@ -14,29 +14,46 @@ interface MarqueeLogosProps {
 }
 
 export default function MarqueeLogos({ companies, className }: MarqueeLogosProps) {
-  // Duplicate logos for seamless infinite loop
-  const doubled = [...companies, ...companies];
+  const isStatic = companies.length === 1;
 
   return (
     <div className={cn("group relative flex overflow-hidden", className)}>
       {/* Marquee track */}
-      <div className="animate-marquee flex shrink-0 items-center gap-x-12 md:gap-x-16">
-        {doubled.map((company, i) => (
-          <div
-            key={`${company.name}-${i}`}
-            className="flex shrink-0 items-center"
-          >
-            <Image
-              src={company.logo}
-              alt={company.name}
-              width={80}
-              height={80}
-              quality={100}
-              className="w-28 h-auto"
-            />
-          </div>
-        ))}
-      </div>
+      {isStatic ? (
+        <div className="flex w-full items-center justify-center gap-x-12 md:gap-x-16">
+          {companies.map((company) => (
+            <div key={company.name} className="flex items-center">
+              <Image
+                src={company.logo}
+                alt={company.name}
+                width={80}
+                height={80}
+                quality={100}
+                className="w-28 h-auto"
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="animate-marquee flex shrink-0 items-center gap-x-12 md:gap-x-16">
+          {/* Duplicate logos for seamless infinite loop */
+          [...companies, ...companies].map((company, i) => (
+            <div
+              key={`${company.name}-${i}`}
+              className="flex shrink-0 items-center"
+            >
+              <Image
+                src={company.logo}
+                alt={company.name}
+                width={80}
+                height={80}
+                quality={100}
+                className="w-28 h-auto"
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Left fade gradient */}
       <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />

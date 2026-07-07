@@ -22,31 +22,31 @@ interface TestimonialsSectionProps {
 const testimonials: Testimonial[] = [
   {
     id: 1,
-    name: "John Doe",
-    handle: "@johndoe",
-    avatar: "/assets/avatar.jpg",
-    quote: "Founder of XYZ Corp.",
-    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed odio sit amet nibh vulputate cursus a sit amet mauris. Morbi accumsan ipsum velit.",
+    name: "Dkloud",
+    handle: "Dkloud Consulting",
+    avatar: "/assets/dkloud-profile.jpg",
+    quote: "Salesforce Consulting Company.",
+    body: "DKLOUD is a London-based Salesforce consultancy specializing in CRM implementation, CPQ, and digital transformation. They help businesses architect, deploy, and optimize their Salesforce investment end-to-end — from initial setup to complex automation and expansion.",
     stars: 4,
   },
-  {
-    id: 2,
-    name: "Jane Smith",
-    handle: "@janesmith",
-    avatar: "/assets/avatar.jpg",
-    quote: "Exercitation veniam consequat",
-    body: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    stars: 5,
-  },
-  {
-    id: 3,
-    name: "Bob Johnson",
-    handle: "@bobjohnson",
-    avatar: "/assets/avatar.jpg",
-    quote: "Excepteur sint occaecat cupidatat",
-    body: "Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus.",
-    stars: 5,
-  },
+  // {
+  //   id: 2,
+  //   name: "Jane Smith",
+  //   handle: "@janesmith",
+  //   avatar: "/assets/avatar.jpg",
+  //   quote: "Exercitation veniam consequat",
+  //   body: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+  //   stars: 5,
+  // },
+  // {
+  //   id: 3,
+  //   name: "Bob Johnson",
+  //   handle: "@bobjohnson",
+  //   avatar: "/assets/avatar.jpg",
+  //   quote: "Excepteur sint occaecat cupidatat",
+  //   body: "Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus.",
+  //   stars: 5,
+  // },
 ];
 
 const StarIcon = ({ filled }: { filled: boolean }) => (
@@ -68,9 +68,9 @@ const StarIcon = ({ filled }: { filled: boolean }) => (
 const TestimonialContent = ({ testimonial }: { testimonial: Testimonial }) => (
   <div className="flex flex-col justify-center h-full px-6 md:px-12 py-12 md:py-16">
     <div className="flex gap-1 mb-8">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {/* {Array.from({ length: 5 }).map((_, i) => (
         <StarIcon key={i} filled={i < testimonial.stars} />
-      ))}
+      ))} */}
     </div>
 
     <blockquote className="m-0 mb-6">
@@ -84,10 +84,10 @@ const TestimonialContent = ({ testimonial }: { testimonial: Testimonial }) => (
     </p>
 
     <a
-      href="#"
+      href="https://www.linkedin.com/company/dkloud-consulting/"
       className="inline-flex items-center gap-2 text-[#e8e8e8] text-sm font-medium no-underline hover:text-white transition-colors duration-200 group"
     >
-      Read more
+      Learn more
       <span className="transition-transform duration-200 group-hover:translate-x-1">
         →
       </span>
@@ -114,7 +114,7 @@ const TestimonialListItem = ({
       activeIndex === index ? "bg-[#111]" : "bg-transparent",
     )}
   >
-    <div className="relative w-[60px] h-[60px] rounded-full overflow-hidden flex-shrink-0 bg-[#1a1a1a]">
+    <div className="relative w-[60px] h-[60px]  overflow-hidden flex-shrink-0 bg-[#1a1a1a]">
       <Image
         src={testimonial.avatar}
         alt={testimonial.name}
@@ -148,8 +148,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                   Our Partners
                 </h2>
                 <p className="text-[#6b6b6b] text-base leading-[1.8] m-0 max-w-[380px]">
-                  Built by Salesforce developers, for Salesforce developers.
-See how teams are cutting metadata creation time from hours to minutes.
+                  Trusted by Salesforce consultancies worldwide. We partner with implementation experts who bring Metaforce to teams building complex CRM solutions.
                 </p>
               </div>
 

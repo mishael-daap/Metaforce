@@ -88,7 +88,7 @@ export default async function Page() {
         </AnimationContainer>
       </MaxWidthWrapper>
       <FeaturesSection />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <FAQSection />
     </div>
   );
